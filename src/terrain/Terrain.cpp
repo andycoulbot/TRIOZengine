@@ -11,12 +11,16 @@ Terrain::Terrain(int gridSize, float cellSize, float maxHeight)
     : m_gridSize(gridSize), m_cellSize(cellSize), m_maxHeight(maxHeight) {
     m_shader = Shader("assets/shaders/terrain/terrain.vert", "assets/shaders/terrain/terrain.frag");
 
-    generateHeightmap();
+    generateIslandHeightmap();
     buildMesh();
 }
 
-void Terrain::generateHeightmap() {
+void Terrain::generateIslandHeightmap() {
     m_heights.resize(m_gridSize + 1, std::vector<float>(m_gridSize + 1, 0.0f));
+
+    float centerX = m_gridSize * 0.5f;
+    float centerZ = m_gridSize * 0.5f;
+    float islandRadius = m_gridSize * 0.38f;
 
     for (int z = 0; z <= m_gridSize; z++) {
         for (int x = 0; x <= m_gridSize; x++) {
@@ -33,7 +37,15 @@ void Terrain::generateHeightmap() {
                 frequency *= 2.0f;
             }
 
-            m_heights[z][x] = height * m_maxHeight;
+            float dx = static_cast<float>(x) - centerX;
+            float dz = static_cast<float>(z) - centerZ;
+            float dist = std::sqrt(dx * dx + dz * dz);
+            float falloff = 1.0f - std::clamp(dist / islandRadius, 0.0f, 1.0f);
+            falloff = falloff * falloff * (3.0f - 2.0f * falloff);
+
+            float h = height * m_maxHeight * falloff;
+            if (h < 0.0f) h = 0.0f;
+            m_heights[z][x] = h;
         }
     }
 }
@@ -90,6 +102,119 @@ void Terrain::buildMesh() {
     m_mesh = Mesh(vertices, indices);
 }
 
+void Terrain::rebuildMesh() {
+    buildMesh();
+}
+
+void Terrain::sculpt(const glm::vec3& center, float radius, float strength, BrushMode mode) {
+    float halfSize = m_gridSize * m_cellSize * 0.5f;
+
+    int minX = static_cast<int>(std::floor((center.x - radius + halfSize) / m_cellSize));
+    int maxX = static_cast<int>(std::ceil((center.x + radius + halfSize) / m_cellSize));
+    int minZ = static_cast<int>(std::floor((center.z - radius + halfSize) / m_cellSize));
+    int maxZ = static_cast<int>(std::ceil((center.z + radius + halfSize) / m_cellSize));
+
+    minX = std::clamp(minX, 0, m_gridSize);
+    maxX = std::clamp(maxX, 0, m_gridSize);
+    minZ = std::clamp(minZ, 0, m_gridSize);
+    maxZ = std::clamp(maxZ, 0, m_gridSize);
+
+    float avgHeight = 0.0f;
+    int count = 0;
+    if (mode == BrushMode::Flatten || mode == BrushMode::Smooth) {
+        for (int z = minZ; z <= maxZ; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                float wx = x * m_cellSize - halfSize;
+                float wz = z * m_cellSize - halfSize;
+                float dx = wx - center.x;
+                float dz = wz - center.z;
+                float dist = std::sqrt(dx * dx + dz * dz);
+                if (dist <= radius) {
+                    avgHeight += m_heights[z][x];
+                    count++;
+                }
+            }
+        }
+        if (count > 0) avgHeight /= count;
+    }
+
+    for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            float wx = x * m_cellSize - halfSize;
+            float wz = z * m_cellSize - halfSize;
+            float dx = wx - center.x;
+            float dz = wz - center.z;
+            float dist = std::sqrt(dx * dx + dz * dz);
+
+            if (dist > radius) continue;
+
+            float falloff = 1.0f - (dist / radius);
+            falloff = falloff * falloff;
+
+            switch (mode) {
+                case BrushMode::Raise:
+                    m_heights[z][x] += strength * falloff;
+                    break;
+                case BrushMode::Lower:
+                    m_heights[z][x] -= strength * falloff;
+                    break;
+                case BrushMode::Smooth:
+                    m_heights[z][x] += (avgHeight - m_heights[z][x]) * falloff * 0.5f;
+                    break;
+                case BrushMode::Flatten:
+                    m_heights[z][x] += (avgHeight - m_heights[z][x]) * falloff;
+                    break;
+            }
+        }
+    }
+
+    rebuildMesh();
+}
+
+void Terrain::setHeightAt(int x, int z, float height) {
+    if (x >= 0 && x <= m_gridSize && z >= 0 && z <= m_gridSize) {
+        m_heights[z][x] = height;
+    }
+}
+
+float Terrain::getHeightAtGrid(int x, int z) const {
+    if (x >= 0 && x <= m_gridSize && z >= 0 && z <= m_gridSize) {
+        return m_heights[z][x];
+    }
+    return 0.0f;
+}
+
+bool Terrain::raycast(const glm::vec3& origin, const glm::vec3& direction, glm::vec3& hitPoint) const {
+    float halfSize = m_gridSize * m_cellSize * 0.5f;
+    float step = m_cellSize * 0.5f;
+    float maxDist = m_gridSize * m_cellSize * 2.0f;
+
+    for (float t = 0.0f; t < maxDist; t += step) {
+        glm::vec3 p = origin + direction * t;
+
+        if (p.x < -halfSize || p.x > halfSize || p.z < -halfSize || p.z > halfSize)
+            continue;
+
+        float terrainH = getHeightAt(p.x, p.z);
+        if (p.y <= terrainH) {
+            for (int i = 0; i < 8; i++) {
+                float mid = t - step * 0.5f;
+                glm::vec3 mp = origin + direction * mid;
+                float mh = getHeightAt(mp.x, mp.z);
+                if (mp.y <= mh) {
+                    t = mid;
+                } else {
+                    step *= 0.5f;
+                }
+            }
+            hitPoint = origin + direction * t;
+            hitPoint.y = getHeightAt(hitPoint.x, hitPoint.z);
+            return true;
+        }
+    }
+    return false;
+}
+
 float Terrain::getHeightAt(float x, float z) const {
     float halfSize = m_gridSize * m_cellSize * 0.5f;
     float gridX = (x + halfSize) / m_cellSize;
@@ -140,19 +265,39 @@ void Terrain::render(const glm::mat4& projection, const glm::mat4& view,
     m_shader.setMat4("lightSpaceMatrix", shadow.getLightSpaceMatrix());
     m_shader.setFloat("maxHeight", m_maxHeight);
 
-    m_shader.setInt("grassTex", 0);
-    m_shader.setInt("rockTex", 1);
-    m_shader.setInt("sandTex", 2);
-    m_shader.setInt("snowTex", 3);
-    m_shader.setInt("shadowMap", 4);
-
-    m_grassTexture.bind(0);
-    m_rockTexture.bind(1);
-    m_sandTexture.bind(2);
-    m_snowTexture.bind(3);
-
-    glActiveTexture(GL_TEXTURE4);
+    m_shader.setInt("shadowMap", 0);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, shadow.getDepthTexture());
+
+    m_shader.setBool("useBrush", false);
+
+    m_mesh.draw();
+}
+
+void Terrain::renderWithBrush(const glm::mat4& projection, const glm::mat4& view,
+                               const Light& light, const Shadow& shadow, const glm::vec3& viewPos,
+                               const glm::vec3& brushPos, float brushRadius) const {
+    m_shader.use();
+    m_shader.setMat4("projection", projection);
+    m_shader.setMat4("view", view);
+    m_shader.setMat4("model", glm::mat4(1.0f));
+    m_shader.setVec3("viewPos", viewPos);
+
+    m_shader.setVec3("light.direction", light.direction);
+    m_shader.setVec3("light.ambient", light.ambient);
+    m_shader.setVec3("light.diffuse", light.diffuse);
+    m_shader.setVec3("light.specular", light.specular);
+
+    m_shader.setMat4("lightSpaceMatrix", shadow.getLightSpaceMatrix());
+    m_shader.setFloat("maxHeight", m_maxHeight);
+
+    m_shader.setInt("shadowMap", 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, shadow.getDepthTexture());
+
+    m_shader.setBool("useBrush", true);
+    m_shader.setVec3("brushPos", brushPos);
+    m_shader.setFloat("brushRadius", brushRadius);
 
     m_mesh.draw();
 }
