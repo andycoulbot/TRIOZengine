@@ -74,9 +74,16 @@ void Water::beginReflection(Camera& camera) {
     glEnable(GL_CLIP_DISTANCE0);
 }
 
-void Water::endReflection() {
-    m_reflectionFBO.unbind(1280, 720);
+void Water::endReflection(Camera& camera) {
     glDisable(GL_CLIP_DISTANCE0);
+
+    // Restore camera position and pitch
+    glm::vec3 pos = camera.getPosition();
+    pos.y = m_savedY;
+    camera.setPosition(pos);
+    camera.invertPitch();
+
+    m_reflectionFBO.unbind(1280, 720);
 }
 
 void Water::beginRefraction(Camera& camera) {

@@ -63,6 +63,19 @@ glm::mat4 Camera::getProjectionMatrix(float aspect) const {
     return glm::perspective(glm::radians(m_fov), aspect, m_near, m_far);
 }
 
+void Camera::updateMovementOnly(const InputManager& input, float dt) {
+    float speed = m_speed;
+    if (input.isKeyPressed(GLFW_KEY_LEFT_SHIFT))
+        speed *= 3.0f;
+
+    if (input.isKeyPressed(GLFW_KEY_W)) m_position += m_front * speed * dt;
+    if (input.isKeyPressed(GLFW_KEY_S)) m_position -= m_front * speed * dt;
+    if (input.isKeyPressed(GLFW_KEY_A)) m_position -= m_right * speed * dt;
+    if (input.isKeyPressed(GLFW_KEY_D)) m_position += m_right * speed * dt;
+    if (input.isKeyPressed(GLFW_KEY_SPACE)) m_position += m_worldUp * speed * dt;
+    if (input.isKeyPressed(GLFW_KEY_LEFT_CONTROL)) m_position -= m_worldUp * speed * dt;
+}
+
 void Camera::invertPitch() {
     m_pitch = -m_pitch;
     updateVectors();

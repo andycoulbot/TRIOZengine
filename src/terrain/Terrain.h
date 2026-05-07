@@ -2,7 +2,6 @@
 
 #include "renderer/Shader.h"
 #include "renderer/Mesh.h"
-#include "renderer/Texture.h"
 #include <glm/glm.hpp>
 #include <vector>
 
@@ -11,13 +10,37 @@ namespace trioz {
 class Light;
 class Shadow;
 
+enum class BrushMode {
+    Raise,
+    Lower,
+    Smooth,
+    Flatten
+};
+
+enum class EditorMode {
+    Edit,
+    Select
+};
+
 class Terrain {
 public:
     Terrain(int gridSize, float cellSize, float maxHeight);
 
     void render(const glm::mat4& projection, const glm::mat4& view,
                 const Light& light, const Shadow& shadow, const glm::vec3& viewPos) const;
+    void renderWithBrush(const glm::mat4& projection, const glm::mat4& view,
+                         const Light& light, const Shadow& shadow, const glm::vec3& viewPos,
+                         const glm::vec3& brushPos, float brushRadius) const;
     void renderShadow(const Shader& shader, const glm::mat4& lightSpaceMatrix) const;
+
+    void sculpt(const glm::vec3& center, float radius, float strength, BrushMode mode);
+    void rebuildMesh();
+    void setBrushUniforms(bool active, const glm::vec3& pos, float radius);
+    bool m_brushActive = false;
+    glm::vec3 m_brushPos = glm::vec3(0.0f);
+    float m_brushRadius = 0.0f;
+
+    bool raycast(const glm::vec3& origin, const glm::vec3& direction, glm::vec3& hitPoint) const;
 
     float getHeightAt(float x, float z) const;
     glm::vec3 getNormalAt(float x, float z) const;
@@ -27,14 +50,20 @@ public:
     float getMaxHeight() const { return m_maxHeight; }
     float getTotalSize() const { return m_gridSize * m_cellSize; }
 
+    std::vector<std::vector<float>>& getHeights() { return m_heights; }
+
 private:
-    void generateHeightmap();
+    void generateIslandHeightmap();
     void buildMesh();
 
     float perlinNoise(float x, float z) const;
     float interpolatedNoise(float x, float z) const;
     float smoothNoise(int x, int z) const;
     float noise2D(int x, int z) const;
+
+    void setupRenderUniforms(const glm::mat4& projection, const glm::mat4& view,
+                             const Light& light, const Shadow& shadow,
+                             const glm::vec3& viewPos) const;
 
     int m_gridSize;
     float m_cellSize;
@@ -43,10 +72,6 @@ private:
     std::vector<std::vector<float>> m_heights;
     Mesh m_mesh;
     Shader m_shader;
-    Texture m_grassTexture;
-    Texture m_rockTexture;
-    Texture m_sandTexture;
-    Texture m_snowTexture;
 };
 
 } // namespace trioz

@@ -17,7 +17,7 @@ public:
     void update(float dt);
 
     void beginReflection(Camera& camera);
-    void endReflection();
+    void endReflection(Camera& camera);
     void beginRefraction(Camera& camera);
     void endRefraction();
 

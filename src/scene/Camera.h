@@ -14,6 +14,7 @@ public:
 
     void updateFreeCamera(const InputManager& input, float dt);
     void updateFPSCamera(const InputManager& input, float dt, const Terrain& terrain);
+    void updateMovementOnly(const InputManager& input, float dt);
 
     glm::mat4 getViewMatrix() const;
     glm::mat4 getProjectionMatrix(float aspect) const;
@@ -24,6 +25,8 @@ public:
     glm::vec3 getUp() const { return m_up; }
     float getYaw() const { return m_yaw; }
     float getPitch() const { return m_pitch; }
+    void setYaw(float yaw) { m_yaw = yaw; updateVectors(); }
+    void setPitch(float pitch) { m_pitch = pitch; updateVectors(); }
     float getNearPlane() const { return m_near; }
     float getFarPlane() const { return m_far; }
     float getFOV() const { return m_fov; }

@@ -11,12 +11,16 @@ Terrain::Terrain(int gridSize, float cellSize, float maxHeight)
     : m_gridSize(gridSize), m_cellSize(cellSize), m_maxHeight(maxHeight) {
     m_shader = Shader("assets/shaders/terrain/terrain.vert", "assets/shaders/terrain/terrain.frag");
 
-    generateHeightmap();
+    generateIslandHeightmap();
     buildMesh();
 }
 
-void Terrain::generateHeightmap() {
+void Terrain::generateIslandHeightmap() {
     m_heights.resize(m_gridSize + 1, std::vector<float>(m_gridSize + 1, 0.0f));
+
+    float centerX = m_gridSize * 0.5f;
+    float centerZ = m_gridSize * 0.5f;
+    float islandRadius = m_gridSize * 0.38f;
 
     for (int z = 0; z <= m_gridSize; z++) {
         for (int x = 0; x <= m_gridSize; x++) {
@@ -33,7 +37,15 @@ void Terrain::generateHeightmap() {
                 frequency *= 2.0f;
             }
 
-            m_heights[z][x] = height * m_maxHeight;
+            float dx = static_cast<float>(x) - centerX;
+            float dz = static_cast<float>(z) - centerZ;
+            float dist = std::sqrt(dx * dx + dz * dz);
+            float falloff = 1.0f - std::clamp(dist / islandRadius, 0.0f, 1.0f);
+            falloff = falloff * falloff * (3.0f - 2.0f * falloff);
+
+            float h = height * m_maxHeight * falloff;
+            if (h < 0.0f) h = 0.0f;
+            m_heights[z][x] = h;
         }
     }
 }
@@ -42,15 +54,13 @@ void Terrain::buildMesh() {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    float halfSize = m_gridSize * m_cellSize * 0.5f;
-
     for (int z = 0; z <= m_gridSize; z++) {
         for (int x = 0; x <= m_gridSize; x++) {
             Vertex v{};
             v.position = glm::vec3(
-                x * m_cellSize - halfSize,
+                x * m_cellSize,
                 m_heights[z][x],
-                z * m_cellSize - halfSize
+                z * m_cellSize
             );
 
             float texScale = 16.0f;
@@ -90,10 +100,13 @@ void Terrain::buildMesh() {
     m_mesh = Mesh(vertices, indices);
 }
 
+void Terrain::rebuildMesh() {
+    buildMesh();
+}
+
 float Terrain::getHeightAt(float x, float z) const {
-    float halfSize = m_gridSize * m_cellSize * 0.5f;
-    float gridX = (x + halfSize) / m_cellSize;
-    float gridZ = (z + halfSize) / m_cellSize;
+    float gridX = x / m_cellSize;
+    float gridZ = z / m_cellSize;
 
     int ix = static_cast<int>(std::floor(gridX));
     int iz = static_cast<int>(std::floor(gridZ));
@@ -124,8 +137,9 @@ glm::vec3 Terrain::getNormalAt(float x, float z) const {
     return glm::normalize(glm::vec3(hL - hR, 2.0f * delta, hD - hU));
 }
 
-void Terrain::render(const glm::mat4& projection, const glm::mat4& view,
-                     const Light& light, const Shadow& shadow, const glm::vec3& viewPos) const {
+void Terrain::setupRenderUniforms(const glm::mat4& projection, const glm::mat4& view,
+                                   const Light& light, const Shadow& shadow,
+                                   const glm::vec3& viewPos) const {
     m_shader.use();
     m_shader.setMat4("projection", projection);
     m_shader.setMat4("view", view);
@@ -139,21 +153,36 @@ void Terrain::render(const glm::mat4& projection, const glm::mat4& view,
 
     m_shader.setMat4("lightSpaceMatrix", shadow.getLightSpaceMatrix());
     m_shader.setFloat("maxHeight", m_maxHeight);
+    m_shader.setInt("shadowMap", 0);
 
-    m_shader.setInt("grassTex", 0);
-    m_shader.setInt("rockTex", 1);
-    m_shader.setInt("sandTex", 2);
-    m_shader.setInt("snowTex", 3);
-    m_shader.setInt("shadowMap", 4);
-
-    m_grassTexture.bind(0);
-    m_rockTexture.bind(1);
-    m_sandTexture.bind(2);
-    m_snowTexture.bind(3);
-
-    glActiveTexture(GL_TEXTURE4);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, shadow.getDepthTexture());
+}
 
+void Terrain::setBrushUniforms(bool active, const glm::vec3& pos, float radius) {
+    m_brushActive = active;
+    m_brushPos = pos;
+    m_brushRadius = radius;
+}
+
+void Terrain::render(const glm::mat4& projection, const glm::mat4& view,
+                     const Light& light, const Shadow& shadow, const glm::vec3& viewPos) const {
+    setupRenderUniforms(projection, view, light, shadow, viewPos);
+    m_shader.setBool("useBrush", m_brushActive);
+    if (m_brushActive) {
+        m_shader.setVec3("brushPos", m_brushPos);
+        m_shader.setFloat("brushRadius", m_brushRadius);
+    }
+    m_mesh.draw();
+}
+
+void Terrain::renderWithBrush(const glm::mat4& projection, const glm::mat4& view,
+                               const Light& light, const Shadow& shadow, const glm::vec3& viewPos,
+                               const glm::vec3& brushPos, float brushRadius) const {
+    setupRenderUniforms(projection, view, light, shadow, viewPos);
+    m_shader.setBool("useBrush", true);
+    m_shader.setVec3("brushPos", brushPos);
+    m_shader.setFloat("brushRadius", brushRadius);
     m_mesh.draw();
 }
 
@@ -162,6 +191,98 @@ void Terrain::renderShadow(const Shader& shader, const glm::mat4& lightSpaceMatr
     shader.setMat4("lightSpaceMatrix", lightSpaceMatrix);
     shader.setMat4("model", glm::mat4(1.0f));
     m_mesh.draw();
+}
+
+void Terrain::sculpt(const glm::vec3& center, float radius, float strength, BrushMode mode) {
+    int minX = std::max(0, static_cast<int>((center.x - radius) / m_cellSize));
+    int maxX = std::min(m_gridSize, static_cast<int>((center.x + radius) / m_cellSize) + 1);
+    int minZ = std::max(0, static_cast<int>((center.z - radius) / m_cellSize));
+    int maxZ = std::min(m_gridSize, static_cast<int>((center.z + radius) / m_cellSize) + 1);
+
+    float avgHeight = 0.0f;
+    int avgCount = 0;
+
+    if (mode == BrushMode::Flatten || mode == BrushMode::Smooth) {
+        for (int z = minZ; z <= maxZ; z++) {
+            for (int x = minX; x <= maxX; x++) {
+                float wx = x * m_cellSize;
+                float wz = z * m_cellSize;
+                float dx = wx - center.x;
+                float dz = wz - center.z;
+                float dist = std::sqrt(dx * dx + dz * dz);
+                if (dist <= radius) {
+                    avgHeight += m_heights[z][x];
+                    avgCount++;
+                }
+            }
+        }
+        if (avgCount > 0) avgHeight /= avgCount;
+    }
+
+    for (int z = minZ; z <= maxZ; z++) {
+        for (int x = minX; x <= maxX; x++) {
+            float wx = x * m_cellSize;
+            float wz = z * m_cellSize;
+            float dx = wx - center.x;
+            float dz = wz - center.z;
+            float dist = std::sqrt(dx * dx + dz * dz);
+
+            if (dist > radius) continue;
+
+            float falloff = 1.0f - (dist / radius);
+            falloff = falloff * falloff;
+
+            switch (mode) {
+                case BrushMode::Raise:
+                    m_heights[z][x] += strength * falloff;
+                    break;
+                case BrushMode::Lower:
+                    m_heights[z][x] -= strength * falloff;
+                    if (m_heights[z][x] < 0.0f) m_heights[z][x] = 0.0f;
+                    break;
+                case BrushMode::Smooth:
+                    m_heights[z][x] += (avgHeight - m_heights[z][x]) * falloff * 0.5f;
+                    break;
+                case BrushMode::Flatten:
+                    m_heights[z][x] += (avgHeight - m_heights[z][x]) * falloff;
+                    break;
+            }
+        }
+    }
+    rebuildMesh();
+}
+
+bool Terrain::raycast(const glm::vec3& origin, const glm::vec3& direction, glm::vec3& hitPoint) const {
+    float totalSize = m_gridSize * m_cellSize;
+    float maxDist = totalSize * 3.0f;
+    float step = m_cellSize * 0.5f;
+
+    for (float t = 0.0f; t < maxDist; t += step) {
+        glm::vec3 p = origin + direction * t;
+
+        if (p.x < 0.0f || p.x > totalSize || p.z < 0.0f || p.z > totalSize)
+            continue;
+
+        float terrainH = getHeightAt(p.x, p.z);
+        if (p.y <= terrainH) {
+            float lo = t - step;
+            float hi = t;
+            for (int i = 0; i < 10; i++) {
+                float mid = (lo + hi) * 0.5f;
+                glm::vec3 mp = origin + direction * mid;
+                float mh = getHeightAt(mp.x, mp.z);
+                if (mp.y <= mh) {
+                    hi = mid;
+                } else {
+                    lo = mid;
+                }
+            }
+            hitPoint = origin + direction * hi;
+            hitPoint.y = getHeightAt(hitPoint.x, hitPoint.z);
+            return true;
+        }
+    }
+    return false;
 }
 
 float Terrain::noise2D(int x, int z) const {
