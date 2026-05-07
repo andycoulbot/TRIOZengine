@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.21...3.31)
 project(TRIOZengine VERSION 0.1.0 LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -11,34 +11,35 @@ option(TRIOZ_BUILD_TESTS "Build unit tests" OFF)
 # ── Dependencies via FetchContent ────────────────────────────────────────────
 include(FetchContent)
 
-# GLFW
+# GLFW 3.4 (Feb 2024)
 set(GLFW_BUILD_DOCS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(GLFW_BUILD_WAYLAND OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(glfw
     GIT_REPOSITORY https://github.com/glfw/glfw.git
-    GIT_TAG        3.3.8
+    GIT_TAG        3.4
 )
 
-# GLM
+# GLM 1.0.3 (Dec 2025)
 FetchContent_Declare(glm
     GIT_REPOSITORY https://github.com/g-truc/glm.git
-    GIT_TAG        0.9.9.8
+    GIT_TAG        1.0.3
 )
 
-# Assimp
+# Assimp 6.0.4 (Jan 2026)
 set(ASSIMP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(ASSIMP_INSTALL OFF CACHE BOOL "" FORCE)
 set(ASSIMP_BUILD_ASSIMP_TOOLS OFF CACHE BOOL "" FORCE)
 FetchContent_Declare(assimp
     GIT_REPOSITORY https://github.com/assimp/assimp.git
-    GIT_TAG        v5.3.1
+    GIT_TAG        v6.0.4
 )
 
-# Dear ImGui
+# Dear ImGui 1.92.7 (Apr 2026)
 FetchContent_Declare(imgui
     GIT_REPOSITORY https://github.com/ocornut/imgui.git
-    GIT_TAG        v1.89.9
+    GIT_TAG        v1.92.7
 )
 
 FetchContent_MakeAvailable(glfw glm assimp imgui)
