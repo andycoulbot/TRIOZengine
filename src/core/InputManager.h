@@ -15,6 +15,7 @@ public:
     bool isKeyPressed(int key) const;
     bool isKeyJustPressed(int key) const;
     bool isMouseButtonPressed(int button) const;
+    bool isMouseButtonJustPressed(int button) const;
 
     glm::vec2 getMousePosition() const;
     glm::vec2 getMouseDelta() const;
@@ -25,10 +26,13 @@ public:
 
 private:
     GLFWwindow* m_window;
-    bool m_cursorLocked = true;
+    bool m_cursorLocked = false;
 
     bool m_keys[512] = {};
     bool m_prevKeys[512] = {};
+
+    bool m_mouseButtons[8] = {};
+    bool m_prevMouseButtons[8] = {};
 
     glm::vec2 m_mousePos = glm::vec2(0.0f);
     glm::vec2 m_lastMousePos = glm::vec2(0.0f);
