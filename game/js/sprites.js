@@ -21,43 +21,56 @@ const Sprites = (() => {
     }
 
     const C = {
-        skin1: '#e8b89d', skin2: '#d4a186', hair_dark: '#3d2b1f', hair_light: '#a0825a',
-        white: '#ffffff', black: '#000000', gray: '#888888', dark_gray: '#444444',
-        green: '#44cc44', green_dark: '#228822', red: '#cc4444', blue: '#4444cc',
+        skin1: '#e8b89d', skin2: '#d4a186', skin3: '#c4916e',
+        hair_dark: '#3d2b1f', hair_dark2: '#2a1a10', hair_light: '#a0825a', hair_light2: '#c4a87a',
+        white: '#ffffff', black: '#000000', gray: '#888888', dark_gray: '#444444', light_gray: '#bbbbbb',
+        green: '#44cc44', green_dark: '#228822', green_bright: '#66ee66',
+        red: '#cc4444', red_dark: '#992222', red_bright: '#ff6666',
+        blue: '#4444cc', blue_dark: '#222299', blue_bright: '#6666ff',
         yellow: '#cccc44', orange: '#cc8844', brown: '#8b6543', light_brown: '#c4a07a',
-        tux_black: '#1a1a2e', shirt_white: '#e8e8e8', tie_brown: '#8b7355',
-        apple_red: '#cc3333', apple_green: '#55aa33', headset: '#333333',
-        mic: '#666666', eye_brown: '#4a3520', eye_white: '#f0f0f0',
-        pilot_blue: '#2c3e6b', pilot_gold: '#ccaa44', laptop: '#555577',
-        kob_purple: '#6644aa', kob_cloak: '#443366', mystery: '#9966cc',
-        mouth: '#cc6666', bg_dark: '#1a1a2e', bg_purple: '#2d1b4e',
+        tux_black: '#1a1a2e', tux_dark: '#12121e', shirt_white: '#e8e8e8', shirt_gray: '#d0d0d0',
+        tie_brown: '#8b7355', tie_dark: '#6a5540',
+        apple_red: '#cc3333', apple_green: '#55aa33', apple_stem: '#5a3a1a',
+        headset: '#333333', headset2: '#222222', mic: '#666666', mic2: '#555555',
+        eye_brown: '#4a3520', eye_white: '#f0f0f0', eye_shine: '#ffffff',
+        pilot_blue: '#2c3e6b', pilot_blue2: '#1e2e55', pilot_gold: '#ccaa44', pilot_gold2: '#aa8833',
+        laptop: '#555577', laptop2: '#444466',
+        kob_purple: '#6644aa', kob_cloak: '#443366', kob_cloak2: '#332255', mystery: '#9966cc', mystery2: '#bb88ee',
+        mouth: '#cc6666', mouth2: '#aa4444', teeth: '#eeeedd',
+        bg_dark: '#1a1a2e', bg_purple: '#2d1b4e',
+        smoke: '#aaaaaa', smoke2: '#888888',
+        cig_white: '#ddddcc', cig_orange: '#ee6633',
     };
 
     function orsonPortrait() {
         if (cache.orson) return cache.orson;
         const _ = null;
-        const s = C.skin1, s2 = C.skin2, h = C.hair_dark, b = C.black, w = C.white;
-        const e = C.eye_brown, hs = C.headset, m = C.mic, g = C.gray, dg = C.dark_gray;
-        const mo = C.mouth, ew = C.eye_white;
+        const s = C.skin1, s2 = C.skin2, s3 = C.skin3;
+        const h = C.hair_dark, h2 = C.hair_dark2;
+        const b = C.black, w = C.white;
+        const e = C.eye_brown, hs = C.headset, hs2 = C.headset2, m = C.mic, m2 = C.mic2;
+        const g = C.gray, dg = C.dark_gray;
+        const mo = C.mouth, mo2 = C.mouth2, ew = C.eye_white, es = C.eye_shine;
+        const t = C.teeth, r = C.red;
         const data = [
-            [_,_,_,_,_,h,h,h,h,h,h,h,_,_,_,_],
-            [_,_,_,h,h,h,h,h,h,h,h,h,h,_,_,_],
-            [_,_,h,h,h,h,h,h,h,h,h,h,h,h,_,_],
-            [_,h,h,h,h,h,h,h,h,h,h,h,h,h,h,_],
+            [_,_,_,_,h2,h,h,h,h,h,h,h2,_,_,_,_],
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
+            [_,_,h2,h,h,h,h,h,h,h,h,h,h,h2,_,_],
+            [_,h2,h,h,h,h,h,h,h,h,h,h,h,h,h2,_],
             [_,h,h,h,s,s,s,s,s,s,s,s,h,h,h,_],
             [h,h,h,s,s,s,s,s,s,s,s,s,s,h,h,h],
-            [h,h,s,s,s,s,s,s,s,s,s,s,s,s,h,h],
-            [h,hs,s,ew,ew,e,s,s,s,ew,ew,e,s,s,h,h],
-            [h,hs,s,ew,b,e,s,s,s,ew,b,e,s,s,h,h],
-            [h,hs,s,s,s,s,s,s2,s,s,s,s,s,s,h,h],
-            [_,hs,s,s,s,s,s2,s2,s2,s,s,s,s,hs,_,_],
-            [_,hs,s,s,s,s,s,s2,s,s,s,s,s,hs,_,_],
-            [_,_,hs,s,s,mo,mo,mo,mo,mo,s,s,hs,_,_,_],
-            [_,_,m,hs,s,s,mo,mo,mo,s,s,hs,m,_,_,_],
-            [_,_,m,m,s,s,s,s,s,s,s,m,m,_,_,_],
-            [_,_,_,_,dg,dg,dg,dg,dg,dg,dg,_,_,_,_,_],
-            [_,_,_,dg,dg,dg,dg,dg,dg,dg,dg,dg,_,_,_,_],
-            [_,_,dg,dg,dg,dg,dg,dg,dg,dg,dg,dg,dg,_,_,_],
+            [h,hs2,h,s,s,s,s,s,s,s,s,s,s,h,hs2,h],
+            [h,hs,s,ew,ew,e,s,s,s,ew,ew,e,s,s,hs,h],
+            [h,hs,s,ew,b,e,s,s,s,es,b,e,s,s,hs,h],
+            [h,hs,s,s,s,s,s,s2,s,s,s,s,s,s,hs,h],
+            [_,hs,s,s,s,s2,s2,s3,s2,s2,s,s,s,hs,_,_],
+            [_,hs2,s,s,s,s,s2,s2,s2,s,s,s,s,hs2,_,_],
+            [_,_,hs,s,mo,mo,mo,t,mo,mo,mo,s,hs,_,_,_],
+            [_,_,m,hs,s,mo2,mo,t,mo,mo2,s,hs,m,_,_,_],
+            [_,_,m2,m,s,s2,s,s2,s,s2,s,m,m2,_,_,_],
+            [_,_,_,_,r,dg,dg,dg,dg,dg,r,_,_,_,_,_],
+            [_,_,_,r,dg,dg,dg,dg,dg,dg,dg,r,_,_,_,_],
+            [_,_,r,dg,dg,dg,dg,dg,dg,dg,dg,dg,r,_,_,_],
         ];
         const c = createCanvas(64, 72);
         const ctx = c.getContext('2d');
@@ -69,29 +82,33 @@ const Sprites = (() => {
     function vaituzPortrait() {
         if (cache.vaituz) return cache.vaituz;
         const _ = null;
-        const s = '#f0c8a8', s2 = '#e0b898', h = C.hair_light, b = C.black, w = C.white;
-        const e = '#5577aa', ew = C.eye_white, gn = C.green, gd = C.green_dark;
-        const tx = C.tux_black, sh = C.shirt_white, tie = C.tie_brown;
-        const mo = C.mouth, ar = C.apple_green;
+        const s = '#f0c8a8', s2 = '#e0b898', s3 = '#d0a888';
+        const h = C.hair_light, h2 = C.hair_light2;
+        const b = C.black, w = C.white;
+        const e = '#5577aa', ew = C.eye_white, es = C.eye_shine;
+        const gn = C.green, gd = C.green_dark, gb = C.green_bright;
+        const tx = C.tux_black, txd = C.tux_dark, sh = C.shirt_white, shg = C.shirt_gray;
+        const tie = C.tie_brown, tied = C.tie_dark;
+        const mo = C.mouth, ar = C.apple_green, ars = C.apple_stem;
         const data = [
-            [_,_,_,_,_,h,h,h,h,h,h,h,_,_,_,_],
-            [_,_,_,h,h,h,h,h,h,h,h,h,h,_,_,_],
-            [_,_,h,h,h,h,h,h,h,h,h,h,h,h,_,_],
-            [_,gn,gd,h,h,h,h,h,h,h,h,h,h,gd,gn,_],
-            [gn,gn,gd,s,s,s,s,s,s,s,s,s,s,gd,gn,gn],
+            [_,_,_,_,_,h2,h,h,h,h,h2,_,_,_,_,_],
+            [_,_,_,h2,h,h,h2,h,h2,h,h,h2,_,_,_,_],
+            [_,_,h2,h,h,h2,h,h,h,h2,h,h,h2,_,_,_],
+            [_,gb,gn,h,h,h,h,h,h,h,h,h,h,gn,gb,_],
+            [gn,gb,gd,s,s,s,s,s,s,s,s,s,s,gd,gb,gn],
             [gn,gn,s,s,s,s,s,s,s,s,s,s,s,s,gn,gn],
             [_,gd,s,s,s,s,s,s,s,s,s,s,s,s,gd,_],
             [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
-            [_,_,s,ew,b,e,s,s,s,ew,b,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
-            [_,_,s,s,s,s,s2,s2,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
             [_,_,s,s,s,mo,mo,mo,mo,mo,s,s,s,_,_,_],
-            [_,_,_,s,s,s,s,s,s,s,s,s,_,_,_,_],
-            [_,_,_,tx,tx,sh,sh,sh,sh,sh,tx,tx,_,_,_,_],
-            [_,_,tx,tx,tx,sh,tie,tie,sh,sh,tx,tx,tx,_,_,_],
-            [_,tx,tx,tx,tx,sh,sh,sh,sh,sh,tx,tx,tx,tx,_,_],
-            [ar,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,_,txd,tx,sh,shg,sh,shg,sh,tx,txd,_,_,_,_],
+            [_,_,txd,tx,tx,sh,tie,tied,sh,sh,tx,tx,txd,_,_,_],
+            [_,txd,tx,tx,tx,sh,shg,sh,shg,sh,tx,tx,tx,txd,_,_],
+            [ar,ars,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,tx,_,_],
         ];
         const c = createCanvas(64, 72);
         const ctx = c.getContext('2d');
@@ -103,27 +120,31 @@ const Sprites = (() => {
     function kobPortrait() {
         if (cache.kob) return cache.kob;
         const _ = null;
-        const s = '#d4a88c', s2 = '#c49880', h = '#2a2a3a', b = C.black, w = C.white;
-        const e = '#6644aa', ew = C.eye_white, cl = C.kob_cloak, p = C.kob_purple;
-        const mo = C.mouth, my = C.mystery;
+        const s = '#d4a88c', s2 = '#c49880', s3 = '#b48870';
+        const h = '#2a2a3a', h2 = '#1a1a2a';
+        const b = C.black, w = C.white;
+        const e = '#6644aa', ew = C.eye_white, es = C.eye_shine;
+        const cl = C.kob_cloak, cl2 = C.kob_cloak2, p = C.kob_purple;
+        const mo = C.mouth, my = C.mystery, my2 = C.mystery2;
+        const gld = C.pilot_gold;
         const data = [
-            [_,_,_,_,cl,cl,cl,cl,cl,cl,cl,cl,_,_,_,_],
-            [_,_,_,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,_,_,_],
-            [_,_,cl,cl,h,h,h,h,h,h,h,h,cl,cl,_,_],
-            [_,cl,cl,h,h,h,h,h,h,h,h,h,h,cl,cl,_],
+            [_,_,_,_,cl2,cl,cl,cl,cl,cl,cl,cl2,_,_,_,_],
+            [_,_,_,cl2,cl,cl,my,cl,cl,my,cl,cl,cl2,_,_,_],
+            [_,_,cl2,cl,h2,h,h,h,h,h,h,h2,cl,cl2,_,_],
+            [_,cl2,cl,h,h,h2,h,h,h,h2,h,h,h,cl,cl2,_],
             [_,cl,h,h,s,s,s,s,s,s,s,s,h,h,cl,_],
             [_,cl,h,s,s,s,s,s,s,s,s,s,s,h,cl,_],
             [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
             [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
-            [_,_,s,ew,p,e,s,s,s,ew,p,e,s,s,_,_],
+            [_,_,s,es,p,e,s,s,s,es,p,e,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
-            [_,_,s,s,s,s,s2,s2,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
             [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
-            [_,_,_,s,s,s,s,s,s,s,s,s,_,_,_,_],
-            [_,_,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,_,_,_],
-            [_,cl,cl,cl,cl,cl,my,my,cl,cl,cl,cl,cl,cl,_,_],
-            [cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,cl2,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl2,_,_,_],
+            [_,cl2,cl,cl,cl,cl,my,my2,cl,cl,cl,cl,cl,cl2,_,_],
+            [cl2,cl,cl,cl,cl,cl,gld,gld,cl,cl,cl,cl,cl,cl,cl2,_],
             [cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,_],
         ];
         const c = createCanvas(64, 72);
@@ -136,28 +157,33 @@ const Sprites = (() => {
     function chebPortrait() {
         if (cache.cheb) return cache.cheb;
         const _ = null;
-        const s = '#e0b898', s2 = '#d0a888', h = '#5a4030', b = C.black, w = C.white;
-        const e = '#446688', ew = C.eye_white, pb = C.pilot_blue, pg = C.pilot_gold;
-        const mo = C.mouth, lp = C.laptop;
+        const s = '#e0b898', s2 = '#d0a888', s3 = '#c09878';
+        const h = '#5a4030', h2 = '#4a3020';
+        const b = C.black, w = C.white;
+        const e = '#446688', ew = C.eye_white, es = C.eye_shine;
+        const pb = C.pilot_blue, pb2 = C.pilot_blue2;
+        const pg = C.pilot_gold, pg2 = C.pilot_gold2;
+        const mo = C.mouth, lp = C.laptop, lp2 = C.laptop2;
+        const sc = '#4488cc';
         const data = [
-            [_,_,_,_,pb,pb,pb,pb,pb,pb,pb,pb,_,_,_,_],
-            [_,_,_,pb,pg,pb,pb,pb,pb,pb,pg,pb,_,_,_,_],
-            [_,_,pb,pb,h,h,h,h,h,h,h,h,pb,pb,_,_],
-            [_,_,_,h,h,h,h,h,h,h,h,h,h,_,_,_],
+            [_,_,_,_,pb2,pb,pb,pb,pb,pb,pb,pb2,_,_,_,_],
+            [_,_,_,pb2,pg,pb,pb,pb,pb,pb,pg,pb2,_,_,_,_],
+            [_,_,pb2,pb,h2,h,h,h,h,h,h,h2,pb,pb2,_,_],
+            [_,_,_,h2,h,h,h2,h,h2,h,h,h,h2,_,_,_],
             [_,_,h,s,s,s,s,s,s,s,s,s,s,h,_,_],
             [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
             [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
             [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
-            [_,_,s,ew,b,e,s,s,s,ew,b,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
-            [_,_,s,s,s,s,s2,s2,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
             [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
-            [_,_,_,s,s,s,s,s,s,s,s,s,_,_,_,_],
-            [_,_,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,_,_,_],
-            [_,pb,pb,pg,pb,pb,pb,pb,pb,pb,pg,pb,pb,pb,_,_],
-            [_,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,_,_],
-            [lp,lp,lp,lp,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,pb2,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb2,_,_,_],
+            [_,pb2,pb,pg,pb,pb,pb,pb,pb,pb,pg,pb,pb,pb2,_,_],
+            [_,pb,pb,pg2,pb,pb,pb,pb,pb,pb,pg2,pb,pb,pb,_,_],
+            [lp,lp2,sc,lp,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,_,_],
         ];
         const c = createCanvas(64, 72);
         const ctx = c.getContext('2d');
@@ -170,26 +196,63 @@ const Sprites = (() => {
         const key = name + '_walk';
         if (cache[key]) return cache[key];
         const frames = [];
-        const { head, body, legs, accent } = colors;
+        const { head, headDark, body, bodyDark, legs, legsDark, accent, accent2, hair } = colors;
         for (let f = 0; f < 4; f++) {
             const c = createCanvas(16, 24);
             const ctx = c.getContext('2d');
-            const _ = null;
+
+            // Hair
+            if (hair) {
+                ctx.fillStyle = hair;
+                ctx.fillRect(3, 0, 10, 4);
+            }
+
+            // Head with shading
             ctx.fillStyle = head;
-            ctx.fillRect(4, 0, 8, 8);
+            ctx.fillRect(4, hair ? 2 : 0, 8, 8);
+            if (headDark) {
+                ctx.fillStyle = headDark;
+                ctx.fillRect(4, hair ? 7 : 5, 8, 3);
+            }
+
+            // Eyes with shine
             ctx.fillStyle = '#000';
-            ctx.fillRect(5, 3, 2, 2);
-            ctx.fillRect(9, 3, 2, 2);
+            ctx.fillRect(5, (hair ? 4 : 2), 2, 2);
+            ctx.fillRect(9, (hair ? 4 : 2), 2, 2);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(5, (hair ? 4 : 2), 1, 1);
+            ctx.fillRect(9, (hair ? 4 : 2), 1, 1);
+
+            // Body with shading
             ctx.fillStyle = body;
             ctx.fillRect(3, 8, 10, 8);
+            if (bodyDark) {
+                ctx.fillStyle = bodyDark;
+                ctx.fillRect(3, 8, 2, 8);
+                ctx.fillRect(11, 8, 2, 8);
+            }
+
+            // Accent details
             if (accent) {
                 ctx.fillStyle = accent;
-                ctx.fillRect(6, 8, 4, 2);
+                ctx.fillRect(5, 8, 6, 2);
             }
+            if (accent2) {
+                ctx.fillStyle = accent2;
+                ctx.fillRect(7, 10, 2, 3);
+            }
+
+            // Legs with animation
             ctx.fillStyle = legs;
-            const legOffset = f % 2 === 0 ? 0 : 1;
+            const legOffset = [0, 1, 0, -1][f];
             ctx.fillRect(4 + legOffset, 16, 3, 8);
             ctx.fillRect(9 - legOffset, 16, 3, 8);
+            if (legsDark) {
+                ctx.fillStyle = legsDark;
+                ctx.fillRect(4 + legOffset, 22, 3, 2);
+                ctx.fillRect(9 - legOffset, 22, 3, 2);
+            }
+
             frames.push(c);
         }
         cache[key] = frames;
@@ -198,31 +261,37 @@ const Sprites = (() => {
 
     function orsonWalk() {
         return createWalkSprite('orson', {
-            head: C.skin1, body: C.dark_gray, legs: '#2a2a2a', accent: null
+            head: C.skin1, headDark: C.skin2, body: C.dark_gray, bodyDark: '#333',
+            legs: '#2a2a2a', legsDark: '#1a1a1a', accent: null, hair: C.hair_dark
         });
     }
 
     function vaituzWalk() {
         return createWalkSprite('vaituz', {
-            head: '#f0c8a8', body: C.tux_black, legs: '#1a1a1a', accent: C.shirt_white
+            head: '#f0c8a8', headDark: '#e0b898', body: C.tux_black, bodyDark: '#101020',
+            legs: '#1a1a1a', legsDark: '#0a0a0a', accent: C.shirt_white, accent2: C.tie_brown,
+            hair: C.hair_light
         });
     }
 
     function kobWalk() {
         return createWalkSprite('kob', {
-            head: '#d4a88c', body: C.kob_cloak, legs: '#332255', accent: C.kob_purple
+            head: '#d4a88c', headDark: '#c49880', body: C.kob_cloak, bodyDark: C.kob_cloak2,
+            legs: '#332255', legsDark: '#221144', accent: C.kob_purple, hair: '#2a2a3a'
         });
     }
 
     function chebWalk() {
         return createWalkSprite('cheb', {
-            head: '#e0b898', body: C.pilot_blue, legs: '#1a2a4a', accent: C.pilot_gold
+            head: '#e0b898', headDark: '#d0a888', body: C.pilot_blue, bodyDark: C.pilot_blue2,
+            legs: '#1a2a4a', legsDark: '#0a1a3a', accent: C.pilot_gold, hair: '#5a4030'
         });
     }
 
     function playerWalk() {
         return createWalkSprite('player', {
-            head: '#ffcc99', body: '#cc4444', legs: '#4444cc', accent: '#ffff44'
+            head: '#ffcc99', headDark: '#eebb88', body: '#cc4444', bodyDark: '#aa2222',
+            legs: '#4444cc', legsDark: '#2222aa', accent: '#ffff44', hair: '#885533'
         });
     }
 
@@ -238,6 +307,12 @@ const Sprites = (() => {
                 ctx.fillStyle = '#222244';
                 ctx.fillRect(0, 0, 16, 1);
                 ctx.fillRect(0, 0, 1, 16);
+                // Subtle texture
+                ctx.fillStyle = '#1e1e34';
+                ctx.fillRect(4, 4, 2, 2);
+                ctx.fillRect(10, 10, 2, 2);
+                ctx.fillRect(8, 2, 1, 1);
+                ctx.fillRect(2, 12, 1, 1);
             },
             floor_light: () => {
                 ctx.fillStyle = '#2a2a3e';
@@ -245,6 +320,10 @@ const Sprites = (() => {
                 ctx.fillStyle = '#333355';
                 ctx.fillRect(0, 0, 16, 1);
                 ctx.fillRect(0, 0, 1, 16);
+                // Checker pattern
+                ctx.fillStyle = '#2e2e44';
+                ctx.fillRect(0, 0, 8, 8);
+                ctx.fillRect(8, 8, 8, 8);
             },
             wall: () => {
                 ctx.fillStyle = '#443366';
@@ -253,14 +332,33 @@ const Sprites = (() => {
                 ctx.fillRect(1, 1, 14, 14);
                 ctx.fillStyle = '#332255';
                 ctx.fillRect(0, 14, 16, 2);
+                // Brick lines
+                ctx.fillStyle = '#3a2a55';
+                ctx.fillRect(0, 5, 16, 1);
+                ctx.fillRect(0, 10, 16, 1);
+                ctx.fillRect(4, 0, 1, 5);
+                ctx.fillRect(12, 5, 1, 5);
+                ctx.fillRect(8, 10, 1, 6);
+                // Highlight
+                ctx.fillStyle = '#665588';
+                ctx.fillRect(1, 1, 14, 1);
             },
             grass: () => {
                 ctx.fillStyle = '#2a5a2a';
                 ctx.fillRect(0, 0, 16, 16);
+                // Varied grass tufts (deterministic)
                 ctx.fillStyle = '#3a7a3a';
-                for (let i = 0; i < 5; i++) {
-                    ctx.fillRect(Math.random() * 14 | 0, Math.random() * 14 | 0, 2, 2);
-                }
+                ctx.fillRect(2, 3, 2, 2);
+                ctx.fillRect(8, 6, 2, 2);
+                ctx.fillRect(12, 2, 2, 2);
+                ctx.fillRect(5, 11, 2, 2);
+                ctx.fillRect(1, 8, 1, 3);
+                ctx.fillRect(10, 12, 1, 3);
+                // Flowers
+                ctx.fillStyle = '#cccc44';
+                ctx.fillRect(6, 1, 1, 1);
+                ctx.fillStyle = '#cc88cc';
+                ctx.fillRect(13, 9, 1, 1);
             },
             water: () => {
                 ctx.fillStyle = '#2244aa';
@@ -268,46 +366,106 @@ const Sprites = (() => {
                 ctx.fillStyle = '#3366cc';
                 ctx.fillRect(2, 4, 12, 2);
                 ctx.fillRect(0, 10, 10, 2);
+                ctx.fillStyle = '#4488dd';
+                ctx.fillRect(4, 4, 3, 1);
+                ctx.fillRect(1, 10, 4, 1);
+                // Sparkle
+                ctx.fillStyle = '#88aaee';
+                ctx.fillRect(6, 7, 1, 1);
             },
             path: () => {
                 ctx.fillStyle = '#8b7355';
                 ctx.fillRect(0, 0, 16, 16);
                 ctx.fillStyle = '#a08868';
                 ctx.fillRect(2, 2, 12, 12);
+                // Stones
+                ctx.fillStyle = '#9a8060';
+                ctx.fillRect(3, 4, 3, 2);
+                ctx.fillRect(9, 8, 4, 3);
+                ctx.fillStyle = '#7a6345';
+                ctx.fillRect(5, 10, 2, 2);
             },
             door: () => {
+                ctx.fillStyle = '#443366';
+                ctx.fillRect(0, 0, 16, 16);
                 ctx.fillStyle = '#8b6543';
                 ctx.fillRect(2, 0, 12, 16);
                 ctx.fillStyle = '#a07850';
                 ctx.fillRect(4, 2, 8, 12);
+                // Door details
+                ctx.fillStyle = '#7a5533';
+                ctx.fillRect(4, 7, 8, 1);
                 ctx.fillStyle = '#ccaa44';
                 ctx.fillRect(10, 7, 2, 2);
+                // Arch
+                ctx.fillStyle = '#665588';
+                ctx.fillRect(2, 0, 1, 16);
+                ctx.fillRect(13, 0, 1, 16);
+                ctx.fillRect(2, 0, 12, 1);
             },
             table: () => {
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, 16, 16);
                 ctx.fillStyle = '#6b4523';
                 ctx.fillRect(1, 4, 14, 10);
                 ctx.fillStyle = '#8b6543';
                 ctx.fillRect(2, 5, 12, 8);
+                // Wood grain
+                ctx.fillStyle = '#7b5533';
+                ctx.fillRect(3, 7, 10, 1);
+                ctx.fillRect(4, 10, 8, 1);
+                // Legs
+                ctx.fillStyle = '#5a3a1a';
+                ctx.fillRect(2, 13, 2, 3);
+                ctx.fillRect(12, 13, 2, 3);
             },
             pc: () => {
-                ctx.fillStyle = '#333';
-                ctx.fillRect(3, 2, 10, 8);
+                ctx.fillStyle = '#1a1a2e';
+                ctx.fillRect(0, 0, 16, 16);
+                // Monitor
+                ctx.fillStyle = '#222';
+                ctx.fillRect(2, 1, 12, 9);
                 ctx.fillStyle = '#4488cc';
-                ctx.fillRect(4, 3, 8, 6);
+                ctx.fillRect(3, 2, 10, 7);
+                // Screen content (code lines)
+                ctx.fillStyle = '#66aaee';
+                ctx.fillRect(4, 3, 6, 1);
+                ctx.fillStyle = '#44cc88';
+                ctx.fillRect(4, 5, 4, 1);
+                ctx.fillStyle = '#ee8844';
+                ctx.fillRect(5, 7, 7, 1);
+                // Stand
+                ctx.fillStyle = '#444';
+                ctx.fillRect(6, 10, 4, 2);
+                ctx.fillRect(4, 12, 8, 1);
+                // Keyboard
                 ctx.fillStyle = '#555';
-                ctx.fillRect(5, 11, 6, 2);
                 ctx.fillRect(3, 13, 10, 2);
+                ctx.fillStyle = '#666';
+                ctx.fillRect(4, 13, 2, 1);
+                ctx.fillRect(7, 13, 2, 1);
+                ctx.fillRect(10, 13, 2, 1);
             },
             apple_tree: () => {
                 ctx.fillStyle = '#2a5a2a';
                 ctx.fillRect(0, 0, 16, 16);
+                // Trunk with texture
                 ctx.fillStyle = '#5a3a1a';
                 ctx.fillRect(6, 8, 4, 8);
+                ctx.fillStyle = '#4a2a0a';
+                ctx.fillRect(7, 8, 1, 8);
+                // Leaves with depth
+                ctx.fillStyle = '#1a6622';
+                ctx.fillRect(2, 1, 12, 9);
                 ctx.fillStyle = '#228822';
-                ctx.fillRect(2, 0, 12, 10);
+                ctx.fillRect(3, 0, 10, 8);
+                ctx.fillStyle = '#33aa33';
+                ctx.fillRect(4, 1, 4, 3);
+                // Apples
                 ctx.fillStyle = '#cc3333';
                 ctx.fillRect(4, 3, 2, 2);
-                ctx.fillRect(10, 5, 2, 2);
+                ctx.fillRect(10, 4, 2, 2);
+                ctx.fillStyle = '#ee4444';
                 ctx.fillRect(7, 2, 2, 2);
             },
             runway: () => {
@@ -316,44 +474,83 @@ const Sprites = (() => {
                 ctx.fillStyle = '#ffffff';
                 ctx.fillRect(7, 0, 2, 4);
                 ctx.fillRect(7, 8, 2, 4);
+                // Edge lines
+                ctx.fillStyle = '#cccc44';
+                ctx.fillRect(0, 0, 1, 16);
+                ctx.fillRect(15, 0, 1, 16);
+                // Texture
+                ctx.fillStyle = '#4a4a4a';
+                ctx.fillRect(3, 6, 3, 1);
+                ctx.fillRect(10, 14, 4, 1);
             },
             burger: () => {
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, 16, 16);
-                ctx.fillStyle = '#cc8844';
-                ctx.fillRect(3, 4, 10, 2);
+                // Burger with detail
+                ctx.fillStyle = '#cc9944';
+                ctx.fillRect(3, 3, 10, 2);
+                ctx.fillStyle = '#ddaa55';
+                ctx.fillRect(4, 3, 8, 1);
                 ctx.fillStyle = '#55aa33';
-                ctx.fillRect(3, 6, 10, 2);
+                ctx.fillRect(3, 5, 10, 1);
                 ctx.fillStyle = '#cc4444';
-                ctx.fillRect(3, 8, 10, 2);
-                ctx.fillStyle = '#cc8844';
-                ctx.fillRect(3, 10, 10, 2);
+                ctx.fillRect(3, 6, 10, 2);
+                ctx.fillStyle = '#ffcc44';
+                ctx.fillRect(3, 8, 10, 1);
+                ctx.fillStyle = '#cc9944';
+                ctx.fillRect(3, 9, 10, 2);
+                ctx.fillStyle = '#bb8833';
+                ctx.fillRect(4, 10, 8, 1);
             },
             bookshelf: () => {
                 ctx.fillStyle = '#5a3a1a';
                 ctx.fillRect(0, 0, 16, 16);
+                ctx.fillStyle = '#4a2a0a';
+                ctx.fillRect(0, 7, 16, 1);
+                // Top shelf books
                 ctx.fillStyle = '#cc4444';
                 ctx.fillRect(1, 1, 3, 6);
                 ctx.fillStyle = '#4444cc';
                 ctx.fillRect(5, 1, 3, 6);
                 ctx.fillStyle = '#44cc44';
-                ctx.fillRect(9, 1, 3, 6);
+                ctx.fillRect(9, 2, 3, 5);
                 ctx.fillStyle = '#cccc44';
-                ctx.fillRect(1, 9, 4, 6);
+                ctx.fillRect(13, 1, 2, 6);
+                // Bottom shelf books
                 ctx.fillStyle = '#cc88cc';
-                ctx.fillRect(6, 9, 4, 6);
+                ctx.fillRect(1, 8, 4, 7);
                 ctx.fillStyle = '#88cccc';
-                ctx.fillRect(11, 9, 4, 6);
+                ctx.fillRect(6, 9, 4, 6);
+                ctx.fillStyle = '#aa8844';
+                ctx.fillRect(11, 8, 4, 7);
+                // Book spines
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(2, 2, 1, 1);
+                ctx.fillRect(6, 3, 1, 1);
+                ctx.fillRect(12, 9, 2, 1);
             },
             throne: () => {
                 ctx.fillStyle = '#1a1a2e';
                 ctx.fillRect(0, 0, 16, 16);
-                ctx.fillStyle = '#ccaa44';
-                ctx.fillRect(3, 0, 10, 14);
+                // Back
                 ctx.fillStyle = '#aa8833';
+                ctx.fillRect(3, 0, 10, 14);
+                ctx.fillStyle = '#ccaa44';
                 ctx.fillRect(4, 1, 8, 12);
-                ctx.fillStyle = '#cc4444';
+                // Cushion
+                ctx.fillStyle = '#cc3333';
                 ctx.fillRect(5, 5, 6, 7);
+                ctx.fillStyle = '#aa2222';
+                ctx.fillRect(5, 10, 6, 2);
+                // Crown detail
+                ctx.fillStyle = '#eedd33';
+                ctx.fillRect(5, 1, 2, 2);
+                ctx.fillRect(9, 1, 2, 2);
+                ctx.fillRect(7, 0, 2, 3);
+                // Armrests
+                ctx.fillStyle = '#aa8833';
+                ctx.fillRect(2, 5, 2, 9);
+                ctx.fillRect(12, 5, 2, 9);
             },
             arena_floor: () => {
                 ctx.fillStyle = '#2e1a1a';
@@ -361,6 +558,11 @@ const Sprites = (() => {
                 ctx.fillStyle = '#442222';
                 ctx.fillRect(0, 0, 16, 1);
                 ctx.fillRect(0, 0, 1, 16);
+                // Blood splatter marks
+                ctx.fillStyle = '#3a1515';
+                ctx.fillRect(5, 5, 2, 1);
+                ctx.fillRect(11, 9, 1, 2);
+                ctx.fillRect(3, 12, 2, 1);
             },
         };
         if (tileData[type]) tileData[type]();
@@ -373,18 +575,20 @@ const Sprites = (() => {
         const c = createCanvas(16, 16);
         const ctx = c.getContext('2d');
         const r = '#cc0000';
+        const rb = '#ff3333';
+        const rd = '#990000';
         const _ = null;
         const data = [
             [_,_,r,r,_,_,r,r],
-            [_,r,r,r,r,r,r,r],
-            [r,r,r,r,r,r,r,r],
+            [_,r,rb,r,r,r,rb,r],
+            [r,rb,r,r,r,r,r,r],
             [r,r,r,r,r,r,r,r],
             [_,r,r,r,r,r,r,_],
-            [_,_,r,r,r,r,_,_],
-            [_,_,_,r,r,_,_,_],
+            [_,_,r,r,r,rd,_,_],
+            [_,_,_,r,rd,_,_,_],
             [_,_,_,_,_,_,_,_],
         ];
-        drawPixels(ctx, data.map(row => row.map(c => c === r ? r : null)), 2);
+        drawPixels(ctx, data.map(row => row.map(c => c)), 2);
         cache.heart = c;
         return c;
     }
@@ -393,18 +597,20 @@ const Sprites = (() => {
         if (cache.cursor) return cache.cursor;
         const c = createCanvas(16, 16);
         const ctx = c.getContext('2d');
-        ctx.fillStyle = '#cc0000';
+        const r = '#cc0000';
+        const rb = '#ff4444';
         const data = [
             [0,0,1,1,0,0,1,1],
-            [0,1,1,1,1,1,1,1],
-            [1,1,1,1,1,1,1,1],
+            [0,1,2,1,1,1,2,1],
+            [1,2,1,1,1,1,1,1],
             [1,1,1,1,1,1,1,1],
             [0,1,1,1,1,1,1,0],
             [0,0,1,1,1,1,0,0],
             [0,0,0,1,1,0,0,0],
         ];
         data.forEach((row, y) => row.forEach((v, x) => {
-            if (v) ctx.fillRect(x * 2, y * 2, 2, 2);
+            if (v === 1) { ctx.fillStyle = r; ctx.fillRect(x * 2, y * 2, 2, 2); }
+            if (v === 2) { ctx.fillStyle = rb; ctx.fillRect(x * 2, y * 2, 2, 2); }
         }));
         cache.cursor = c;
         return c;
@@ -417,82 +623,162 @@ const Sprites = (() => {
         const ctx = c.getContext('2d');
         switch (type) {
             case 'apple':
-                ctx.fillStyle = '#55aa33';
-                ctx.fillRect(5, 2, 6, 10);
                 ctx.fillStyle = '#44aa22';
-                ctx.fillRect(6, 3, 4, 8);
+                ctx.fillRect(5, 3, 6, 9);
+                ctx.fillStyle = '#55bb33';
+                ctx.fillRect(6, 4, 4, 7);
+                ctx.fillStyle = '#66cc44';
+                ctx.fillRect(7, 5, 2, 2);
                 ctx.fillStyle = '#5a3a1a';
-                ctx.fillRect(7, 0, 2, 3);
+                ctx.fillRect(7, 0, 2, 4);
+                ctx.fillStyle = '#33aa11';
+                ctx.fillRect(9, 1, 2, 2);
                 break;
             case 'laptop':
-                ctx.fillStyle = '#555577';
-                ctx.fillRect(2, 4, 12, 8);
+                ctx.fillStyle = '#444466';
+                ctx.fillRect(2, 3, 12, 8);
                 ctx.fillStyle = '#4488cc';
-                ctx.fillRect(3, 5, 10, 6);
+                ctx.fillRect(3, 4, 10, 6);
+                ctx.fillStyle = '#66aaee';
+                ctx.fillRect(4, 5, 4, 1);
+                ctx.fillStyle = '#555577';
+                ctx.fillRect(1, 11, 14, 2);
                 ctx.fillStyle = '#666688';
-                ctx.fillRect(1, 12, 14, 2);
+                ctx.fillRect(3, 11, 2, 1);
+                ctx.fillRect(7, 11, 2, 1);
+                ctx.fillRect(11, 11, 2, 1);
                 break;
             case 'headset':
+                ctx.fillStyle = '#222';
+                ctx.fillRect(3, 0, 10, 3);
                 ctx.fillStyle = '#333';
-                ctx.fillRect(3, 1, 10, 2);
                 ctx.fillRect(2, 3, 3, 8);
                 ctx.fillRect(11, 3, 3, 8);
+                ctx.fillStyle = '#444';
+                ctx.fillRect(3, 4, 1, 6);
+                ctx.fillRect(12, 4, 1, 6);
                 ctx.fillStyle = '#666';
                 ctx.fillRect(11, 9, 2, 5);
+                ctx.fillStyle = '#888';
+                ctx.fillRect(12, 10, 1, 3);
                 break;
             case 'burger':
-                ctx.fillStyle = '#cc8844';
-                ctx.fillRect(3, 3, 10, 2);
+                ctx.fillStyle = '#ddaa55';
+                ctx.fillRect(3, 2, 10, 2);
+                ctx.fillStyle = '#cc9944';
+                ctx.fillRect(4, 2, 8, 1);
                 ctx.fillStyle = '#55aa33';
-                ctx.fillRect(3, 5, 10, 2);
+                ctx.fillRect(3, 4, 10, 1);
                 ctx.fillStyle = '#cc4444';
-                ctx.fillRect(3, 7, 10, 2);
-                ctx.fillStyle = '#cc8844';
-                ctx.fillRect(3, 9, 10, 2);
+                ctx.fillRect(3, 5, 10, 2);
+                ctx.fillStyle = '#ffcc44';
+                ctx.fillRect(3, 7, 10, 1);
+                ctx.fillStyle = '#ddaa55';
+                ctx.fillRect(3, 8, 10, 2);
                 break;
             case 'heroes5':
-                ctx.fillStyle = '#4444cc';
+                ctx.fillStyle = '#3333bb';
                 ctx.fillRect(2, 1, 12, 14);
-                ctx.fillStyle = '#6666ee';
+                ctx.fillStyle = '#4444dd';
                 ctx.fillRect(3, 2, 10, 12);
                 ctx.fillStyle = '#ccaa44';
-                ctx.fillRect(5, 5, 6, 6);
+                ctx.fillRect(5, 5, 6, 5);
+                ctx.fillStyle = '#eedd44';
+                ctx.fillRect(6, 6, 4, 3);
+                ctx.fillStyle = '#fff';
+                ctx.font = '5px monospace';
+                ctx.fillText('V', 7, 13);
                 break;
             case 'key':
                 ctx.fillStyle = '#ccaa44';
                 ctx.fillRect(3, 3, 4, 4);
+                ctx.fillStyle = '#eedd44';
+                ctx.fillRect(4, 4, 2, 2);
+                ctx.fillStyle = '#ccaa44';
                 ctx.fillRect(7, 5, 6, 2);
                 ctx.fillRect(11, 5, 2, 4);
                 ctx.fillRect(9, 5, 2, 4);
                 break;
             case 'microphone':
-                ctx.fillStyle = '#888';
-                ctx.fillRect(6, 2, 4, 6);
-                ctx.fillStyle = '#666';
-                ctx.fillRect(7, 8, 2, 4);
+                ctx.fillStyle = '#777';
+                ctx.fillRect(6, 1, 4, 6);
+                ctx.fillStyle = '#999';
+                ctx.fillRect(7, 2, 2, 4);
+                ctx.fillStyle = '#555';
+                ctx.fillRect(7, 7, 2, 5);
                 ctx.fillRect(4, 12, 8, 2);
+                ctx.fillStyle = '#666';
+                ctx.fillRect(5, 12, 6, 1);
                 break;
             case 'videocard':
                 ctx.fillStyle = '#228822';
-                ctx.fillRect(1, 4, 14, 8);
+                ctx.fillRect(1, 3, 14, 9);
+                ctx.fillStyle = '#33aa33';
+                ctx.fillRect(2, 4, 1, 7);
+                ctx.fillStyle = '#333';
+                ctx.fillRect(3, 4, 5, 7);
                 ctx.fillStyle = '#444';
-                ctx.fillRect(2, 5, 6, 6);
+                ctx.fillRect(4, 5, 3, 5);
                 ctx.fillStyle = '#888';
-                ctx.fillRect(10, 5, 4, 6);
+                ctx.fillRect(9, 4, 5, 7);
+                ctx.fillStyle = '#aaa';
+                ctx.fillRect(10, 5, 3, 5);
+                // Connectors
                 ctx.fillStyle = '#ccaa44';
                 ctx.fillRect(2, 12, 2, 2);
                 ctx.fillRect(6, 12, 2, 2);
                 ctx.fillRect(10, 12, 2, 2);
+                // Fan
+                ctx.fillStyle = '#555';
+                ctx.fillRect(10, 6, 2, 2);
                 break;
         }
         cache[key] = c;
         return c;
     }
 
+    // Particle system for visual effects
+    const particles = [];
+
+    function addParticle(x, y, color, life, vx, vy) {
+        particles.push({ x, y, color, life, maxLife: life, vx: vx || 0, vy: vy || 0 });
+    }
+
+    function updateParticles(dt) {
+        for (let i = particles.length - 1; i >= 0; i--) {
+            const p = particles[i];
+            p.life -= dt;
+            p.x += p.vx * dt;
+            p.y += p.vy * dt;
+            if (p.life <= 0) particles.splice(i, 1);
+        }
+    }
+
+    function renderParticles(ctx) {
+        for (const p of particles) {
+            const alpha = Math.max(0, p.life / p.maxLife);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = p.color;
+            const size = 2 + alpha * 2;
+            ctx.fillRect(p.x - size / 2, p.y - size / 2, size, size);
+        }
+        ctx.globalAlpha = 1;
+    }
+
+    function emitBurst(x, y, color, count) {
+        for (let i = 0; i < count; i++) {
+            const angle = (Math.PI * 2 * i) / count;
+            const speed = 30 + Math.random() * 40;
+            addParticle(x, y, color, 0.5 + Math.random() * 0.5,
+                Math.cos(angle) * speed, Math.sin(angle) * speed);
+        }
+    }
+
     return {
         orsonPortrait, vaituzPortrait, kobPortrait, chebPortrait,
         orsonWalk, vaituzWalk, kobWalk, chebWalk, playerWalk,
         createTile, createHeartSprite, createMenuCursor, itemSprite,
+        particles, addParticle, updateParticles, renderParticles, emitBurst,
         C
     };
 })();

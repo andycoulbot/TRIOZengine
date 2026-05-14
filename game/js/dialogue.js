@@ -11,7 +11,7 @@ const Dialogue = (() => {
     let selectedChoice = 0;
     let showChoices = false;
     let onComplete = null;
-    let textSpeed = 2;
+    let textSpeed = 0.02;
     let blipCounter = 0;
 
     function start(node, callback) {
@@ -46,15 +46,13 @@ const Dialogue = (() => {
         if (!active) return;
         if (!showChoices) {
             textTimer += dt;
-            if (textTimer >= textSpeed) {
-                textTimer = 0;
-                if (textIndex < fullText.length) {
-                    displayText += fullText[textIndex];
-                    textIndex++;
-                    blipCounter++;
-                    if (blipCounter % 3 === 0) {
-                        Audio8Bit.textBlip();
-                    }
+            while (textTimer >= textSpeed && textIndex < fullText.length) {
+                textTimer -= textSpeed;
+                displayText += fullText[textIndex];
+                textIndex++;
+                blipCounter++;
+                if (blipCounter % 3 === 0) {
+                    Audio8Bit.textBlip();
                 }
             }
         }
@@ -108,39 +106,76 @@ const Dialogue = (() => {
     function render(ctx, W, H) {
         if (!active) return;
 
-        const boxH = 150;
+        const boxH = 160;
         const boxY = H - boxH - 10;
         const boxX = 10;
         const boxW = W - 20;
 
-        ctx.fillStyle = '#000000';
+        // Box background with gradient effect
+        ctx.fillStyle = '#0a0a1e';
         ctx.fillRect(boxX, boxY, boxW, boxH);
+        ctx.fillStyle = 'rgba(30,20,60,0.5)';
+        ctx.fillRect(boxX + 2, boxY + 2, boxW - 4, boxH - 4);
+
+        // Double border (outer white, inner colored)
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 3;
         ctx.strokeRect(boxX, boxY, boxW, boxH);
 
+        // Inner decorative border
+        ctx.strokeStyle = 'rgba(100,80,160,0.4)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(boxX + 4, boxY + 4, boxW - 8, boxH - 8);
+
         let textStartX = boxX + 20;
         if (speakerPortrait) {
-            ctx.drawImage(speakerPortrait, boxX + 10, boxY + 10, 64, 72);
-            ctx.strokeStyle = '#888';
-            ctx.lineWidth = 1;
-            ctx.strokeRect(boxX + 9, boxY + 9, 66, 74);
-            textStartX = boxX + 90;
+            // Portrait background glow
+            const speakerColors = {
+                'Орсон': '#cc4444',
+                'Вайтуз': '#44cc44',
+                'Коб': '#9966cc',
+                'Чеб': '#4488cc',
+            };
+            const glowColor = speakerColors[speakerName] || '#888';
+            ctx.fillStyle = glowColor + '33';
+            ctx.fillRect(boxX + 6, boxY + 6, 76, 84);
+
+            ctx.drawImage(speakerPortrait, boxX + 10, boxY + 10, 68, 76);
+
+            // Portrait border
+            ctx.strokeStyle = glowColor;
+            ctx.lineWidth = 2;
+            ctx.strokeRect(boxX + 9, boxY + 9, 70, 78);
+            textStartX = boxX + 96;
         }
 
         if (speakerName) {
-            ctx.fillStyle = '#ffcc00';
-            ctx.font = '16px monospace';
+            // Speaker name with colored background
+            const nameColors = {
+                'Орсон': '#cc4444',
+                'Вайтуз': '#44cc44',
+                'Коб': '#9966cc',
+                'Чеб': '#4488cc',
+            };
+            const nameColor = nameColors[speakerName] || '#ffcc00';
+            ctx.fillStyle = nameColor;
+            ctx.font = 'bold 16px monospace';
             ctx.fillText(speakerName, textStartX, boxY + 25);
+
+            // Underline
+            const nameWidth = ctx.measureText(speakerName).width;
+            ctx.fillStyle = nameColor + '66';
+            ctx.fillRect(textStartX, boxY + 28, nameWidth, 2);
         }
 
+        // Main text
         ctx.fillStyle = '#ffffff';
         ctx.font = '14px monospace';
         const maxLineW = boxW - (textStartX - boxX) - 20;
         const words = displayText.split(' ');
         let line = '';
-        let lineY = boxY + (speakerName ? 45 : 30);
-        const lineHeight = 18;
+        let lineY = boxY + (speakerName ? 50 : 35);
+        const lineHeight = 20;
 
         for (const word of words) {
             const test = line + word + ' ';
@@ -154,32 +189,47 @@ const Dialogue = (() => {
         }
         ctx.fillText(line, textStartX, lineY);
 
+        // Choices
         if (showChoices && choices.length > 0) {
-            const choiceStartY = boxY - choices.length * 30 - 10;
-            ctx.fillStyle = '#000000';
-            ctx.fillRect(boxX, choiceStartY, boxW, choices.length * 30 + 10);
+            const choiceH = choices.length * 32 + 16;
+            const choiceStartY = boxY - choiceH - 6;
+
+            // Choice box background
+            ctx.fillStyle = '#0a0a1e';
+            ctx.fillRect(boxX, choiceStartY, boxW, choiceH);
             ctx.strokeStyle = '#ffcc00';
             ctx.lineWidth = 2;
-            ctx.strokeRect(boxX, choiceStartY, boxW, choices.length * 30 + 10);
+            ctx.strokeRect(boxX, choiceStartY, boxW, choiceH);
 
             ctx.font = '14px monospace';
             for (let i = 0; i < choices.length; i++) {
-                const cy = choiceStartY + 25 + i * 30;
+                const cy = choiceStartY + 26 + i * 32;
                 if (i === selectedChoice) {
-                    ctx.drawImage(Sprites.createMenuCursor(), textStartX - 20, cy - 12, 16, 16);
+                    // Highlight bar
+                    ctx.fillStyle = 'rgba(204,170,0,0.15)';
+                    ctx.fillRect(boxX + 4, cy - 16, boxW - 8, 28);
+                    ctx.drawImage(Sprites.createMenuCursor(), textStartX - 22, cy - 12, 16, 16);
                     ctx.fillStyle = '#ffcc00';
                 } else {
-                    ctx.fillStyle = '#ffffff';
+                    ctx.fillStyle = '#aaaaaa';
                 }
                 ctx.fillText(choices[i].text, textStartX, cy);
             }
         }
 
+        // Continue indicator (blinking arrow)
         if (textIndex >= fullText.length && !showChoices && choices.length === 0) {
-            const blink = Date.now() % 1000 < 500;
+            const blink = Date.now() % 800 < 500;
             if (blink) {
                 ctx.fillStyle = '#ffffff';
-                ctx.fillRect(boxX + boxW - 30, boxY + boxH - 20, 8, 8);
+                const ax = boxX + boxW - 30;
+                const ay = boxY + boxH - 22;
+                ctx.beginPath();
+                ctx.moveTo(ax, ay);
+                ctx.lineTo(ax + 10, ay);
+                ctx.lineTo(ax + 5, ay + 8);
+                ctx.closePath();
+                ctx.fill();
             }
         }
     }
