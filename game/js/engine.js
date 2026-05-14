@@ -304,31 +304,37 @@
         ctx.font = '14px monospace';
         ctx.fillText('Пиксельная RPG в стиле Undertale', W / 2, 155);
 
-        // Character portraits with glow
-        const portraits = [
-            { fn: Sprites.orsonPortrait, label: 'Орсон', x: 100, color: '#cc4444' },
-            { fn: Sprites.vaituzPortrait, label: 'Вайтуз', x: 240, color: '#44cc44' },
-            { fn: Sprites.kobPortrait, label: 'Коб', x: 380, color: '#9966cc' },
-            { fn: Sprites.chebPortrait, label: 'Чеб', x: 520, color: '#4488cc' },
+        // Only Orson on title - he is the main character
+        const portrait = Sprites.orsonPortrait();
+        const bob = Math.sin(frameCount * 0.04) * 4;
+
+        // Glow behind portrait
+        ctx.fillStyle = '#cc444433';
+        ctx.fillRect(W / 2 - 48, 178 + bob, 96, 104);
+
+        ctx.drawImage(portrait, W / 2 - 40, 183 + bob, 80, 90);
+
+        // Name plate
+        ctx.fillStyle = '#cc444466';
+        ctx.font = '14px monospace';
+        const nameW = ctx.measureText('Орсон').width + 16;
+        ctx.fillRect(W / 2 - nameW / 2, 280, nameW, 22);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('Орсон', W / 2, 296);
+
+        // Mystery silhouettes
+        ctx.fillStyle = '#222233';
+        ctx.font = '10px monospace';
+        const silhouettes = [
+            { x: 130, label: '???' },
+            { x: 380, label: '???' },
+            { x: 520, label: '(секрет)' },
         ];
-
-        for (const p of portraits) {
-            const portrait = p.fn();
-            const bob = Math.sin(frameCount * 0.04 + p.x * 0.01) * 4;
-
-            // Glow behind portrait
-            ctx.fillStyle = p.color + '22';
-            ctx.fillRect(p.x - 38, 183 + bob, 76, 84);
-
-            ctx.drawImage(portrait, p.x - 32, 187 + bob, 64, 72);
-
-            // Name plate
-            ctx.fillStyle = p.color + '44';
-            const nameW = ctx.measureText(p.label).width + 12;
-            ctx.fillRect(p.x - nameW / 2, 268, nameW, 18);
-            ctx.fillStyle = '#ffffff';
-            ctx.font = '12px monospace';
-            ctx.fillText(p.label, p.x, 281);
+        for (const s of silhouettes) {
+            ctx.fillStyle = '#111122';
+            ctx.fillRect(s.x - 28, 195, 56, 68);
+            ctx.fillStyle = '#333344';
+            ctx.fillText(s.label, s.x, 278);
         }
 
         // Blinking prompt
