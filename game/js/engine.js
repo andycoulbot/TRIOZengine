@@ -162,7 +162,7 @@
             gameMode = 'battle';
             Battle.start(GameState.battleData, (result, log) => {
                 gameMode = 'dialogue';
-                const afterScene = GameState.afterBattle || 'ch1_chapter1_end';
+                const afterScene = GameState.afterBattle || 'ch5_after_vilgefortz';
                 loadDialogue(afterScene);
             });
             return;
@@ -199,7 +199,7 @@
 
         if (sceneId.includes('ending') || sceneId === 'credits') {
             Audio8Bit.playMelody('ending');
-        } else if (sceneId.includes('kob')) {
+        } else if (sceneId.includes('battle') || sceneId.includes('vilgefortz')) {
             Audio8Bit.playMelody('kob');
         } else if (GameState.scene !== 'title') {
             Audio8Bit.playMelody('overworld');
@@ -266,11 +266,12 @@
     }
 
     function renderTitle() {
-        // Background gradient
+        // Background gradient - dark and ominous
         const grad = ctx.createLinearGradient(0, 0, 0, H);
-        grad.addColorStop(0, '#0a0a1e');
-        grad.addColorStop(0.5, '#1a1a3e');
-        grad.addColorStop(1, '#0a0a1e');
+        grad.addColorStop(0, '#0a0515');
+        grad.addColorStop(0.3, '#1a0a2e');
+        grad.addColorStop(0.7, '#0d0820');
+        grad.addColorStop(1, '#050210');
         ctx.fillStyle = grad;
         ctx.fillRect(0, 0, W, H);
 
@@ -278,7 +279,7 @@
         for (const star of starField) {
             const flicker = Math.sin(frameCount * star.speed + star.x) * 0.3 + 0.7;
             const alpha = star.brightness * flicker;
-            ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+            ctx.fillStyle = `rgba(255,200,255,${alpha})`;
             ctx.fillRect(
                 (star.x + frameCount * star.speed * 0.5) % W,
                 star.y,
@@ -286,77 +287,92 @@
             );
         }
 
+        // Floating runes/symbols
+        ctx.font = '16px monospace';
+        const runes = ['⚔', '🛡', '🧠', '💀', '🗡', '👁', '🔥'];
+        for (let i = 0; i < 7; i++) {
+            const rx = (i * 97 + frameCount * 0.3) % W;
+            const ry = (Math.sin(frameCount * 0.02 + i) * 20) + 80 + i * 40;
+            const ra = Math.sin(frameCount * 0.03 + i * 2) * 0.15 + 0.15;
+            ctx.fillStyle = `rgba(150,100,200,${ra})`;
+            ctx.fillText(runes[i], rx, ry);
+        }
+
         ctx.textAlign = 'center';
 
         // Title shadow
-        ctx.fillStyle = '#440000';
-        ctx.font = 'bold 48px monospace';
-        ctx.fillText('ГЕРОИ ЧАТИКА', W / 2 + 3, 123);
+        ctx.fillStyle = '#220033';
+        ctx.font = 'bold 36px monospace';
+        ctx.fillText('МЕЧ И ШИЗОФРЕНИЯ', W / 2 + 3, 78);
 
         // Title glow
         const glowAlpha = Math.sin(frameCount * 0.05) * 0.2 + 0.8;
-        ctx.fillStyle = `rgba(255,50,50,${glowAlpha})`;
-        ctx.font = 'bold 48px monospace';
-        ctx.fillText('ГЕРОИ ЧАТИКА', W / 2, 120);
+        ctx.fillStyle = `rgba(200,100,255,${glowAlpha})`;
+        ctx.font = 'bold 36px monospace';
+        ctx.fillText('МЕЧ И ШИЗОФРЕНИЯ', W / 2, 75);
 
         // Subtitle
-        ctx.fillStyle = '#aaaacc';
-        ctx.font = '14px monospace';
-        ctx.fillText('Пиксельная RPG в стиле Undertale', W / 2, 155);
+        ctx.fillStyle = '#aa88cc';
+        ctx.font = '13px monospace';
+        ctx.fillText('Приключения Орсона в мире, где всё пошло не так', W / 2, 105);
 
-        // Only Orson on title - he is the main character
+        // Orson portrait - center
         const portrait = Sprites.orsonPortrait();
         const bob = Math.sin(frameCount * 0.04) * 4;
 
-        // Glow behind portrait
-        ctx.fillStyle = '#cc444433';
-        ctx.fillRect(W / 2 - 48, 178 + bob, 96, 104);
+        // Red glow behind portrait
+        ctx.fillStyle = '#cc444422';
+        ctx.fillRect(W / 2 - 52, 120 + bob, 104, 112);
+        ctx.drawImage(portrait, W / 2 - 44, 125 + bob, 88, 100);
 
-        ctx.drawImage(portrait, W / 2 - 40, 183 + bob, 80, 90);
-
-        // Name plate
-        ctx.fillStyle = '#cc444466';
-        ctx.font = '14px monospace';
-        const nameW = ctx.measureText('Орсон').width + 16;
-        ctx.fillRect(W / 2 - nameW / 2, 280, nameW, 22);
+        // Name
+        ctx.fillStyle = '#cc444488';
+        ctx.font = 'bold 16px monospace';
+        const nameW = ctx.measureText('ОРСОН').width + 20;
+        ctx.fillRect(W / 2 - nameW / 2, 235, nameW, 24);
         ctx.fillStyle = '#ffffff';
-        ctx.fillText('Орсон', W / 2, 296);
+        ctx.fillText('ОРСОН', W / 2, 253);
 
-        // Mystery silhouettes
-        ctx.fillStyle = '#222233';
+        // Character description
+        ctx.fillStyle = '#887799';
+        ctx.font = '11px monospace';
+        ctx.fillText('Миллионер · Провокатор · Заклинатель Тряски', W / 2, 275);
+        ctx.fillText('Франция · 25 лет · 47 открытых вкладок', W / 2, 292);
+
+        // Shake meter preview
+        const shakeW = 200;
+        ctx.fillStyle = '#222';
+        ctx.fillRect(W / 2 - shakeW / 2, 310, shakeW, 12);
+        const shakeFill = Math.sin(frameCount * 0.03) * 0.3 + 0.3;
+        ctx.fillStyle = '#cc44aa';
+        ctx.fillRect(W / 2 - shakeW / 2 + 1, 311, (shakeW - 2) * shakeFill, 10);
+        ctx.fillStyle = '#aa88cc';
         ctx.font = '10px monospace';
-        const silhouettes = [
-            { x: 130, label: '???' },
-            { x: 380, label: '???' },
-            { x: 520, label: '(секрет)' },
-        ];
-        for (const s of silhouettes) {
-            ctx.fillStyle = '#111122';
-            ctx.fillRect(s.x - 28, 195, 56, 68);
-            ctx.fillStyle = '#333344';
-            ctx.fillText(s.label, s.x, 278);
-        }
+        ctx.fillText('ТРЯСКА', W / 2, 320);
 
         // Blinking prompt
         const blinkAlpha = Math.sin(frameCount * 0.08) * 0.4 + 0.6;
         ctx.fillStyle = `rgba(255,204,0,${blinkAlpha})`;
-        ctx.font = 'bold 22px monospace';
-        ctx.fillText('▶ Нажмите Z или ENTER ◀', W / 2, 340);
+        ctx.font = 'bold 20px monospace';
+        ctx.fillText('▶ Нажмите Z или ENTER ◀', W / 2, 355);
 
-        // Controls info box
+        // Controls info
         ctx.fillStyle = 'rgba(255,255,255,0.05)';
-        ctx.fillRect(60, 375, W - 120, 80);
-        ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+        ctx.fillRect(60, 380, W - 120, 80);
+        ctx.strokeStyle = 'rgba(150,100,200,0.15)';
         ctx.lineWidth = 1;
-        ctx.strokeRect(60, 375, W - 120, 80);
+        ctx.strokeRect(60, 380, W - 120, 80);
 
-        ctx.fillStyle = '#999999';
-        ctx.font = '13px monospace';
-        ctx.fillText('⬆⬇⬅➡ / WASD — движение', W / 2, 398);
-        ctx.fillText('Z / Enter — подтвердить  |  X / Esc — отмена', W / 2, 418);
-        ctx.fillStyle = '#ccaa44';
+        ctx.fillStyle = '#777788';
         ctx.font = '12px monospace';
-        ctx.fillText('1000+ путей  ·  30+ финалов  ·  Секретная линия Коба', W / 2, 442);
+        ctx.fillText('⬆⬇⬅➡ / WASD — навигация', W / 2, 400);
+        ctx.fillText('Z / Enter — подтвердить  |  X / Esc — отмена', W / 2, 418);
+        ctx.fillStyle = '#9966cc';
+        ctx.font = '11px monospace';
+        ctx.fillText('6 глав · 3 концовки · Босс-файты · Тряска™', W / 2, 440);
+        ctx.fillStyle = '#555566';
+        ctx.font = '10px monospace';
+        ctx.fillText('90% дурка · 9% победа · 1% правда', W / 2, 458);
 
         ctx.textAlign = 'left';
     }
@@ -367,17 +383,34 @@
         const time = frameCount * 0.05;
         const frame = Math.floor(time) % 4;
 
-        if (scene.includes('orson') || scene.includes('temple') || scene.includes('war') || scene.includes('coronation') || scene.includes('ceremony') || scene.includes('debate') || scene.includes('voice') || scene.includes('reborn')) {
+        // Show NPCs based on which characters appear in scene
+        if (scene.includes('orson') || scene.includes('ch1_') || scene.includes('ch2_') || scene.includes('ch3_') || scene.includes('ch4_') || scene.includes('ch6_')) {
             npcs.push({ sprites: Sprites.orsonWalk(), x: 200, y: 150, color: '#cc4444' });
         }
-        if (scene.includes('vaituz') || scene.includes('apple') || scene.includes('peace') || scene.includes('coronation') || scene.includes('ceremony')) {
+        if (scene.includes('vaituz') || scene.includes('ch5_vaituz')) {
             npcs.push({ sprites: Sprites.vaituzWalk(), x: 350, y: 180, color: '#44cc44' });
         }
-        if (scene.includes('cheb') || scene.includes('fly') || scene.includes('delta') || scene.includes('coronation') || scene.includes('ceremony')) {
+        if (scene.includes('cheb') || scene.includes('ch5_cheb')) {
             npcs.push({ sprites: Sprites.chebWalk(), x: 450, y: 160, color: '#4488cc' });
         }
-        if (scene.includes('kob') && !scene.includes('locked') && !scene.includes('door')) {
+        if (scene.includes('kob') || scene.includes('ch5_kob')) {
             npcs.push({ sprites: Sprites.kobWalk(), x: 300, y: 170, color: '#9966cc' });
+        }
+        if (scene.includes('vilgefortz') || scene.includes('ch5_vilgefortz')) {
+            npcs.push({ sprites: Sprites.kobWalk(), x: 250, y: 140, color: '#880088' });
+        }
+        if (scene.includes('pericles') || scene.includes('ch1_meet_pericles') || scene.includes('ch1_corridor')) {
+            npcs.push({ sprites: Sprites.orsonWalk(), x: 400, y: 200, color: '#ccaa44' });
+        }
+        if (scene.includes('germanovna') || scene.includes('ch6_german')) {
+            npcs.push({ sprites: Sprites.vaituzWalk(), x: 350, y: 150, color: '#ffffff' });
+        }
+        if (scene.includes('ch5_enter_square') || scene.includes('ch5_everyone')) {
+            // Show everyone on the square
+            npcs.push({ sprites: Sprites.orsonWalk(), x: 150, y: 150, color: '#cc4444' });
+            npcs.push({ sprites: Sprites.vaituzWalk(), x: 250, y: 180, color: '#44cc44' });
+            npcs.push({ sprites: Sprites.chebWalk(), x: 350, y: 160, color: '#4488cc' });
+            npcs.push({ sprites: Sprites.kobWalk(), x: 450, y: 170, color: '#9966cc' });
         }
 
         for (const npc of npcs) {
@@ -404,7 +437,6 @@
         ctx.fillStyle = hudGrad;
         ctx.fillRect(0, 0, W, 34);
 
-        // Bottom line
         ctx.fillStyle = 'rgba(100,80,160,0.3)';
         ctx.fillRect(0, 33, W, 1);
 
@@ -414,21 +446,19 @@
         const heart = Sprites.createHeartSprite();
         ctx.drawImage(heart, 8, 8, 16, 16);
 
-        // HP bar background
+        // HP bar
         ctx.fillStyle = '#333';
         ctx.fillRect(28, 11, 60, 12);
-        // HP bar fill
         const hpRatio = GameState.hp / GameState.maxHp;
         const hpColor = hpRatio > 0.5 ? '#44cc44' : hpRatio > 0.25 ? '#cccc44' : '#cc4444';
         ctx.fillStyle = hpColor;
         ctx.fillRect(29, 12, Math.floor(58 * hpRatio), 10);
-        // HP text
         ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 10px monospace';
         ctx.fillText(`${GameState.hp}/${GameState.maxHp}`, 32, 21);
 
         // Chapter
-        ctx.fillStyle = '#ffcc00';
+        ctx.fillStyle = '#cc88ff';
         ctx.font = 'bold 13px monospace';
         ctx.fillText(`Гл.${GameState.chapter}`, 100, 22);
 
@@ -436,18 +466,28 @@
         ctx.font = '11px monospace';
         const S = GameState.stats;
         const statData = [
-            { label: 'УВ', val: S.respect, color: '#ff8888' },
-            { label: 'ДР', val: S.friendship, color: '#88ff88' },
-            { label: 'ХА', val: S.chaos, color: '#ff4444' },
-            { label: 'МД', val: S.wisdom, color: '#88ccff' },
+            { label: 'ХР', val: S.charisma, color: '#ffaa44' },
             { label: 'ШЗ', val: S.shiza, color: '#cc88ff' },
+            { label: 'ХС', val: S.chaos, color: '#ff4444' },
+            { label: 'ПР', val: S.paranoia, color: '#ff8888' },
+            { label: 'ТР', val: S.troll, color: '#88ff88' },
         ];
-        let sx = 165;
+        let sx = 155;
         for (const st of statData) {
             ctx.fillStyle = st.color;
             ctx.fillText(`${st.label}:${st.val}`, sx, 22);
-            sx += 55;
+            sx += 50;
         }
+
+        // Shake meter
+        ctx.fillStyle = '#444';
+        ctx.fillRect(420, 12, 50, 10);
+        const shakeRatio = Math.min((GameState.tshake || 0) / 100, 1);
+        ctx.fillStyle = shakeRatio > 0.7 ? '#ff0066' : shakeRatio > 0.4 ? '#cc44aa' : '#8844aa';
+        ctx.fillRect(421, 13, Math.floor(48 * shakeRatio), 8);
+        ctx.fillStyle = '#cc88ff';
+        ctx.font = '9px monospace';
+        ctx.fillText('ТРС', 475, 21);
 
         // Inventory
         if (GameState.inventory.length > 0) {

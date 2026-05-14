@@ -1,14 +1,14 @@
 const GameState = {
-    hp: 20, maxHp: 20,
+    hp: 25, maxHp: 25,
     chapter: 0, scene: 'title',
-    stats: { respect: 50, friendship: 50, chaos: 0, wisdom: 0, shiza: 0 },
-    reputation: { orson: 0, vaituz: 0, kob: 0, cheb: 0 },
+    stats: { charisma: 5, shiza: 0, chaos: 0, paranoia: 0, troll: 0 },
+    reputation: { vilgefortz: 0, kob: 0, cheb: 0, vaituz: 0, akulbot: 0, madyar: 0, pericles: 0, germanovna: 0 },
     inventory: [],
     flags: {},
     choices: [],
-    kobSecrets: 0,
     endingId: null,
     pathCount: 0,
+    tshake: 0, // "тряска" meter
 };
 
 const Story = (() => {
@@ -24,2321 +24,1294 @@ const Story = (() => {
     speaker: '', text: '',
     choices: [
         { text: 'НАЧАТЬ ИГРУ', next: null, effect: () => { GameState.scene = 'intro'; }},
-        { text: 'СЕКРЕТЫ', next: null, effect: () => { GameState.scene = 'secrets_menu'; }},
     ]
 },
 
-// ============== INTRO ==============
 'intro': {
-    speaker: '', text: 'Где-то в глубинах интернета существует чатик... Место, где герои спорят о видеокартах, обсуждают Heroes 5 и решают судьбы миров.',
+    speaker: '', text: 'Франция. Квартира миллионера неизвестного происхождения. 3:47 ночи. На экране ноутбука — 47 открытых вкладок: форумы, дискорд, Heroes 5. Рядом — пустые банки от энергетика и дорогие часы.',
     choices: [
-        { text: 'Войти в чатик', next: null, effect: () => { GameState.scene = 'ch1_start'; GameState.chapter = 1; }},
+        { text: 'Продолжить', next: null, effect: () => { GameState.chapter = 1; GameState.scene = 'ch1_wake'; }},
     ]
 },
 
-// ============== CHAPTER 1: ЧАТИК ==============
-// Orson is the main character - you meet him first!
-'ch1_start': {
-    speaker: 'Орсон', text: 'Здравствуй. На связи, браток. Ты новенький в чатике? Сразу скажу — тут мои правила. У меня такой вопрос неловкий — ты за Пятёрку или за Тройку?',
+// ============== ГЛАВА 1: ПРОБУЖДЕНИЕ ==============
+'ch1_wake': {
+    speaker: '', text: 'ГЛАВА 1: ПРОБУЖДЕНИЕ В МИРЕ МЕЧА И ШИЗОФРЕНИИ.\n\nОрсон открывает глаза. Он лежит на каменном полу. Вокруг — средневековый замок. Стены увиты плющом. В воздухе пахнет магией и багетами.',
     choices: [
-        { text: 'За Пятёрку, конечно!', next: null, effect: () => {
-            R.orson += 20; S.respect += 10;
-            GameState.scene = 'ch1_orson_welcomes';
-        }},
-        { text: 'За Тройку!', next: null, effect: () => {
-            R.orson -= 30; S.chaos += 10;
-            GameState.scene = 'ch1_orson_first_rage';
-        }},
-        { text: 'Эээ... а что это?', next: null, effect: () => {
-            S.wisdom += 3;
-            GameState.scene = 'ch1_orson_explains_h5';
-        }},
-        { text: '*молча смотреть*', next: null, effect: () => {
-            S.chaos += 5;
-            GameState.scene = 'ch1_orson_stares';
-        }},
+        { text: '(Встать и осмотреться)', next: null, effect: () => { GameState.scene = 'ch1_look_around'; }},
+        { text: '(Лежать дальше)', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_stay_lying'; }},
     ]
 },
 
-'ch1_orson_welcomes': {
-    speaker: 'Орсон', text: 'Наш человек! Классно, классно, брат! Покупаю видеокарту за 160 000! Чтоб поиграть в 30-35 фпс! Сейчас покажу тебе чатик... Кстати, тут должен быть один чел — Вайтуз. Он тормозит, но вроде норм. Должен скоро подойти...',
+'ch1_stay_lying': {
+    speaker: 'Орсон', text: '...Серьёзно? Кто-то управляет мной? Я лежу на полу средневекового замка и кто-то решает, встать мне или нет? Какие же вы жалкие, ребят.',
     choices: [
-        { text: 'А кто такой Вайтуз?', next: null, effect: () => { GameState.scene = 'ch1_orson_about_vaituz'; }},
-        { text: 'Покажи чатик!', next: null, effect: () => { GameState.scene = 'ch1_explore_with_orson'; }},
-        { text: 'А 160к за видеокарту... серьёзно?', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_orson_videocard'; }},
+        { text: '(Всё-таки встать)', next: null, effect: () => { GameState.scene = 'ch1_look_around'; }},
     ]
 },
 
-'ch1_orson_first_rage': {
-    speaker: 'Орсон', text: 'ЧТО?! ТРОЙКА?! Чем меньше ты будешь писать, что тройка нагибает Пятёрку, тем меньше ты будешь походить на лицо со своей авы! Ты не устал позориться?! ЗАЙДИ В ВОЙС!',
+'ch1_look_around': {
+    speaker: 'Орсон', text: 'Так... Это не моя квартира. Где мой ноутбук? Где мой телефон? Где... *замечает рыцарские доспехи на стене* ...Где я, чёрт возьми?!',
     choices: [
-        { text: 'Ок, ок, я пошутил!', next: null, effect: () => { R.orson += 5; S.chaos -= 5; GameState.scene = 'ch1_orson_calms'; }},
-        { text: 'БИТВА!', next: null, effect: () => { GameState.scene = 'ch1_battle_orson'; }},
-        { text: '*медленно пятиться к выходу*', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_escape_orson'; }},
+        { text: '(Подойти к окну)', next: null, effect: () => { GameState.scene = 'ch1_window'; }},
+        { text: '(Обыскать комнату)', next: null, effect: () => { GameState.scene = 'ch1_search_room'; }},
+        { text: '(Крикнуть "Алло!")', next: null, effect: () => { S.chaos += 2; GameState.scene = 'ch1_yell'; }},
     ]
 },
 
-'ch1_orson_calms': {
-    speaker: 'Орсон', text: 'Хм. Ладно. Но запомни — здесь Пятёрка. Точка. Кстати, сейчас должен подойти Вайтуз... Он опаздывает. Как всегда.',
+'ch1_window': {
+    speaker: '', text: 'За окном — фэнтезийный мир. Зелёные холмы, замки вдалеке, драконы в небе. На одном из замков развевается флаг с логотипом Heroes 5.',
     choices: [
-        { text: 'Кто такой Вайтуз?', next: null, effect: () => { GameState.scene = 'ch1_orson_about_vaituz'; }},
-        { text: 'Подождём', next: null, effect: () => { GameState.scene = 'ch1_vaituz_arrival'; }},
+        { text: 'Это... это Пятёрка?!', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_orson_excited'; }},
+        { text: 'Я сплю. Однозначно.', next: null, effect: () => { GameState.scene = 'ch1_dream_doubt'; }},
     ]
 },
 
-'ch1_orson_explains_h5': {
-    speaker: 'Орсон', text: 'Heroes of Might and Magic V! ВЕЛИЧАЙШАЯ ИГРА ВСЕХ ВРЕМЁН! Нивал создали шедевр! Я верю в Реборн — перерождение этой игры! Секта свидетелей Реборна — это не секта, это ИСТИНА! ...Но об этом потом. Сейчас ждём Вайтуза.',
+'ch1_orson_excited': {
+    speaker: 'Орсон', text: 'Я... я ВНУТРИ Heroes 5?! Исходный код Нивал! Мифы были правдой! Реборн — это не просто перерождение игры, это перерождение РЕАЛЬНОСТИ! Ладно... ладно, спокойно. Надо осмотреться.',
     choices: [
-        { text: 'Это звучит как секта...', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch1_orson_about_vaituz'; }},
-        { text: 'Расскажи ещё!', next: null, effect: () => { S.shiza += 5; R.orson += 10; GameState.scene = 'ch1_orson_about_vaituz'; }},
+        { text: '(Обыскать комнату)', next: null, effect: () => { GameState.scene = 'ch1_search_room'; }},
     ]
 },
 
-'ch1_orson_stares': {
-    speaker: 'Орсон', text: '...Ты чего молчишь? Собирался написать что-то, испугался войса. Удалил. Оставил только это, бро. *неловкая пауза на 40 секунд* ...Ладно. Должен подойти Вайтуз.',
+'ch1_dream_doubt': {
+    speaker: 'Орсон', text: 'Сон... Логично. Я заснул после 17 часов на форуме. Классика. Ладно, раз это сон — можно делать что угодно. И никто не может меня остановить.',
     choices: [
-        { text: '...', next: null, effect: () => { GameState.scene = 'ch1_vaituz_arrival'; }},
-        { text: 'Привет! Я просто стесняюсь', next: null, effect: () => { R.orson += 5; GameState.scene = 'ch1_orson_about_vaituz'; }},
+        { text: '(Обыскать комнату)', next: null, effect: () => { GameState.scene = 'ch1_search_room'; }},
     ]
 },
 
-'ch1_escape_orson': {
-    speaker: '', text: 'Вы пятитесь к выходу. Орсон кричит вслед: "Какие же вы жалкие, ребят!" Вдруг вы слышите странный звук — как поезд...',
+'ch1_search_room': {
+    speaker: '', text: 'В комнате найдено: старый телефон (работает!), дорогие часы (ваши!), помятый французский камзол, и записка: "Выход через главный зал. — П."',
     choices: [
-        { text: 'Что это?!', next: null, effect: () => { GameState.scene = 'ch1_vaituz_arrival'; }},
+        { text: '🔍 Взять телефон', next: null, effect: () => { GameState.inventory.push({id:'phone', name:'Телефон', desc:'Нет сигнала, но калькулятор работает'}); GameState.scene = 'ch1_take_phone'; }},
+        { text: '🔍 Взять часы', next: null, effect: () => { GameState.inventory.push({id:'watch', name:'Дорогие часы', desc:'Показывают 3:47 всегда'}); GameState.scene = 'ch1_take_watch'; }},
+        { text: '🔍 Взять всё', next: null, effect: () => { GameState.inventory.push({id:'phone', name:'Телефон', desc:'Нет сигнала'}); GameState.inventory.push({id:'watch', name:'Дорогие часы', desc:'3:47 навсегда'}); GameState.scene = 'ch1_take_all'; }},
     ]
 },
 
-'ch1_explore_with_orson': {
-    speaker: 'Орсон', text: 'Тут у нас чатик — главная комната. Вон там Храм Пятёрки — я там молюсь на Heroes 5. Войс-Каньон — голосовой канал. Чебовка — аэродром Чеба. Но сначала ждём Вайтуза — он опять опаздывает.',
+'ch1_take_phone': {
+    speaker: 'Орсон', text: 'Телефон... Нет сигнала. Нет интернета. Нет дискорда. Это... это хуже смерти. Ладно, хотя бы калькулятор работает. Кому-то может пригодиться.',
     choices: [
-        { text: 'Кто такой Вайтуз?', next: null, effect: () => { GameState.scene = 'ch1_orson_about_vaituz'; }},
-        { text: 'Подождём его', next: null, effect: () => { GameState.scene = 'ch1_vaituz_arrival'; }},
+        { text: '(Идти к выходу)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
     ]
 },
 
-'ch1_orson_about_vaituz': {
-    speaker: 'Орсон', text: 'Вайтуз? Похвалил его один раз, а он обиделся как девочка. Он тормозит, плохо играет, МЕДЛЕННО несёт аптечки. Но он говорит "у меня мозг не кипит" и все почему-то смеются. Должен быть скоро...',
+'ch1_take_watch': {
+    speaker: 'Орсон', text: 'Мои часы! Дорогие, между прочим. Показывают 3:47. Всегда 3:47. Сломались, видимо. Или время тут не работает. Французский интеллект подсказывает — второе.',
     choices: [
-        { text: 'Подождём', next: null, effect: () => { GameState.scene = 'ch1_vaituz_arrival'; }},
+        { text: '(Идти к выходу)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
     ]
 },
 
-// === TRAIN CUTSCENE: VAITUZ APPEARS ===
-'ch1_vaituz_arrival': {
-    speaker: '', text: 'Вы слышите нарастающий грохот. Земля трясётся. Это... поезд?! Откуда тут поезд?!',
+'ch1_take_all': {
+    speaker: 'Орсон', text: 'Забираю всё. Я миллионер — могу себе позволить. Хотя технически это мои вещи... Или нет? Кто вообще меня сюда притащил? Если это розыгрыш — кому-то конец.',
     choices: [
-        { text: 'ЧТО ПРОИСХОДИТ?!', next: null, effect: () => { GameState.scene = 'ch1_train_hit'; }},
+        { text: '(Идти к выходу)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
     ]
 },
 
-'ch1_train_hit': {
-    speaker: '', text: '* ГРОХОТ! БАБАХ! СКРЕЖЕТ! * Огромный поезд пролетает через чатик! Кто-то летит по воздуху... Это человек? Он падает! Он падает прямо перед вами!',
+'ch1_yell': {
+    speaker: 'Орсон', text: 'АЛЛО! ЕСТЬ ТУТ КТО?! ...Эхо. Тишина. Замечательно. Даже тут меня игнорируют.',
     choices: [
-        { text: 'Помочь!!!', next: null, effect: () => { S.friendship += 5; GameState.scene = 'ch1_vaituz_survives'; }},
-        { text: 'ОН ЖИВ?!', next: null, effect: () => { GameState.scene = 'ch1_vaituz_survives'; }},
+        { text: '(Крикнуть громче)', next: null, effect: () => { S.paranoia += 2; GameState.scene = 'ch1_yell_louder'; }},
+        { text: '(Осмотреть комнату тихо)', next: null, effect: () => { GameState.scene = 'ch1_search_room'; }},
     ]
 },
 
-'ch1_vaituz_survives': {
-    speaker: 'Вайтуз', text: 'Ээээээ... *отряхивается* Ну, это что только что было? *смотрит на себя* Вроде всё на месте. У меня мозг не кипит! *показывает большой палец*',
+'ch1_yell_louder': {
+    speaker: '', text: '*Из стены вылезает маленький гном с бородой до пола.*',
     choices: [
-        { text: 'ТЕБЯ СБИЛ ПОЕЗД!!!', next: null, effect: () => { GameState.scene = 'ch1_vaituz_chill'; }},
-        { text: 'Как ты ЖИВ?!', next: null, effect: () => { GameState.scene = 'ch1_vaituz_chill'; }},
-        { text: '*молча смотреть в шоке*', next: null, effect: () => { GameState.scene = 'ch1_vaituz_chill'; }},
+        { text: '...Что?', next: null, effect: () => { GameState.scene = 'ch1_meet_pericles'; }},
     ]
 },
 
-'ch1_vaituz_chill': {
-    speaker: 'Вайтуз', text: 'Поезд? Какой поезд? А, этот. Ну да, он меня каждый день сбивает. Привык. Кстати, хочешь яблоко? *достаёт идеально целое яблоко из кармана*',
+'ch1_corridor': {
+    speaker: '', text: 'Коридор замка. Факелы на стенах мерцают. На полу — мозаика с картой мира Heroes 5. У выхода стоит маленький гном.',
     choices: [
-        { text: 'КАК ЯБЛОКО ЦЕЛОЕ?!', next: null, effect: () => { GameState.scene = 'ch1_vaituz_apple_magic'; }},
-        { text: 'Да, спасибо...', next: null, effect: () => {
-            R.vaituz += 10; S.friendship += 5;
-            GameState.inventory.push({ id: 'apple', name: 'Неубиваемое яблоко Вайтуза', desc: '+8 HP' });
-            GameState.scene = 'ch1_after_train';
-        }},
-        { text: 'Я не голоден, я в ШОКЕ', next: null, effect: () => { GameState.scene = 'ch1_vaituz_confused'; }},
+        { text: '(Подойти к гному)', next: null, effect: () => { GameState.scene = 'ch1_meet_pericles'; }},
+        { text: '(Пройти мимо)', next: null, effect: () => { R.pericles -= 5; GameState.scene = 'ch1_ignore_pericles'; }},
     ]
 },
 
-'ch1_vaituz_apple_magic': {
-    speaker: 'Вайтуз', text: 'Эээ... ну я же говорю — у меня мозг не кипит. И яблоко тоже. Бля, как же ахуенно после энергетика и яблок! *неловко подмигивает*',
+'ch1_meet_pericles': {
+    speaker: 'Периклес', text: 'Приветствую, путник! Я Периклес, гном-проводник! Ты наконец проснулся! Мы ждали тебя три дня! Твоя миссия — пройти через мир Меча и Шизофрении и найти путь домой!',
     choices: [
-        { text: 'Ты... странный', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_after_train'; }},
-        { text: 'Дай яблоко!', next: null, effect: () => {
-            R.vaituz += 10; S.friendship += 5;
-            GameState.inventory.push({ id: 'apple', name: 'Неубиваемое яблоко Вайтуза', desc: '+8 HP' });
-            GameState.scene = 'ch1_after_train';
-        }},
+        { text: 'Какой ещё мир?', next: null, effect: () => { GameState.scene = 'ch1_pericles_explain'; }},
+        { text: 'Отойди, коротышка', next: null, effect: () => { S.troll += 3; R.pericles -= 10; GameState.scene = 'ch1_pericles_insulted'; }},
+        { text: 'Три дня?! У меня стрим через час!', next: null, effect: () => { S.paranoia += 2; GameState.scene = 'ch1_pericles_stream'; }},
     ]
 },
 
-'ch1_vaituz_confused': {
-    speaker: 'Вайтуз', text: 'В шоке? От чего? *искренне не понимает* А, от поезда? Так это тут норма. Веду себя так же, как и ты, брат). Кстати, я Вайтуз. Или Витус. Или... эээ... Вайтуз.',
+'ch1_pericles_explain': {
+    speaker: 'Периклес', text: 'Это мир, рождённый из коллективного безумия интернета. Здесь форумы становятся лабиринтами, троллинг — магией, а конфликты — настоящими битвами. Ты тут потому что... ну... тебе, видимо, есть что проработать.',
     choices: [
-        { text: 'Ладно, привыкну', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Мне нечего прорабатывать!', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch1_denial'; }},
+        { text: 'Как мне выбраться?', next: null, effect: () => { GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-'ch1_after_train': {
-    speaker: 'Орсон', text: 'О, Вайтуз! Опять на поезде приехал? Ладно, теперь мы втроём. Куда пойдём?',
+'ch1_pericles_insulted': {
+    speaker: 'Периклес', text: '*вздыхает* Каждый раз одно и то же с вами, токсичными. Ладно, я всё равно обязан тебе помочь. Контракт. Так вот — тебе нужно пройти 6 испытаний, чтобы проснуться.',
     choices: [
-        { text: 'Храм Пятёрки', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Войс-Каньон (Голосовой канал)', next: null, effect: () => { GameState.scene = 'ch1_voice_canyon'; }},
-        { text: 'Чебовка (Аэродром)', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
-        { text: 'Расскажите про себя', next: null, effect: () => { GameState.scene = 'ch1_awkward_introductions'; }},
+        { text: 'Говори быстрее', next: null, effect: () => { GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-// === AWKWARD/FUNNY MOMENTS ===
-'ch1_awkward_introductions': {
-    speaker: 'Вайтуз', text: 'Ну... я... эээ... *молчит 15 секунд* ...я Вайтуз. Я ношу зелёные наушники. Иногда смокинг. Играю в игры, но плохо. Очень плохо. *опять молчит* ...у меня мозг не кипит.',
+'ch1_pericles_stream': {
+    speaker: 'Периклес', text: 'Стрим?! Тут нет интернета, герой! Тут нет дискорда! Тут нет форумов! Только ты, мир, и последствия твоих решений! ...Кстати, у тебя красные глаза. Ты спал?',
     choices: [
-        { text: '*неловкое молчание*', next: null, effect: () => { GameState.scene = 'ch1_awkward_silence_1'; }},
-        { text: 'А... это хорошо?', next: null, effect: () => { GameState.scene = 'ch1_awkward_silence_1'; }},
+        { text: 'Я спорил на форуме 17 часов', next: null, effect: () => { S.shiza += 2; GameState.scene = 'ch1_exit_quest'; }},
+        { text: 'Это не твоё дело', next: null, effect: () => { R.pericles -= 3; GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-'ch1_awkward_silence_1': {
-    speaker: '', text: '*Неловкая пауза. Вайтуз жуёт яблоко. Орсон смотрит на вас как на идиота. Вы смотрите на них как на идиотов. Все трое — идиоты.*',
+'ch1_denial': {
+    speaker: 'Периклес', text: '...Ладно. Конечно нечего. Ты абсолютно нормальный. Миллионер из Франции который спорит на форумах 17 часов в день — вершина здоровья. Пойдём, покажу выход.',
     choices: [
-        { text: 'Согласиться с этим', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_after_awkward'; }},
-        { text: 'Начать говорить о погоде', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_weather_cringe'; }},
-        { text: 'Ладно, куда идём?', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Это был сарказм?!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch1_pericles_sarcasm'; }},
+        { text: 'Пойдём', next: null, effect: () => { GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-'ch1_weather_cringe': {
-    speaker: '', text: 'Вы: "Ну... погода сегодня хорошая, да?" Орсон и Вайтуз смотрят на вас. Вы в интернете. Тут нет погоды.',
+'ch1_pericles_sarcasm': {
+    speaker: 'Периклес', text: 'Конечно нет! Я маленький гном, куда мне до сарказма! *подмигивает* Пойдём, пока ты не начал спорить со стенами.',
     choices: [
-        { text: '*умереть от стыда*', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_after_cringe_weather'; }},
+        { text: '...Пойдём', next: null, effect: () => { GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-'ch1_after_cringe_weather': {
-    speaker: 'Вайтуз', text: 'Эээ... а это тут причём? Кстати, а я как-то случайно помогал разрушать Юник, когда была война. То есть... не. Не помогал. Хотя да. Нет. Блин.',
+'ch1_ignore_pericles': {
+    speaker: 'Периклес', text: '*бежит следом* Стой! Ты не можешь просто уйти! Без проводника ты заблудишься! Тут ловушки! Тут монстры! Тут... тут КОММЕНТАРИИ ОЖИЛИ!',
     choices: [
-        { text: 'Что?', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '...Комментарии?', next: null, effect: () => { GameState.scene = 'ch1_exit_quest'; }},
     ]
 },
 
-'ch1_after_awkward': {
-    speaker: 'Орсон', text: 'Ладно, хватит тупить. У нас есть дела. Реборн ждать не будет! Куда пойдём?',
+'ch1_exit_quest': {
+    speaker: 'Периклес', text: 'Итак, план простой: выходим из замка, проходим через город, добираемся до Портала Пробуждения. По пути будут... трудности. Ты готов?',
     choices: [
-        { text: 'Храм Пятёрки', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Войс-Каньон', next: null, effect: () => { GameState.scene = 'ch1_voice_canyon'; }},
-        { text: 'Чебовка', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
+        { text: 'Я всегда готов', next: null, effect: () => { S.charisma += 2; GameState.scene = 'ch1_castle_exit'; }},
+        { text: 'Мне нужны припасы', next: null, effect: () => { GameState.scene = 'ch1_castle_loot'; }},
     ]
 },
 
-'ch1_apple_taken': {
-    speaker: 'Вайтуз', text: 'Бля, как же ахуенно после энергетика и яблок! Кста, я только что выжил после поезда и мне норм. А это тут причём?)',
+'ch1_castle_loot': {
+    speaker: '', text: 'Вы обыскиваете замок. Находите: потрёпанный багет (может использоваться как оружие), зарядку (без розетки), и свиток с надписью: "Если ты это читаешь — беги."',
     choices: [
-        { text: 'Осмотреть чатик', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
-        { text: 'Кобика зовём?)', next: null, effect: () => { GameState.kobSecrets++; F.mentioned_kob_early = true; GameState.scene = 'ch1_mention_kob'; }},
+        { text: '🍞 Взять багет-оружие', next: null, effect: () => { GameState.inventory.push({id:'baguette', name:'Боевой Багет', desc:'+3 к атаке, -5 к достоинству'}); GameState.scene = 'ch1_castle_exit'; }},
+        { text: '🔌 Взять зарядку', next: null, effect: () => { GameState.inventory.push({id:'charger', name:'Зарядка', desc:'Нет розетки в средневековье'}); GameState.scene = 'ch1_castle_exit'; }},
+        { text: '📜 Прочитать свиток', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch1_scroll_warning'; }},
     ]
 },
 
-'ch1_apple_refused': {
-    speaker: 'Вайтуз', text: 'Ну ладно... Веду себя так же, как и ты, брат).',
+'ch1_scroll_warning': {
+    speaker: '', text: 'Свиток: "Предупреждение: этот мир реагирует на твоё поведение. Чем больше ты провоцируешь — тем сильнее мир провоцирует тебя. Чем больше тряска — тем ближе финал. С уважением, Е.Г."',
     choices: [
-        { text: 'Осмотреться', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
+        { text: 'Кто такая Е.Г.?', next: null, effect: () => { F.noticed_eg = true; GameState.scene = 'ch1_castle_exit'; }},
+        { text: 'Тряска? Какая тряска?', next: null, effect: () => { GameState.scene = 'ch1_castle_exit'; }},
     ]
 },
 
-'ch1_who_vaituz': {
-    speaker: 'Вайтуз', text: 'Я Вайтуз. Ну, или Витус. Меня сегодня поезд сбил. Но у меня мозг не кипит! Играю в игры, но очень плохо. Зелёные наушники, смокинг, яблоко. Это мой вайб.',
+'ch1_castle_exit': {
+    speaker: '', text: 'Вы выходите из замка. Перед вами — дорога, ведущая к городу. Солнце странное — оно пиксельное. Деревья шумят HTML-тегами. В воздухе пахнет Wi-Fi.',
     choices: [
-        { text: 'А что тут происходит?', next: null, effect: () => { GameState.scene = 'ch1_whats_up'; }},
-        { text: 'Ты не устал позориться?', next: null, effect: () => { R.vaituz -= 10; S.chaos += 5; GameState.scene = 'ch1_insult_vaituz'; }},
+        { text: '(Идти к городу)', next: null, effect: () => { GameState.scene = 'ch1_road_event'; }},
+        { text: '(Осмотреть окрестности)', next: null, effect: () => { GameState.scene = 'ch1_look_outside'; }},
     ]
 },
 
-'ch1_silent_leave': {
-    speaker: '', text: 'Вы молча уходите. Орсон: "Какие же вы жалкие, ребят!" Вайтуз: "Ээээ..."',
+'ch1_look_outside': {
+    speaker: 'Орсон', text: 'Так... Пиксельное солнце. HTML-деревья. Запах Wi-Fi. Либо я сошёл с ума, либо Нивал действительно зашифровали в исходном коде Heroes 5 параллельную вселенную. Я знал. Я ЗНАЛ.',
     choices: [
-        { text: 'Идти дальше одному', next: null, effect: () => { GameState.scene = 'ch1_alone_explore'; }},
-        { text: 'Вернуться', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Идти к городу)', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_road_event'; }},
     ]
 },
 
-'ch1_mention_kob': {
-    speaker: 'Вайтуз', text: 'О, Кобик! Ну... Коб это... как сказать. Он любит выпить, моды у людей подтырить и выдать за свои. Ещё он себя пиарит как бешеный. А потом просит 200 монет на ресторан в центре. Нарцисс, короче. Но знает бургерные в Москве! Может позвать его?',
+'ch1_road_event': {
+    speaker: '', text: 'На дороге вам встречается первое существо — говорящий комментарий. Это буквально текстовый блок с ножками, на котором написано: "Ты неправ и вот почему:"',
     choices: [
-        { text: 'Давай, позовём!', next: null, effect: () => { F.kob_invited = true; GameState.kobSecrets++; GameState.scene = 'ch1_kob_invited'; }},
-        { text: 'Нет, сначала к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Он звучит подозрительно', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_kob_suspicious'; }},
+        { text: '(Проигнорировать)', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch1_comment_ignored'; }},
+        { text: '(Начать спорить)', next: null, effect: () => { S.troll += 3; S.chaos += 5; GameState.tshake += 5; GameState.scene = 'ch1_comment_argue'; }},
+        { text: '(Ударить багетом)', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_comment_hit'; }},
     ]
 },
 
-'ch1_kob_invited': {
-    speaker: '', text: 'Вайтуз набирает Коба в чате. Через минуту появляется ответ: "200 монет и буду через 5 минут. Заодно покажу новый мод. Ну, не совсем мой, но..."',
+'ch1_comment_ignored': {
+    speaker: 'Периклес', text: 'Молодец! Первый комментарий — и ты не клюнул! Обычно гости этого мира застревают на первом споре на три дня. У тебя есть шанс, герой!',
     choices: [
-        { text: 'Подождать Коба', next: null, effect: () => { GameState.scene = 'ch1_wait_kob'; }},
-        { text: 'Пока ждём, поговорить с Вайтузом', next: null, effect: () => { GameState.scene = 'ch1_chat_while_waiting'; }},
+        { text: '(Продолжить путь)', next: null, effect: () => { GameState.scene = 'ch1_city_gates'; }},
     ]
 },
 
-'ch1_kob_suspicious': {
-    speaker: 'Вайтуз', text: 'Ну, подозрительный — это мягко сказано. Но он знает все секреты чатика. Все. И он в курсе всех модов Heroes 5. Правда, половина из них... заимствованные. Ладно, давай к Орсону?',
+'ch1_comment_argue': {
+    speaker: 'Орсон', text: '...НЕПРАВ?! ДА ТЫ ДАЖЕ НЕ ЗНАЕШЬ О ЧЁМ ГОВОРИШЬ! ТЫ ПРОСТО ТЕКСТОВЫЙ БЛОК С НОЖКАМИ! У ТЕБЯ ДАЖЕ ШРИФТ КРИВОЙ!',
     choices: [
-        { text: 'Да, пойдём', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Расскажи ещё про секреты', next: null, effect: () => { S.wisdom += 3; GameState.kobSecrets++; GameState.scene = 'ch1_kob_secrets_hint'; }},
+        { text: '(Продолжать спорить)', next: null, effect: () => { S.chaos += 5; GameState.tshake += 10; GameState.scene = 'ch1_comment_spiral'; }},
+        { text: '(Остановиться)', next: null, effect: () => { GameState.scene = 'ch1_comment_stop'; }},
     ]
 },
 
-'ch1_kob_secrets_hint': {
-    speaker: 'Вайтуз', text: 'Ну, говорят, если найти три предмета Коба — его фляжку, украденный мод и VIP-карту ресторана — то можно разблокировать секретную линию. Но это, наверное, враки...',
+'ch1_comment_spiral': {
+    speaker: '', text: '*Через два часа.* Орсон всё ещё спорит с комментарием. Периклес уснул на камне. Комментарий размножился — теперь их 47. Все говорят одновременно.',
     choices: [
-        { text: 'Интересно... Пойдём искать!', next: null, effect: () => { F.kob_quest_started = true; GameState.kobSecrets++; GameState.scene = 'ch1_explore_chat'; }},
-        { text: 'Ладно, пойдём к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Уйти наконец)', next: null, effect: () => { GameState.scene = 'ch1_city_gates'; }},
     ]
 },
 
-'ch1_about_orson': {
-    speaker: 'Вайтуз', text: 'Орсон? Бля, без рофлов — похвалил его один раз, а он обиделся как девочка. Он параноик, шизофреник, помешан на Heroes 5. Вообразил, что может всё в этом мире. У него есть гарнитура, и он ВСЕГДА в войсе. Покупает видеокарту за 160 000, чтобы играть в 30-35 фпс. Голова не репа, как он говорит.',
+'ch1_comment_stop': {
+    speaker: 'Периклес', text: 'Хвалю за сдержанность! Хотя... ты два часа спорил. С текстовым блоком. На ножках. Ладно, идём дальше.',
     choices: [
-        { text: 'Звучит... интересно. Пойдём!', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Может лучше не связываться?', next: null, effect: () => { GameState.scene = 'ch1_avoid_orson'; }},
-        { text: 'Что за Реборн?', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_about_reborn'; }},
+        { text: '(Идти к городу)', next: null, effect: () => { GameState.scene = 'ch1_city_gates'; }},
     ]
 },
 
-'ch1_about_reborn': {
-    speaker: 'Вайтуз', text: 'Реборн? Ээээ... Это типа перерождение Heroes 5 в шизоидной интерпретации Орсона. Он верит, что может воскресить игру, переделать её, сделать великой. Секта свидетелей Реборна, как говорят. Он реально верит в исходный код Нивала.',
+'ch1_comment_hit': {
+    speaker: '', text: '*Орсон бьёт комментарий багетом.* Комментарий рассыпается на буквы. Из него выпадает 5 монет и записка: "1★ — ужасный спорщик".',
     choices: [
-        { text: 'Он безумен. Хочу увидеть это!', next: null, effect: () => { S.shiza += 5; S.chaos += 3; GameState.scene = 'ch1_after_train'; }},
-        { text: 'Это грустно на самом деле', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_after_train'; }},
-        { text: 'А Чеб что думает об этом?', next: null, effect: () => { GameState.scene = 'ch1_about_cheb'; }},
+        { text: '(Забрать лут и идти)', next: null, effect: () => { GameState.inventory.push({id:'coins_5', name:'5 монет'}); GameState.scene = 'ch1_city_gates'; }},
     ]
 },
 
-'ch1_about_cheb': {
-    speaker: 'Вайтуз', text: 'Чеб? Он лётчик из Казахстана. Летает на дельтаплане и делает моды на игру. Орсон его обожает — даже коронацию ему устраивал. "Коронация Чеба начнётся сегодня в 8 часов вечера" — прям целую церемонию замутили! Чеб нормальный, правда.',
+'ch1_city_gates': {
+    speaker: '', text: 'Ворота города "Форум-Сити". Над входом надпись: "ДОБРО ПОЖАЛОВАТЬ. ПРАВИЛА: 1) Не кормите троллей. 2) Не спорьте с Орсоном. 3) См. правило 2."',
     choices: [
-        { text: 'Хочу познакомиться с Чебом!', next: null, effect: () => { R.cheb += 5; GameState.scene = 'ch1_find_cheb'; }},
-        { text: 'Ладно, давай к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Правило 2?! Они меня ЗНАЮТ?!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch1_enter_city'; }},
+        { text: '(Тихо войти)', next: null, effect: () => { GameState.scene = 'ch1_enter_city'; }},
     ]
 },
 
-'ch1_avoid_orson': {
-    speaker: 'Вайтуз', text: 'А это тут причём? Ну ладно... Можем тут потусить. Кста, я МЕДЛЕННО несу аптечки. Всегда. Я всё медленно делаю. Но у меня мозг не кипит!',
+'ch1_enter_city': {
+    speaker: 'Периклес', text: 'Добро пожаловать в Форум-Сити! Тут есть магазин, площадь, и... осторожнее. Местные не любят провокаторов. Ну то есть... тебя.',
     choices: [
-        { text: 'Осмотреть чатик', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
-        { text: 'Поиграть с Вайтузом', next: null, effect: () => { R.vaituz += 10; GameState.scene = 'ch1_play_with_vaituz'; }},
-        { text: 'Ладно, пойдём к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Мне нужен хлеб и сигареты', next: null, effect: () => { GameState.chapter = 2; GameState.scene = 'ch2_start'; }},
+        { text: 'Покажи мне всё', next: null, effect: () => { GameState.chapter = 2; GameState.scene = 'ch2_start'; }},
     ]
 },
 
-'ch1_explore_chat': {
-    speaker: '', text: 'Вы осматриваете чатик. В углу стоит пыльный ПК. На стене — плакат Heroes 5. На столе — энергетик и недоеденное яблоко. В другом углу — загадочная дверь с надписью "КОБ. ВХОД: 200 МОНЕТ".',
+// ============== ГЛАВА 2: ЗА ХЛЕБОМ И СИГАРЕТАМИ ==============
+'ch2_start': {
+    speaker: '', text: 'ГЛАВА 2: ЗА ХЛЕБОМ И СИГАРЕТАМИ.\n\nУлицы Форум-Сити. Дома сделаны из сообщений. Вывески мигают как баннеры. Где-то играет 8-битная музыка.',
     choices: [
-        { text: 'Осмотреть ПК', next: null, effect: () => { GameState.scene = 'ch1_examine_pc'; }},
-        { text: 'Осмотреть дверь Коба', next: null, effect: () => { GameState.kobSecrets++; GameState.scene = 'ch1_kob_door'; }},
-        { text: 'Взять энергетик', next: null, effect: () => { GameState.inventory.push({ id: 'energy', name: 'Энергетик', desc: '+5 HP, +3 хаос' }); GameState.scene = 'ch1_take_energy'; }},
-        { text: 'Идти к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Пойти к рынку)', next: null, effect: () => { GameState.scene = 'ch2_market'; }},
+        { text: '(Свернуть в переулок)', next: null, effect: () => { GameState.scene = 'ch2_alley'; }},
+        { text: '(Заговорить с прохожим)', next: null, effect: () => { GameState.scene = 'ch2_passerby'; }},
     ]
 },
 
-'ch1_examine_pc': {
-    speaker: '', text: 'На экране ПК — открытый Heroes 5. Видно незаконченную партию. В чате написано: "Орсон: Покупаю видеокарту за 160 000. Чеб: а я на дельтаплане летаю, мне норм." В углу экрана — файл "reborn_plan.txt".',
+'ch2_market': {
+    speaker: '', text: 'Рынок Форум-Сити. Торговцы кричат: "ЛУЧШИЕ МОДЫ!", "СКИНЫ ПО СКИДКЕ!", "ГАЙДЫ — 3 МОНЕТЫ!". У одного прилавка — подозрительный тип в плаще продаёт "секретный исходный код Нивал".',
     choices: [
-        { text: 'Прочитать reborn_plan.txt', next: null, effect: () => { S.shiza += 5; F.read_reborn = true; GameState.scene = 'ch1_read_reborn'; }},
-        { text: 'Доиграть партию в Героев', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_play_heroes'; }},
-        { text: 'Уйти от ПК', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
+        { text: '(Подойти к типу с кодом)', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch2_code_seller'; }},
+        { text: '(Искать хлеб)', next: null, effect: () => { GameState.scene = 'ch2_bread_search'; }},
+        { text: '(Искать сигареты)', next: null, effect: () => { GameState.scene = 'ch2_cig_search'; }},
+        { text: '(Устроить сцену)', next: null, effect: () => { S.chaos += 5; S.troll += 3; GameState.tshake += 5; GameState.scene = 'ch2_market_scene'; }},
     ]
 },
 
-'ch1_read_reborn': {
-    speaker: '', text: '"ПЛАН РЕБОРНА: 1) Получить исходный код Нивал. 2) Переписать ВСЮ игру. 3) Сделать Heroes 5 великой снова. 4) Доказать всем, что Орсон был прав. 5) ??? 6) PROFIT. Подпись: Орсон. P.S. Пятёрка лучше тройки во всём."',
+'ch2_code_seller': {
+    speaker: '???', text: '*шёпотом* Исходный код Нивал... настоящий! 50 монет! Мифы — правда! Всё зашифровано! Перерождение возможно!',
     choices: [
-        { text: 'Этот человек... гений или безумец', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_after_train'; }},
-        { text: 'Удалить файл', next: null, effect: () => { S.chaos += 10; F.deleted_reborn = true; GameState.scene = 'ch1_deleted_reborn'; }},
-        { text: 'Скопировать себе', next: null, effect: () => { F.has_reborn_plan = true; GameState.inventory.push({ id: 'reborn_plan', name: 'План Реборна' }); GameState.scene = 'ch1_after_train'; }},
+        { text: 'Я ЗНАЛ! Давай сюда!', next: null, effect: () => { S.shiza += 10; F.bought_code = true; GameState.inventory.push({id:'fake_code', name:'Исходный код Нивал', desc:'Подозрительно пахнет фейком'}); GameState.scene = 'ch2_code_bought'; }},
+        { text: 'Это фейк, отвали', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch2_bread_search'; }},
     ]
 },
 
-'ch1_deleted_reborn': {
-    speaker: '', text: 'Вы удалили файл. Где-то в чатике раздался нечеловеческий крик Орсона: "КТО УДАЛИЛ МОЙ ПЛАН?! У ВАС 3 СУТОК, ЧТОБЫ ВЗЯТЬСЯ ЗА ГОЛОВУ!!!"',
+'ch2_code_bought': {
+    speaker: 'Периклес', text: '*шёпотом* Ты только что купил распечатку из Wikipedia за 50 монет. Ну... по крайней мере ты счастлив. На какое-то время.',
     choices: [
-        { text: 'Бежать!', next: null, effect: () => { GameState.scene = 'ch1_orson_angry_chase'; }},
-        { text: 'Притвориться невиновным', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_meet_orson_angry'; }},
+        { text: 'ТЫ НЕ ПОНИМАЕШЬ!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch2_bread_search'; }},
     ]
 },
 
-'ch1_play_heroes': {
-    speaker: '', text: 'Вы пытаетесь играть в Heroes 5. Ваш герой ходит... Вражеский герой с именем "ОрсонЛорд" уничтожает вашу армию за один ход. На экране появляется: "30-35 фпс, брат. Ты проиграл."',
+'ch2_bread_search': {
+    speaker: '', text: 'Вы находите пекарню "Баг и Багет". На вывеске: "Лучшие багеты за пределами Франции! (Единственные багеты за пределами Франции.)"',
     choices: [
-        { text: 'Реванш!', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_heroes_rematch'; }},
-        { text: 'Эта игра не для меня', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Войти в пекарню)', next: null, effect: () => { GameState.scene = 'ch2_bakery'; }},
     ]
 },
 
-'ch1_heroes_rematch': {
-    speaker: '', text: 'Снова проигрыш. "ОрсонЛорд" слишком силён. Но вы заметили в углу карты скрытый артефакт — "Фляжка Коба". Странно...',
+'ch2_bakery': {
+    speaker: 'Пекарь', text: 'Бонжур! О, французский гость! Наконец-то настоящий ценитель! У нас сегодня свежий багет, круассан с начинкой из критических комментариев, и торт "Слитый аргумент".',
     choices: [
-        { text: 'Взять фляжку', next: null, effect: () => { F.has_kob_flask = true; GameState.kobSecrets++; GameState.inventory.push({ id: 'kob_flask', name: 'Фляжка Коба', desc: 'Секретный предмет' }); GameState.scene = 'ch1_found_flask'; }},
-        { text: 'Проигнорировать', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Багет. Просто багет.', next: null, effect: () => { GameState.inventory.push({id:'bread', name:'Свежий багет', desc:'Настоящий! Почти.'}); GameState.scene = 'ch2_got_bread'; }},
+        { text: 'Торт "Слитый аргумент"??', next: null, effect: () => { GameState.scene = 'ch2_cake_joke'; }},
+        { text: 'Критический круассан?', next: null, effect: () => { GameState.scene = 'ch2_croissant'; }},
     ]
 },
 
-'ch1_found_flask': {
-    speaker: '', text: 'Вы подобрали загадочную фляжку. Пахнет... алкоголем и амбициями. На донышке выгравировано: "КОБ. Собственность не трогать. P.S. Мод мой, отвалите." (Секретный предмет 1/3)',
+'ch2_got_bread': {
+    speaker: 'Орсон', text: 'Наконец нормальный багет. Первое нормальное что случилось за весь день. Теперь сигареты.',
     choices: [
-        { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Искать сигареты)', next: null, effect: () => { GameState.scene = 'ch2_cig_search'; }},
     ]
 },
 
-'ch1_kob_door': {
-    speaker: '', text: 'Дверь с надписью: "КОБ. ВХОД: 200 МОНЕТ. Лучшие бургеры, лучшие моды (оригинальные!). VIP-зона." Дверь заперта.',
+'ch2_cake_joke': {
+    speaker: 'Пекарь', text: 'Торт "Слитый аргумент"! Сверху — крем из оправданий, внутри — пустота, украшен крошками разрушенных отношений! Наш бестселлер!',
     choices: [
-        { text: 'Постучать', next: null, effect: () => { GameState.scene = 'ch1_knock_kob'; }},
-        { text: 'Попытаться взломать', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_break_kob_door'; }},
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
+        { text: '...Дайте багет и всё', next: null, effect: () => { GameState.inventory.push({id:'bread', name:'Свежий багет'}); GameState.scene = 'ch2_cig_search'; }},
     ]
 },
 
-'ch1_knock_kob': {
-    speaker: '', text: 'Из-за двери раздаётся голос: "200 монет, и я открою. Или покажи мод, который я могу... заимствовать. Ахах, шутка. Или нет."',
+'ch2_croissant': {
+    speaker: 'Пекарь', text: 'Критический круассан! При каждом укусе вы слышите чей-то голос, который говорит что вы неправы! Очень бодрит утром!',
     choices: [
-        { text: 'У меня нет 200 монет', next: null, effect: () => { GameState.scene = 'ch1_no_money_kob'; }},
-        { text: 'Ты кто такой вообще?', next: null, effect: () => { GameState.scene = 'ch1_who_kob'; }},
+        { text: 'Мне хватает таких голосов', next: null, effect: () => { GameState.inventory.push({id:'bread', name:'Свежий багет'}); GameState.scene = 'ch2_cig_search'; }},
     ]
 },
 
-'ch1_who_kob': {
-    speaker: '', text: '"Я Коб. Известный модмейкер, ресторанный критик, и вообще важная персона. Подписывайся на мой канал. Лайк, шер, репост. А теперь — 200 монет или вали."',
+'ch2_cig_search': {
+    speaker: '', text: 'Вы находите киоск "Последний Нерв". Продавец — уставший мужик с глазами человека, который видел слишком много интернет-споров.',
     choices: [
-        { text: 'Ладно, потом зайду', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Ты нарцисс', next: null, effect: () => { S.chaos += 3; R.kob -= 5; GameState.scene = 'ch1_kob_offended'; }},
+        { text: 'Сигареты есть?', next: null, effect: () => { GameState.scene = 'ch2_cig_buy'; }},
     ]
 },
 
-'ch1_kob_offended': {
-    speaker: '', text: '"Нарцисс? Я? Ну может чуть-чуть. Но мои моды — произведение искусства! Ну, частично мои. В общем, дверь закрыта. Пока."',
+'ch2_cig_buy': {
+    speaker: 'Продавец', text: 'Сигареты? Есть. "Тролль Лайт", "Капс Лок Ментол", и "Форумный Дым" — последние горят три часа, как средний спор.',
     choices: [
-        { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '"Форумный Дым"', next: null, effect: () => { GameState.inventory.push({id:'cigs', name:'Сигареты "Форумный Дым"', desc:'Горят 3 часа'}); GameState.scene = 'ch2_park'; }},
+        { text: 'Какой-нибудь энергетик?', next: null, effect: () => { GameState.inventory.push({id:'energy', name:'Энергетик "Бессонница"', desc:'+5 HP, -3 к адекватности'}); GameState.scene = 'ch2_park'; }},
+        { text: 'Всё вместе', next: null, effect: () => { GameState.inventory.push({id:'cigs', name:'Сигареты'}); GameState.inventory.push({id:'energy', name:'Энергетик'}); GameState.scene = 'ch2_park'; }},
     ]
 },
 
-'ch1_no_money_kob': {
-    speaker: '', text: '"Ну что за народ... Все бедные, а Кобу ресторан оплачивать кто будет? Ладно, приходи когда найдёшь монеты. Или принеси мне чужой мод, я его... доработаю."',
+'ch2_alley': {
+    speaker: '', text: 'Тёмный переулок. На стенах граффити: "ОРСОН БЫЛ ЗДЕСЬ", "РЕБОРН — ИСТИНА", "ТРОЙКА > ПЯТЁРКИ" (последнее зачёркнуто трижды). В углу сидит подозрительная фигура.',
     choices: [
-        { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Подойти к фигуре)', next: null, effect: () => { GameState.scene = 'ch2_alley_figure'; }},
+        { text: '(Уйти на рынок)', next: null, effect: () => { GameState.scene = 'ch2_market'; }},
     ]
 },
 
-'ch1_take_energy': {
-    speaker: 'Вайтуз', text: 'О, ты тоже любишь энергетики? Бля, как же ахуенно после энергетика и яблок! Я всегда говорю!',
+'ch2_alley_figure': {
+    speaker: '???', text: '*фигура поднимает голову* ...Ты... ты Орсон? Тот самый? Который на форуме написал 3000 слов о том, почему все неправы? ...Я твой фанат.',
     choices: [
-        { text: 'Выпить прямо сейчас', next: null, effect: () => { S.chaos += 3; GameState.hp = Math.min(GameState.maxHp, GameState.hp + 5); GameState.scene = 'ch1_after_train'; }},
-        { text: 'Сохранить на потом', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: 'Наконец-то! Признание!', next: null, effect: () => { S.troll += 3; GameState.scene = 'ch2_fan_happy'; }},
+        { text: 'Уходи. Мне не нужны фанаты', next: null, effect: () => { S.charisma += 2; GameState.scene = 'ch2_fan_rejected'; }},
     ]
 },
 
-'ch1_insult_vaituz': {
-    speaker: 'Вайтуз', text: '...Моё сердце подсказывает, что ты пидорас. Хотя не, извини, я просто обозлился. Хотя не, иди нахуй. Хотя... ладно, давай просто к Орсону пойдём.',
+'ch2_fan_happy': {
+    speaker: '???', text: 'Можно автограф?! Распишитесь на моём скриншоте спора! Это тот самый спор на 147 страниц! Вы тогда сказали: "Какие же вы жалкие, ребят" — это было ГЕНИАЛЬНО!',
     choices: [
-        { text: 'Извини, погорячился', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch1_after_train'; }},
-        { text: '*молча идти к Орсону*', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Подписать)', next: null, effect: () => { S.charisma += 5; GameState.inventory.push({id:'fan_note', name:'Благодарность фаната', desc:'Тёплое чувство'}); GameState.scene = 'ch2_market'; }},
     ]
 },
 
-'ch1_explore_with_vaituz': {
-    speaker: 'Вайтуз', text: 'Го! Тут у нас чатик, типа главная комната. Там дальше Храм Пятёрки — это где Орсон молится Heroes 5. Ещё есть Войс-Каньон — там орут. И Чебовка — аэродром.',
+'ch2_fan_rejected': {
+    speaker: '???', text: '...Ладно. *шёпотом* Я всё равно буду верить в Реборн. *исчезает в тени*',
     choices: [
-        { text: 'Пойдём в Храм Пятёрки', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Пойдём в Войс-Каньон', next: null, effect: () => { GameState.scene = 'ch1_voice_canyon'; }},
-        { text: 'Пойдём на Чебовку', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
-        { text: 'Сначала к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Идти на рынок)', next: null, effect: () => { GameState.scene = 'ch2_market'; }},
     ]
 },
 
-'ch1_whats_up': {
-    speaker: 'Вайтуз', text: 'Тут... ну... Орсон воюет со всеми. Он верит в Реборн — перерождение Heroes 5. Секта свидетелей Реборна, ахах. Чеб летает на дельтаплане в Казахстане и делает моды. Коб... ну, Коб пьёт и ворует моды. Обычный день, короче.',
+'ch2_passerby': {
+    speaker: 'Прохожий', text: 'Привет! Ты новенький? Добро пожаловать в Форум-Сити! Тут всё мирно, если не заходить в раздел "Политика" и не упоминать Heroes при Орсоне. *замечает вас* ...О НЕТ.',
     choices: [
-        { text: 'Пойдём к Орсону', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Хочу на Чебовку', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
-        { text: 'Что за Реборн?', next: null, effect: () => { GameState.scene = 'ch1_about_reborn'; }},
+        { text: 'Что "о нет"?', next: null, effect: () => { GameState.scene = 'ch2_passerby_realizes'; }},
     ]
 },
 
-'ch1_play_with_vaituz': {
-    speaker: 'Вайтуз', text: 'Го в Героев! Я правда плохо играю... Кста, я МЕДЛЕННО несу аптечки. Всегда. Эээ... О, мой ход! *проигрывает за 3 хода* Ну... у меня мозг не кипит.',
+'ch2_passerby_realizes': {
+    speaker: 'Прохожий', text: 'ТЫ... ТЫ ОРСОН?! *убегает* ОРСОН В ГОРОДЕ! ВСЕ В УКРЫТИЕ! ОРСОН В ГОРОДЕ!',
     choices: [
-        { text: 'Ничего, бывает', next: null, effect: () => { R.vaituz += 10; S.friendship += 5; GameState.scene = 'ch1_after_game'; }},
-        { text: 'Давай ещё раз!', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch1_play_again'; }},
+        { text: 'Почему все убегают?!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch2_market'; }},
+        { text: '...Я не настолько плохой', next: null, effect: () => { GameState.scene = 'ch2_market'; }},
     ]
 },
 
-'ch1_after_game': {
-    speaker: 'Вайтуз', text: 'Спасибо, что не орёшь как Орсон. Он бы уже ультиматум выкатил: "У вас 3 суток, чтобы взяться за голову!" Ладно, пора двигать.',
+'ch2_market_scene': {
+    speaker: 'Орсон', text: 'ЭЙ! ТУТ ЕСТЬ КТО-НИБУДЬ КРОМЕ МЕНЯ, КТО УМЕЕТ ДУМАТЬ?! *все замолкают* НАКОНЕЦ ТИШИНА! Так, мне нужен хлеб и сигареты. Где тут магазин?!',
     choices: [
-        { text: 'К Орсону!', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Осмотреться', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
+        { text: '(Все показывают в одну сторону)', next: null, effect: () => { GameState.scene = 'ch2_bread_search'; }},
     ]
 },
 
-'ch1_play_again': {
-    speaker: 'Вайтуз', text: '*проигрывает снова* Ээээ... Я не учавствовал в войне с Юником! То есть... я помогал разрушать Юник, когда была война. Блин, сам себя запутал.',
+'ch2_park': {
+    speaker: '', text: 'Парк Форум-Сити. Деревья из ASCII-арта. Скамейки с табличками: "Модератор сидел здесь". На одной скамейке сидит человек в зелёных наушниках и жуёт яблоко.',
     choices: [
-        { text: 'Ладно, идём дальше', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
+        { text: '(Подойти к человеку)', next: null, effect: () => { GameState.scene = 'ch2_meet_vaituz_park'; }},
+        { text: '(Сесть на другую скамейку)', next: null, effect: () => { GameState.scene = 'ch2_bench_rest'; }},
+        { text: '(Идти дальше к магазину)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
-'ch1_alone_explore': {
-    speaker: '', text: 'Вы бродите по чатику в одиночестве. Тишина. Только гудит сервер. Вдруг за углом — кто-то.',
+'ch2_meet_vaituz_park': {
+    speaker: 'Вайтуз', text: 'Эээ... привет. Ты тоже тут? Я... эээ... *жуёт яблоко* ...заблудился. Уже три дня. У меня мозг не кипит. Но карту я потерял.',
     choices: [
-        { text: 'Подойти', next: null, effect: () => { GameState.scene = Math.random() > 0.5 ? 'ch1_meet_orson' : 'ch1_find_cheb'; }},
-        { text: 'Спрятаться', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_hide_eavesdrop'; }},
+        { text: 'Идём со мной, я знаю путь', next: null, effect: () => { R.vaituz += 10; F.vaituz_companion = true; GameState.scene = 'ch2_vaituz_joins'; }},
+        { text: 'Это не моя проблема', next: null, effect: () => { R.vaituz -= 10; GameState.scene = 'ch2_vaituz_left'; }},
     ]
 },
 
-'ch1_hide_eavesdrop': {
-    speaker: '', text: 'Вы слышите разговор: "...я говорю, 4090 для ноута — это кайф! ПК мощь, ноут пародия, но ноуты путешествуют до дивана за 2 секунды!" Это Орсон.',
+'ch2_vaituz_joins': {
+    speaker: 'Вайтуз', text: 'Правда?! Спасибо! Я... эээ... я полезный. Иногда. Ну... могу держать яблоко. И... эээ... моральная поддержка? *неуверенная улыбка*',
     choices: [
-        { text: 'Выйти и поздороваться', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Продолжить подслушивать', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_eavesdrop_more'; }},
+        { text: '(Идти к магазину вместе)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
-'ch1_eavesdrop_more': {
-    speaker: '', text: '"...и потом я купил видеокарту за 160 000, брат! 30-35 фпс, как в 2009! Классно, классно! Кто не в Чебовке, тот лол!" Орсон замолкает. "...кто-то тут?" Вас заметили!',
+'ch2_vaituz_left': {
+    speaker: 'Вайтуз', text: '...Ладно. *грустно жуёт яблоко* Я посижу тут. Может кто-нибудь ещё придёт. Эээ...',
     choices: [
-        { text: 'Привет, я новенький!', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Бежать!', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_run_from_orson'; }},
+        { text: '(Идти к магазину)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
-'ch1_run_from_orson': {
-    speaker: 'Орсон', text: 'СТОЙ! Ты не устал позориться?! Зайди в войс, пж! Продолжим там! СТОЙ, Я СКАЗАЛ!',
+'ch2_bench_rest': {
+    speaker: 'Орсон', text: '*садится, закуривает* ...Тихо. Впервые за долгое время тихо. Никто не спорит. Никто не пишет. Просто... тишина. *пауза* ...Мне не нравится. Слишком тихо. Что-то не так.',
     choices: [
-        { text: 'Остановиться', next: null, effect: () => { GameState.scene = 'ch1_after_train'; }},
-        { text: 'Продолжать бежать', next: null, effect: () => { S.chaos += 10; GameState.scene = 'ch1_escape_to_canyon'; }},
+        { text: '(Продолжить сидеть)', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch2_bench_paranoia'; }},
+        { text: '(Встать и идти)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
-// === MEETING ORSON ===
-'ch1_meet_orson': {
-    speaker: 'Орсон', text: 'Здравствуй. На связи, браток. Ты новенький? Хм. Надеюсь ты не из этих... БТДшеров. У меня такой вопрос неловкий — ты за Пятёрку или за Тройку?',
+'ch2_bench_paranoia': {
+    speaker: 'Орсон', text: '...Почему так тихо? Они что-то замышляют. Все они. Город слишком мирный. Это ловушка. Они знают что я тут. Заговор. Однозначно заговор.',
     choices: [
-        { text: 'За Пятёрку, конечно!', next: null, effect: () => { R.orson += 20; S.respect += 10; GameState.scene = 'ch1_orson_happy'; }},
-        { text: 'За Тройку!', next: null, effect: () => { R.orson -= 30; S.chaos += 10; GameState.scene = 'ch1_orson_rage'; }},
-        { text: 'Мне всё равно', next: null, effect: () => { R.orson -= 5; GameState.scene = 'ch1_orson_confused'; }},
-        { text: 'Что за Пятёрка?', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch1_orson_explains'; }},
+        { text: '(Быстро уйти)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
-'ch1_meet_orson_tense': {
-    speaker: 'Орсон', text: 'Та-а-ак. Подслушиваешь? Какие же вы жалкие, ребят. Ладно, я устал слышать оправдания. Ты за Пятёрку или нет?',
+// ============== ГЛАВА 3: МАГАЗИН ==============
+'ch3_start': {
+    speaker: '', text: 'ГЛАВА 3: ПРОДАВЕЦ ПРАВДЫ.\n\nМагазин "Всё для Героев". На витрине — моды, гайды, фигурки из Heroes. За прилавком — пожилой продавец с мудрым взглядом и бейджиком "Аркадий".',
     choices: [
-        { text: 'Да! За Пятёрку!', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch1_orson_happy'; }},
-        { text: 'Я просто мимо проходил', next: null, effect: () => { GameState.scene = 'ch1_orson_confused'; }},
+        { text: '(Войти)', next: null, effect: () => { GameState.scene = 'ch3_enter_shop'; }},
     ]
 },
 
-'ch1_meet_orson_angry': {
-    speaker: 'Орсон', text: 'КТО?! КТО УДАЛИЛ МОЙ ФАЙЛ?! Реборн! Мой великий план! Ты! Ты это сделал?! Голова не репа! Ничего святого!',
+'ch3_enter_shop': {
+    speaker: 'Аркадий', text: 'Добро пожаловать! О... *надевает очки* ...Орсон? Тот самый? Я читал твои посты. Все 3000 из них. У меня есть всё что тебе нужно. И кое-что, чего ты не просил.',
     choices: [
-        { text: 'Нет, это не я!', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_orson_interrogate'; }},
-        { text: 'Да, и что?', next: null, effect: () => { R.orson -= 30; S.chaos += 20; GameState.scene = 'ch1_battle_orson_angry'; }},
-        { text: 'У меня есть копия плана', next: null, effect: () => { if (F.has_reborn_plan) { R.orson += 20; GameState.scene = 'ch1_orson_grateful'; } else { GameState.scene = 'ch1_orson_liar'; }}},
+        { text: 'Мне нужен хлеб и...', next: null, effect: () => { GameState.scene = 'ch3_bread_already'; }},
+        { text: 'Что у тебя есть по Heroes 5?', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch3_heroes_shelf'; }},
+        { text: 'Что значит "чего я не просил"?', next: null, effect: () => { GameState.scene = 'ch3_unwanted'; }},
     ]
 },
 
-'ch1_orson_grateful': {
-    speaker: 'Орсон', text: 'Ты... ты сохранил план Реборна?! Брат! Наш человек! Пятёрку хвалит! Крутое видео, я глянул! ...То есть, спасибо! Реборн будет жить! Ты в команде!',
+'ch3_bread_already': {
+    speaker: 'Аркадий', text: 'Хлеб? У тебя же уже есть багет. Я это вижу. Ты пришёл сюда не за хлебом, Орсон. Ты пришёл потому что тебе скучно без конфликта.',
     choices: [
-        { text: 'Рад помочь!', next: null, effect: () => { R.orson += 20; F.orson_ally = true; GameState.scene = 'ch1_orson_ally'; }},
-        { text: 'Что мне за это будет?', next: null, effect: () => { GameState.scene = 'ch1_orson_reward'; }},
+        { text: 'ЧТО?! Это не правда!', next: null, effect: () => { S.chaos += 3; GameState.tshake += 5; GameState.scene = 'ch3_provoked'; }},
+        { text: '...Может быть', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch3_honest_moment'; }},
     ]
 },
 
-'ch1_orson_liar': {
-    speaker: 'Орсон', text: 'Враньё! У тебя нет никакой копии! Ты обосрался, бро! Без мозгов и чести!',
+'ch3_provoked': {
+    speaker: 'Аркадий', text: '*спокойно* Вот видишь? Я сказал одну фразу — и ты уже на взводе. Это "Тряска", Орсон. Ты трясёшь не только других. Ты трясёшь себя.',
     choices: [
-        { text: 'Ладно, извини...', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch1_orson_confused'; }},
+        { text: 'Ты не знаешь меня!', next: null, effect: () => { S.paranoia += 5; GameState.tshake += 5; GameState.scene = 'ch3_argue_seller'; }},
+        { text: '...Тряска?', next: null, effect: () => { GameState.scene = 'ch3_about_shake'; }},
     ]
 },
 
-'ch1_orson_happy': {
-    speaker: 'Орсон', text: 'Наш человек! Пятёрку хвалит! Классно, классно, брат! Покупаю видеокарту за 160 000, чтобы поиграть в 30-35 фпс! Ну а если будет плохо, оправдаюсь у себя в голове, что так играли в 2009! Пойдём, покажу тебе Храм!',
+'ch3_honest_moment': {
+    speaker: 'Аркадий', text: '*удивлённо* Ого. Честность. Редкий товар. За это — скидка. *достаёт из-под прилавка старую книгу* Вот. "Как перестать спорить с интернетом". Бесплатно.',
     choices: [
-        { text: 'Пойдём в Храм!', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Расскажи про Реборн', next: null, effect: () => { GameState.scene = 'ch1_orson_reborn_talk'; }},
-        { text: 'Кто такой Чеб?', next: null, effect: () => { GameState.scene = 'ch1_orson_about_cheb'; }},
-        { text: 'Зачем тебе видеокарта за 160к?', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_orson_videocard'; }},
+        { text: '(Взять книгу)', next: null, effect: () => { GameState.inventory.push({id:'book_peace', name:'Книга мира', desc:'Как перестать спорить'}); F.took_peace_book = true; GameState.scene = 'ch3_after_shop'; }},
+        { text: 'Мне не нужна помощь', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_rage': {
-    speaker: 'Орсон', text: 'ЧТО?! ТРОЙКА?! Чем меньше ты будешь писать, что тройка нагибает Пятёрку, тем меньше ты будешь походить на лицо со своей авы! Ты не устал позориться?! ЗАЙДИ В ВОЙС! ПРЯМО! СЕЙЧАС!',
+'ch3_about_shake': {
+    speaker: 'Аркадий', text: 'Тряска — это твоя суперсила и проклятие одновременно. Когда ты говоришь — люди теряют самообладание. Но ты тоже. Чем больше трясёшь — тем ближе к краю. К СВОЕМУ краю.',
     choices: [
-        { text: 'Ладно, зайду в войс', next: null, effect: () => { GameState.scene = 'ch1_voice_confrontation'; }},
-        { text: 'Нет, не зайду', next: null, effect: () => { R.orson -= 20; GameState.scene = 'ch1_orson_mute'; }},
-        { text: 'Я пошутил, Пятёрка лучше!', next: null, effect: () => { R.orson += 5; S.chaos -= 5; GameState.scene = 'ch1_orson_forgive'; }},
-        { text: 'БИТВА!', next: null, effect: () => { GameState.scene = 'ch1_battle_orson'; }},
+        { text: 'Я контролирую это', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+        { text: 'Как остановить?', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch3_stop_shake'; }},
     ]
 },
 
-'ch1_orson_confused': {
-    speaker: 'Орсон', text: 'Тебе всё равно? Тебе... ВСЕМ ВСЁ РАВНО?! Бог есть и он всё видит! Ладно, мне кажется, ты просто не понимаешь масштаба. Пойдём, я покажу тебе настоящее искусство — Heroes 5.',
+'ch3_stop_shake': {
+    speaker: 'Аркадий', text: 'Тишина. Просто... тишина. Но ты же не можешь молчать, Орсон. Для тебя тишина — это смерть. В этом и проблема.',
     choices: [
-        { text: 'Ладно, покажи', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Нет, спасибо', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
+        { text: '(Задуматься)', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_explains': {
-    speaker: 'Орсон', text: 'Heroes of Might and Magic V! ВЕЛИЧАЙШАЯ ИГРА ВСЕХ ВРЕМЁН! Пятёрка! Нивал создали шедевр, а потом бросили! Но я... Я верю в Реборн! Перерождение! Я получу исходный код и сделаю её снова великой!',
+'ch3_argue_seller': {
+    speaker: 'Орсон', text: 'ТЫ ПРОДАВЕЦ В МАГАЗИНЕ ФИГУРОК! ЧТО ТЫ МОЖЕШЬ ЗНАТЬ О МНЕ?! Я МИЛЛИОНЕР! Я ИЗ ФРАНЦИИ! У МЕНЯ ДОРОГИЕ ЧАСЫ!',
     choices: [
-        { text: 'Звучит амбициозно', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch1_orson_happy'; }},
-        { text: 'Ты безумец', next: null, effect: () => { R.orson -= 15; S.shiza += 5; GameState.scene = 'ch1_orson_rage'; }},
-        { text: 'Можно помочь?', next: null, effect: () => { R.orson += 15; F.help_reborn = true; GameState.scene = 'ch1_help_reborn'; }},
+        { text: '(Продолжать орать)', next: null, effect: () => { GameState.tshake += 10; GameState.scene = 'ch3_seller_calm'; }},
+        { text: '(Остыть)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_videocard': {
-    speaker: 'Орсон', text: 'Просто делюсь! 8000 шейдеров — хорошо, 7000 — не очень, 6000 — сойдёт. У моей из видео — 24. 32 шейдера. Это как 7 рублей вместо 5. Чтоб ты понимал. Короче, ноуты игровые кайф! Я фетишист ноутбуков, кайф ПК мне не привить!',
+'ch3_seller_calm': {
+    speaker: 'Аркадий', text: '*абсолютно спокойно* Часы показывают 3:47. Уже три дня. Ты заметил? Время остановилось, Орсон. Для тебя. Потому что ты застрял. Не здесь. Внутри себя.',
     choices: [
-        { text: 'Ноут лучше ПК, согласен!', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'ПК всегда был основой гейминга', next: null, effect: () => { R.orson -= 5; GameState.scene = 'ch1_orson_pc_debate'; }},
-        { text: 'Это... интересный взгляд', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_temple_h5'; }},
+        { text: '...', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_pc_debate': {
-    speaker: 'Орсон', text: 'Это так цинично! Честно говоря, да, ПК всегда был основой гейминга. Но ноуты путешествуют до дивана за 2 секунды! И обратно! Кстати, кайф ПК мне не привить. Ладно, пошли в Храм.',
+'ch3_heroes_shelf': {
+    speaker: 'Аркадий', text: 'Heroes 5? Конечно! Вот тебе: диск с оригиналом, сборник модов (не краденых!), и... *достаёт пыльную коробку* ...Прототип Heroes 6, который Нивал так и не выпустили.',
     choices: [
-        { text: 'Пойдём', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'ПРОТОТИП?! ДАВАЙ!', next: null, effect: () => { S.shiza += 10; GameState.inventory.push({id:'h6_proto', name:'Прототип Heroes 6', desc:'Или просто пустая коробка?'}); GameState.scene = 'ch3_after_shop'; }},
+        { text: 'Ты тоже фейки продаёшь', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_reborn_talk': {
-    speaker: 'Орсон', text: 'Реборн — это перерождение Heroes 5! Я нашёл мифы исходного кода Нивал! Сделал первый шаг для разоблачения! И медицинское наблюдение... э, это из песни. Неважно. Реборн — это будущее! Секта свидетелей Реборна — это не секта, это ИСТИНА!',
+'ch3_unwanted': {
+    speaker: 'Аркадий', text: 'Зеркало. *ставит на прилавок маленькое зеркало* Посмотри на себя, Орсон. Красные глаза. Помятая одежда. Дорогие часы, которые не идут. Ты выглядишь как человек, который не спал неделю.',
     choices: [
-        { text: 'Я верю в Реборн!', next: null, effect: () => { S.shiza += 10; R.orson += 15; F.reborn_believer = true; GameState.scene = 'ch1_reborn_believer'; }},
-        { text: 'Это звучит как секта', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch1_orson_offended'; }},
-        { text: 'Какой план действий?', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_reborn_plan'; }},
+        { text: '(Посмотреть в зеркало)', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch3_mirror'; }},
+        { text: '(Отвернуться)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_reborn_believer': {
-    speaker: 'Орсон', text: 'БРАТ! Ты понял! Ты ПОНЯЛ! Пойдём в Храм Пятёрки, я проведу обряд посвящения! Коронация нового Чеба — может и тебя короновать? Шучу. Или нет.',
+'ch3_mirror': {
+    speaker: 'Орсон', text: '...Ладно, выгляжу не лучшим образом. И что? Я был занят. Важными вещами. Форумами. Дискордом. Разоблачениями. Это ВАЖНО.',
     choices: [
-        { text: 'В Храм!', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: '(Купить зеркало)', next: null, effect: () => { GameState.inventory.push({id:'mirror', name:'Зеркало правды', desc:'Показывает что есть'}); GameState.scene = 'ch3_after_shop'; }},
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
     ]
 },
 
-'ch1_orson_offended': {
-    speaker: 'Орсон', text: 'Не секта?! Ладно, посидишь недельку в чарующем муте. Какие же вы жалкие, ребят. Вильгефорц ещё ищет оправдания... Вильгефорц рвётся как собака с ободранным боком!',
+'ch3_after_shop': {
+    speaker: 'Периклес', text: 'Ну что, закупился? Дальше нам надо... *замечает что Орсон задумался* ...Ты в порядке?',
     choices: [
-        { text: 'Кто такой Вильгефорц?', next: null, effect: () => { GameState.scene = 'ch1_about_vilgefortz'; }},
-        { text: 'Ладно, извини', next: null, effect: () => { R.orson += 5; GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'Мне нужен интернет. Срочно.', next: null, effect: () => { GameState.chapter = 4; GameState.scene = 'ch4_start'; }},
+        { text: 'Просто идём дальше', next: null, effect: () => { GameState.chapter = 4; GameState.scene = 'ch4_start'; }},
     ]
 },
 
-'ch1_about_vilgefortz': {
-    speaker: 'Орсон', text: 'Вильгефорц? Враг! Подлый враг! Он высмеивал меня перед всеми! Я доверился ему, хотел с ним дружить! А что в итоге? Ты высмеиваешь меня перед всеми! ...Прости, Никита. Так что ты слит.',
+// ============== ГЛАВА 4: ФОРУМ И РЕБОРН ==============
+'ch4_start': {
+    speaker: '', text: 'ГЛАВА 4: КРОЛИЧЬЯ НОРА.\n\nВы находите заброшенный дом с работающим компьютером. На экране — форум. Орсон садится как к алтарю.',
     choices: [
-        { text: 'Я не Никита...', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Все тебя предают, да?', next: null, effect: () => { S.wisdom += 5; R.orson += 5; GameState.scene = 'ch1_orson_deep'; }},
+        { text: '(Открыть форум)', next: null, effect: () => { GameState.scene = 'ch4_forum'; }},
+        { text: '(Открыть YouTube)', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_orson_deep': {
-    speaker: 'Орсон', text: '...Мне плевать. Я доверился, я хотел быть другом. Думал, будем вместе комьюнити поднимать. Умная голова с точки зрения логики... Левое полушарие. Или правое... Ну как поднимать, новое что-то придумывать. И что в итоге?',
+'ch4_forum': {
+    speaker: '', text: 'Форум "ИСТИНА.ру". Разделы: "Теории Заговора", "Нивал: что скрывают?", "Шизофрения или сверхспособность?", "Реборн: перерождение Heroes 5".',
     choices: [
-        { text: 'Мне жаль это слышать', next: null, effect: () => { S.wisdom += 10; R.orson += 15; GameState.scene = 'ch1_orson_opens_up'; }},
-        { text: 'Может проблема в тебе?', next: null, effect: () => { R.orson -= 20; S.chaos += 5; GameState.scene = 'ch1_orson_rage'; }},
+        { text: '📋 Теории Заговора', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch4_conspiracy'; }},
+        { text: '🎮 Нивал: что скрывают?', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch4_nival_secrets'; }},
+        { text: '🧠 Шизофрения или сверхспособность?', next: null, effect: () => { GameState.scene = 'ch4_schizo_thread'; }},
+        { text: '🔄 Реборн', next: null, effect: () => { GameState.scene = 'ch4_reborn_thread'; }},
+        { text: '(Закрыть форум)', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch4_close_forum'; }},
     ]
 },
 
-'ch1_orson_opens_up': {
-    speaker: 'Орсон', text: '...Спасибо за совет. Расслабился. Знаешь, карма и обычное человеческое желание отомстить всегда преследует. Но может... может пора перестать воевать? Пойдём в Храм, покажу тебе красоту Пятёрки.',
+'ch4_conspiracy': {
+    speaker: '', text: 'Тема: "ДОКАЗАТЕЛЬСТВА что Heroes 5 содержит скрытый код реальности". Автор: OrsonGPT. 847 ответов. Последний: "Бро, выйди на улицу."',
     choices: [
-        { text: 'С удовольствием', next: null, effect: () => { F.orson_peaceful = true; GameState.scene = 'ch1_temple_h5'; }},
+        { text: '(Написать ответ на 3000 слов)', next: null, effect: () => { S.shiza += 5; S.chaos += 3; GameState.tshake += 5; GameState.scene = 'ch4_write_essay'; }},
+        { text: '(Читать молча)', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-// === TEMPLE ===
-'ch1_temple_h5': {
-    speaker: '', text: 'Храм Пятёрки. Стены покрыты скриншотами Heroes 5. В центре — золотой трон (для Чеба, говорят). На алтаре — диск с Heroes 5. Орсон падает на колени.',
+'ch4_write_essay': {
+    speaker: '', text: '*Орсон печатает два часа. Стена текста. Аргументы, контраргументы, ссылки на несуществующие исследования, цитаты на латыни (неправильные), и финальное: "Какие же вы жалкие, ребят."*',
     choices: [
-        { text: 'Помолиться Пятёрке', next: null, effect: () => { S.shiza += 5; R.orson += 10; GameState.scene = 'ch1_pray_h5'; }},
-        { text: 'Осмотреть трон', next: null, effect: () => { GameState.scene = 'ch1_examine_throne'; }},
-        { text: 'Поискать секреты', next: null, effect: () => { GameState.kobSecrets++; GameState.scene = 'ch1_temple_secret'; }},
-        { text: 'Выйти', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
+        { text: '(Отправить)', next: null, effect: () => { GameState.scene = 'ch4_essay_response'; }},
     ]
 },
 
-'ch1_pray_h5': {
-    speaker: 'Орсон', text: 'Да! ДА! Пятёрка услышала нас! Чувствуешь? Это вайб 2009 года! 30-35 фпс! Классно, классно, брат! Ты теперь свидетель Реборна!',
+'ch4_essay_response': {
+    speaker: '', text: 'Ответ через 3 секунды: "Не читал лол". 47 лайков. Орсон смотрит на экран. Его левый глаз дёргается.',
     choices: [
-        { text: 'Аминь!', next: null, effect: () => { F.reborn_sworn = true; GameState.scene = 'ch1_chapter1_end'; }},
-        { text: 'Это было... необычно', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(Написать ещё 3000 слов)', next: null, effect: () => { S.chaos += 10; GameState.tshake += 10; GameState.scene = 'ch4_spiral'; }},
+        { text: '(Закрыть вкладку)', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_examine_throne': {
-    speaker: 'Орсон', text: 'Это трон Чеба! Коронация Чеба начнётся... ну, когда он прилетит на дельтаплане из Казахстана. Художник-татуировщик нужен. Звёзды на плечах и крылья на спине! Девушек не зовите, Чеб сказал — гарем не нужен.',
+'ch4_spiral': {
+    speaker: '', text: '*6 часов спустя. 47 000 слов. 3 бана. 2 разблокировки. 1 смена аккаунта. Орсон забыл зачем пришёл. Периклес давно уснул.*',
     choices: [
-        { text: 'Когда коронация?', next: null, effect: () => { GameState.scene = 'ch1_coronation_info'; }},
-        { text: 'Пойдём дальше', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(Остановиться наконец)', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_coronation_info': {
-    speaker: 'Орсон', text: 'Сегодня в 8 вечера! Будет обильное празднество и активное фыр-фыр на Чебовке! Не опоздай!',
+'ch4_nival_secrets': {
+    speaker: '', text: 'Раздел полон скриншотов кода. Большинство — фотошоп. Но Орсон видит ПАТТЕРНЫ. Связи. Числа. 30-35 фпс — это код! 30+35=65. 6+5=11. 1+1=2. ДВА МИРА!',
     choices: [
-        { text: 'Буду!', next: null, effect: () => { F.coronation_planned = true; GameState.scene = 'ch1_chapter1_end'; }},
+        { text: 'Я гений!', next: null, effect: () => { S.shiza += 10; GameState.scene = 'ch4_youtube'; }},
+        { text: 'Это бред', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_temple_secret': {
-    speaker: '', text: 'За алтарём — скрытый проход! Там стоит пыльная полка с мод-файлами для Heroes 5. На одном написано: "УКРАДЕНО У: [имя зачёркнуто]. Доработано: КОБ". Это краденый мод!',
+'ch4_schizo_thread': {
+    speaker: '', text: 'Тема: "Шизофрения — это не болезнь, это расширенное восприятие реальности?" Автор: АнонимныйГений. Орсон читает и кивает. Потом останавливается. Перечитывает. Замирает.',
     choices: [
-        { text: 'Взять мод', next: null, effect: () => { F.has_stolen_mod = true; GameState.inventory.push({ id: 'stolen_mod', name: 'Краденый мод Коба', desc: 'Секретный предмет' }); GameState.scene = 'ch1_found_mod'; }},
-        { text: 'Оставить', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(Задуматься)', next: null, effect: () => { GameState.scene = 'ch4_schizo_think'; }},
+        { text: '(Закрыть быстро)', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_found_mod': {
-    speaker: '', text: 'Вы подобрали краденый мод. На обложке — плохо замазанное чужое имя и подпись Коба маркером. (Секретный предмет 2/3)',
+'ch4_schizo_think': {
+    speaker: 'Орсон', text: '...А если... нет. Нет. Я не... Это просто форум. Люди пишут всякое. Я нормальный. Я НОРМАЛЬНЫЙ. Просто умнее всех. Это не одно и то же. Это РАЗНЫЕ ВЕЩИ.',
     choices: [
-        { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(Перейти на YouTube)', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-// === VOICE CANYON = ГОЛОСОВОЙ КАНАЛ ===
-'ch1_voice_canyon': {
-    speaker: '', text: '🎙️ ВОЙС-КАНЬОН (Голосовой канал). Иконки пользователей мигают зелёным. Орсон уже здесь — его иконка не перестаёт гореть. Вайтуз тоже тут, но его микрофон молчит.',
+'ch4_reborn_thread': {
+    speaker: '', text: 'Тема: "РЕБОРН — Перерождение Heroes 5 в моей интерпретации". Автор: OrsonGPT. 12 000 просмотров. 3 лайка. 847 комментариев (все негативные).',
     choices: [
-        { text: '🎙️ Включить микрофон', next: null, effect: () => { GameState.scene = 'ch1_voice_enter'; }},
-        { text: '🔇 Сидеть в муте и слушать', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_voice_lurk'; }},
-        { text: '❌ Выйти из канала', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
+        { text: '(Читать комментарии)', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch4_reborn_comments'; }},
+        { text: '(Не читать — сразу на YouTube)', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_voice_enter': {
-    speaker: 'Орсон', text: '🎙️ О! Новенький в войсе! Го лучше в войс, если хочешь что-то добавить! Ладно, сейчас будет ГОЛОСОВОЙ БАТТЛ! Тема — Пятёрка вс Тройка. Отвечай правильно — или будешь слит!',
+'ch4_reborn_comments': {
+    speaker: '', text: '"Бред", "Кто это?", "Вызовите скорую автору", "Респект за упорство, но нет", "Мифы Нивал — это фанфик", "Ты спорил в войсе 17 часов, отдохни".',
     choices: [
-        { text: 'Готов!', next: null, effect: () => { F.voice_score = 0; GameState.scene = 'ch1_voice_q1'; }},
-        { text: 'Я лучше послушаю...', next: null, effect: () => { GameState.scene = 'ch1_voice_lurk'; }},
+        { text: 'ОНИ ВСЕ ЗАБЛУЖДАЮТСЯ', next: null, effect: () => { S.shiza += 5; S.paranoia += 5; GameState.scene = 'ch4_youtube'; }},
+        { text: '...847 комментариев. И все негативные.', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-// === VOICE QUIZ ROUND 1 ===
-'ch1_voice_q1': {
-    speaker: 'Орсон', text: '🎙️ ВОПРОС 1: Сколько фпс в Heroes 5 на видеокарте за 160 000?',
+'ch4_close_forum': {
+    speaker: 'Периклес', text: 'Ты... закрыл форум? Добровольно? *проверяет температуру Орсона* Ты точно себя хорошо чувствуешь?',
     choices: [
-        { text: '60 фпс', next: null, effect: () => { R.orson -= 5; GameState.scene = 'ch1_voice_q1_wrong1'; }},
-        { text: '30-35 фпс', next: null, effect: () => { F.voice_score = (F.voice_score||0) + 1; R.orson += 5; GameState.scene = 'ch1_voice_q1_right'; }},
-        { text: '144 фпс', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch1_voice_q1_wrong2'; }},
-        { text: '*включить музыку в микрофон*', next: null, effect: () => { S.chaos += 10; GameState.scene = 'ch1_voice_troll'; }},
+        { text: 'Я в порядке', next: null, effect: () => { GameState.scene = 'ch4_youtube'; }},
     ]
 },
 
-'ch1_voice_q1_right': {
-    speaker: 'Орсон', text: '🎙️ КЛАССНО! 30-35 фпс — как в 2009 году! Это как 7 рублей вместо 5!',
+'ch4_youtube': {
+    speaker: '', text: 'YouTube. В рекомендациях: "РЕБОРН Heroes 5 — ПОЛНАЯ ПРАВДА" (47 просмотров, автор: OrsonGPT), "Heroes 5 исходный код РАЗБОР" (3 просмотра), и "Как перестать спорить в интернете" (12 млн просмотров).',
     choices: [
-        { text: 'Следующий вопрос!', next: null, effect: () => { GameState.scene = 'ch1_voice_q2'; }},
+        { text: '▶️ Смотреть видео про Реборн', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch4_reborn_video'; }},
+        { text: '▶️ Смотреть про исходный код', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch4_source_video'; }},
+        { text: '▶️ Смотреть "Как перестать спорить"', next: null, effect: () => { S.charisma += 10; F.watched_peace = true; GameState.scene = 'ch4_peace_video'; }},
+        { text: '(Выключить компьютер)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
     ]
 },
 
-'ch1_voice_q1_wrong1': {
-    speaker: 'Орсон', text: '🎙️ 60?! Ты что, в будущем живёшь? 30-35 фпс, брат! Как в 2009!',
+'ch4_reborn_video': {
+    speaker: '', text: '*Видео OrsonGPT.* На экране — Орсон объясняет теорию Реборна. Монтаж из скриншотов Heroes 5, красных стрелок, и подчёркиваний. BGM — эпичная музыка. 47 просмотров. 2 дизлайка.',
     choices: [
-        { text: 'Дальше!', next: null, effect: () => { GameState.scene = 'ch1_voice_q2'; }},
+        { text: 'Это гениально (я ведь снял это)', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch4_end'; }},
+        { text: '...47 просмотров', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch4_end'; }},
     ]
 },
 
-'ch1_voice_q1_wrong2': {
-    speaker: 'Орсон', text: '🎙️ 144?! Обосрался, бро! Это тебе не CS:GO! Это Пятёрка! Тут ДУША, а не фреймрейт!',
+'ch4_source_video': {
+    speaker: '', text: '*Видео.* 40 минут разбора кода. Половина — фантазии. Четверть — настоящий код, вырванный из контекста. Четверть — Орсон спорит с комментаторами в реальном времени.',
     choices: [
-        { text: 'Понял...', next: null, effect: () => { GameState.scene = 'ch1_voice_q2'; }},
+        { text: '(Досмотреть)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
     ]
 },
 
-'ch1_voice_troll': {
-    speaker: 'Орсон', text: '🎙️ ЧТО ЗА МУЗЫКА?! ВЫКЛЮЧИ ЭТО НЕМЕДЛЕННО! *звуки фидбэка* ОН МУЗЫКУ В ВОЙСЕ ВКЛЮЧИЛ! КАКИЕ ЖЕ ВЫ ЖАЛКИЕ, РЕБЯТ!',
+'ch4_peace_video': {
+    speaker: '', text: '*Видео.* Спокойный голос: "Шаг 1: Закройте вкладку. Шаг 2: Выйдите на улицу. Шаг 3: Поговорите с живым человеком. Шаг 4: НЕ СПОРЬТЕ с ним."',
     choices: [
-        { text: '*выключить и извиниться*', next: null, effect: () => { R.orson -= 5; GameState.scene = 'ch1_voice_q2'; }},
-        { text: '*сделать громче*', next: null, effect: () => { S.chaos += 20; R.orson -= 30; F.voice_banned = true; GameState.scene = 'ch1_voice_kicked'; }},
+        { text: 'Хм... может в этом что-то есть', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+        { text: 'Этот человек неправ и вот почему—', next: null, effect: () => { S.troll += 3; S.chaos += 3; GameState.scene = 'ch4_end'; }},
     ]
 },
 
-'ch1_voice_kicked': {
-    speaker: '', text: '🚫 Вас выкинули из голосового канала. Орсон написал в чат: "Посидишь в чарующем муте недельку." *неловко*',
+'ch4_end': {
+    speaker: 'Периклес', text: 'Ну что, насиделся? Нам пора. Впереди... *мрачнеет* ...Площадь Встречи. Там тебя ждут. Все.',
     choices: [
-        { text: 'Ладно, я это заслужил', next: null, effect: () => { F.muted = true; GameState.scene = 'ch1_chapter1_end'; }},
+        { text: 'Кто — все?', next: null, effect: () => { GameState.scene = 'ch4_who_waits'; }},
+        { text: 'Пойдём', next: null, effect: () => { GameState.chapter = 5; GameState.scene = 'ch5_start'; }},
     ]
 },
 
-// === VOICE QUIZ ROUND 2 ===
-'ch1_voice_q2': {
-    speaker: 'Орсон', text: '🎙️ ВОПРОС 2: Кто создал Heroes 5?',
+'ch4_who_waits': {
+    speaker: 'Периклес', text: 'Все, кого ты когда-либо задел. Вильгефортс. Коб. Чеб. Витус. Акулбот. Мадьяр. И... возможно другие. Они собрались. Они ждут. И они настроены серьёзно.',
     choices: [
-        { text: 'Ubisoft', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch1_voice_q2_wrong1'; }},
-        { text: 'Нивал', next: null, effect: () => { F.voice_score = (F.voice_score||0) + 1; R.orson += 10; GameState.scene = 'ch1_voice_q2_right'; }},
-        { text: 'Blizzard', next: null, effect: () => { R.orson -= 15; S.chaos += 5; GameState.scene = 'ch1_voice_q2_wrong2'; }},
+        { text: 'Пусть ждут. Я готов.', next: null, effect: () => { S.charisma += 5; GameState.chapter = 5; GameState.scene = 'ch5_start'; }},
+        { text: '...Может обойдём?', next: null, effect: () => { GameState.scene = 'ch4_no_bypass'; }},
     ]
 },
 
-'ch1_voice_q2_right': {
-    speaker: 'Орсон', text: '🎙️ НИВАЛ! Гении! Создатели шедевра! Исходный код Нивал — это священный грааль!',
+'ch4_no_bypass': {
+    speaker: 'Периклес', text: 'Нет. Это единственный путь. Через них — или никуда. Такие правила этого мира. Нельзя убежать от последствий, Орсон. Даже во сне.',
     choices: [
-        { text: 'Дальше!', next: null, effect: () => { GameState.scene = 'ch1_voice_q3'; }},
+        { text: '(Глубокий вдох) Идём.', next: null, effect: () => { GameState.chapter = 5; GameState.scene = 'ch5_start'; }},
     ]
 },
 
-'ch1_voice_q2_wrong1': {
-    speaker: 'Орсон', text: '🎙️ UBISOFT?! Эти пидорасы только издали! НИВАЛ создали! Н-И-В-А-Л! Запомни!',
+// ============== ГЛАВА 5: ВСТРЕЧА СО ВСЕМИ ==============
+'ch5_start': {
+    speaker: '', text: 'ГЛАВА 5: ПЛОЩАДЬ ПРАВДЫ.\n\nОгромная площадь. В центре — трибуна. Вокруг — толпа. Орсон выходит один. Тишина. Потом — голоса. Все одновременно.',
     choices: [
-        { text: 'Понял...', next: null, effect: () => { GameState.scene = 'ch1_voice_q3'; }},
+        { text: '(Выйти на площадь)', next: null, effect: () => { GameState.scene = 'ch5_enter_square'; }},
     ]
 },
 
-'ch1_voice_q2_wrong2': {
-    speaker: 'Орсон', text: '🎙️ BLIZZARD?! Ты совсем?! *звуки удара по столу* Это не Warcraft! Это Heroes! НИВАЛ! БОЖЕ!',
+'ch5_enter_square': {
+    speaker: '', text: 'На площади стоят: Вильгефортс (в тёмном плаще, скрестив руки), Коб (с бутылкой вина), Чеб (в лётной форме, жуёт сушёный конь), Вайтуз (с яблоком), Акулбот (с планшетом мемов), Мадьяр (ноутбук под мышкой), и гном Периклес позади.',
     choices: [
-        { text: '*тихо сидеть*', next: null, effect: () => { GameState.scene = 'ch1_voice_q3'; }},
+        { text: '(Подойти к Вильгефортсу)', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_start'; }},
+        { text: '(Подойти к Кобу)', next: null, effect: () => { GameState.scene = 'ch5_kob_start'; }},
+        { text: '(Подойти к Чебу)', next: null, effect: () => { GameState.scene = 'ch5_cheb_start'; }},
+        { text: '(Крикнуть: "Ну что, начнём?!")', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
-// === VOICE QUIZ ROUND 3 ===
-'ch1_voice_q3': {
-    speaker: 'Орсон', text: '🎙️ ВОПРОС 3: Что такое Реборн?',
+'ch5_vilgefortz_start': {
+    speaker: 'Вильгефортс', text: 'Орсон. Наконец-то. Знаешь, я следил за твоими постами. За каждым. И знаешь что? Ты был прав ровно ноль раз. НИ РАЗУ. Каждый твой аргумент — карточный домик из паранойи и самообмана.',
     choices: [
-        { text: 'Перерождение Heroes 5', next: null, effect: () => { F.voice_score = (F.voice_score||0) + 1; R.orson += 10; GameState.scene = 'ch1_voice_q3_right'; }},
-        { text: 'Какой-то мод?', next: null, effect: () => { R.orson -= 5; GameState.scene = 'ch1_voice_q3_wrong'; }},
-        { text: 'Секта', next: null, effect: () => { R.orson -= 20; S.chaos += 5; GameState.scene = 'ch1_voice_q3_sect'; }},
-        { text: 'Эээ...', next: null, effect: () => { GameState.scene = 'ch1_voice_q3_vaituz'; }},
+        { text: 'ТЫ ВЫСМЕИВАЛ МЕНЯ!', next: null, effect: () => { S.chaos += 5; R.vilgefortz -= 10; GameState.scene = 'ch5_vilgefortz_mock'; }},
+        { text: 'Давай поговорим спокойно', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch5_vilgefortz_calm'; }},
+        { text: '(Вызвать на битву)', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_battle'; }},
     ]
 },
 
-'ch1_voice_q3_right': {
-    speaker: 'Орсон', text: '🎙️ ИМЕННО! Перерождение Heroes 5 в моей интерпретации! Это будущее!',
+'ch5_vilgefortz_mock': {
+    speaker: 'Вильгефортс', text: 'Я высмеивал? Нет, Орсон. Ты сам себя высмеивал. Каждый раз, когда писал "Какие же вы жалкие, ребят" — зеркало трескалось. Ты проецировал. Всегда проецировал.',
     choices: [
-        { text: 'Последний вопрос!', next: null, effect: () => { GameState.scene = 'ch1_voice_q4'; }},
+        { text: 'ЗАТКНИСЬ!', next: null, effect: () => { S.chaos += 10; GameState.tshake += 15; GameState.scene = 'ch5_vilgefortz_battle'; }},
+        { text: '...Проецировал?', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch5_vilgefortz_truth'; }},
     ]
 },
 
-'ch1_voice_q3_wrong': {
-    speaker: 'Орсон', text: '🎙️ МОД?! Это не мод! Это ПЕРЕРОЖДЕНИЕ! Целая философия! Моды делает Коб — и то крадёные!',
+'ch5_vilgefortz_calm': {
+    speaker: 'Вильгефортс', text: '*удивлён* Спокойно? Ты? Хм. Ладно. Орсон, я не враг. Я — зеркало. Ты видел во мне то, что боялся видеть в себе. Того, кто умнее. Того, кто не боится сказать правду.',
     choices: [
-        { text: 'Дальше...', next: null, effect: () => { GameState.scene = 'ch1_voice_q4'; }},
+        { text: 'Может ты прав', next: null, effect: () => { S.charisma += 10; R.vilgefortz += 10; GameState.scene = 'ch5_vilgefortz_peace'; }},
+        { text: 'Ты не умнее меня', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_battle'; }},
     ]
 },
 
-'ch1_voice_q3_sect': {
-    speaker: 'Орсон', text: '🎙️ *звук лопнувшего микрофона* НЕ СЕКТА!!! СЕКТА СВИДЕТЕЛЕЙ РЕБОРНА — ЭТО ИСТИНА! *Вайтуз тихо выключил микрофон*',
+'ch5_vilgefortz_truth': {
+    speaker: 'Вильгефортс', text: 'Каждый раз, когда ты обвинял кого-то в тупости — ты боялся что тупой ты. Каждый раз, когда кричал "заговор" — ты знал что заговора нет. Признай это, Орсон. И станет легче.',
     choices: [
-        { text: 'Прости...', next: null, effect: () => { GameState.scene = 'ch1_voice_q4'; }},
+        { text: '...', next: null, effect: () => { S.charisma += 10; GameState.scene = 'ch5_vilgefortz_peace'; }},
+        { text: 'НЕТ! НИКОГДА!', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_battle'; }},
     ]
 },
 
-'ch1_voice_q3_vaituz': {
-    speaker: 'Вайтуз', text: '🎙️ Эээ... я тоже не знаю. Но у меня мозг не кипит. А это тут причём?',
+'ch5_vilgefortz_peace': {
+    speaker: 'Вильгефортс', text: '*протягивает руку* Мир, Орсон? Не ради форума. Ради тебя.',
     choices: [
-        { text: '*орсон молча смотрит*', next: null, effect: () => { GameState.scene = 'ch1_voice_q4'; }},
+        { text: '(Пожать руку)', next: null, effect: () => { R.vilgefortz += 20; F.vilgefortz_peace = true; GameState.scene = 'ch5_after_vilgefortz'; }},
+        { text: '(Отказаться)', next: null, effect: () => { R.vilgefortz -= 10; GameState.scene = 'ch5_after_vilgefortz'; }},
     ]
 },
 
-// === VOICE QUIZ ROUND 4 ===
-'ch1_voice_q4': {
-    speaker: 'Орсон', text: '🎙️ ПОСЛЕДНИЙ ВОПРОС: Что Вайтуз носит в руках?',
+'ch5_vilgefortz_battle': {
+    speaker: '', text: 'БОСС-ФАЙТ: ВИЛЬГЕФОРТС — Зеркало Правды!',
     choices: [
-        { text: 'Яблоко', next: null, effect: () => { F.voice_score = (F.voice_score||0) + 1; R.vaituz += 10; GameState.scene = 'ch1_voice_results'; }},
-        { text: 'Банан', next: null, effect: () => { R.vaituz -= 5; GameState.scene = 'ch1_voice_q4_wrong'; }},
-        { text: 'Энергетик', next: null, effect: () => { GameState.scene = 'ch1_voice_q4_half'; }},
-    ]
-},
-
-'ch1_voice_q4_wrong': {
-    speaker: 'Вайтуз', text: '🎙️ БАНАН?! Эээ... *обиженно* ЯБЛОКО! Я всегда с яблоком! Как можно перепутать?! *моё сердце подсказывает...*',
-    choices: [
-        { text: 'Извини...', next: null, effect: () => { GameState.scene = 'ch1_voice_results'; }},
-    ]
-},
-
-'ch1_voice_q4_half': {
-    speaker: 'Вайтуз', text: '🎙️ Ну... энергетик я тоже люблю. Бля, как же ахуенно после энергетика и яблок! Но в руках — ЯБЛОКО.',
-    choices: [
-        { text: 'Понял!', next: null, effect: () => { GameState.scene = 'ch1_voice_results'; }},
-    ]
-},
-
-// === VOICE QUIZ RESULTS ===
-'ch1_voice_results': {
-    speaker: 'Орсон', text: `🎙️ Результаты голосового баттла! Правильных ответов: ${F.voice_score || 0}/4. ${(F.voice_score||0) >= 3 ? 'БРАЗО! Ты прошёл испытание войсом!' : (F.voice_score||0) >= 2 ? 'Неплохо. Но можешь лучше.' : 'ТЫ СЛИТ! Но хоть не сбежал.'}`,
-    choices: [
-        { text: 'Продолжить', next: null, effect: () => {
-            if ((F.voice_score||0) >= 3) { F.voice_champion = true; R.orson += 20; }
-            GameState.scene = 'ch1_chapter1_end';
-        }},
-    ]
-},
-
-'ch1_voice_lurk': {
-    speaker: '', text: '🎙️ Вы сидите в муте и слушаете. Орсон спорит с невидимым оппонентом о Heroes 5 уже час. Вайтуз иногда говорит "эээ..." Вдруг вы слышите песню...',
-    choices: [
-        { text: 'Послушать песню', next: null, effect: () => { GameState.scene = 'ch1_listen_voice'; }},
-        { text: 'Выйти из войса', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_listen_voice': {
-    speaker: '', text: '🎙️ Вы слышите: "Шиз-Колян! Fake news maker! Хей, безликий хер ты! Зум-зум, шиз-шиз!" Это... песня? Орсон поёт в войсе?!',
-    choices: [
-        { text: '🎙️ Включить мик и подпевать', next: null, effect: () => { S.shiza += 5; S.chaos += 3; GameState.scene = 'ch1_sing_along'; }},
-        { text: 'Это очень неловко', next: null, effect: () => { GameState.scene = 'ch1_voice_cringe'; }},
-    ]
-},
-
-'ch1_voice_cringe': {
-    speaker: '', text: '*Вы сидите в муте и слушаете как Орсон поёт дисс-трек на самого себя. Вайтуз тихо ест яблоко. Вам очень, ОЧЕНЬ неловко.*',
-    choices: [
-        { text: '*тихо выйти из войса*', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_sing_along': {
-    speaker: '', text: '🎙️ "Хей, Коля Шизик! Хей, Коля Шизик! Прощенье хер те!" Вы подпеваете! Орсон замечает ваш микрофон... Он улыбается?!',
-    choices: [
-        { text: '*неловко улыбнуться в ответ*', next: null, effect: () => { R.orson += 10; F.song_friend = true; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_chebovka': {
-    speaker: '', text: 'Чебовка — аэродром. Вдалеке виден дельтаплан. На стене — карта Казахстана и расписание рейсов. "Рейс: Казахстан → Чатик. Пилот: Чеб. Статус: Летит."',
-    choices: [
-        { text: 'Подождать Чеба', next: null, effect: () => { GameState.scene = 'ch1_wait_cheb'; }},
-        { text: 'Осмотреть дельтаплан', next: null, effect: () => { GameState.scene = 'ch1_examine_delta'; }},
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_wait_cheb': {
-    speaker: '', text: 'Через минуту на горизонте появляется дельтаплан! Чеб приземляется — немного кривовато, но с апломбом. Он в лётной форме.',
-    choices: [
-        { text: 'Привет, Чеб!', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch1_meet_cheb'; }},
-    ]
-},
-
-'ch1_meet_cheb': {
-    speaker: 'Чеб', text: 'Салам! Я Чеб, лётчик из Казахстана! На дельтаплане прилетел. Красиво тут у вас. Я ещё моды делаю — настоящие моды, не как у Коба. У меня всё оригинальное! Как дела в чатике?',
-    choices: [
-        { text: 'Орсон тебе коронацию готовит!', next: null, effect: () => { R.cheb += 5; GameState.scene = 'ch1_cheb_coronation'; }},
-        { text: 'Можно полетать на дельтаплане?', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch1_cheb_fly'; }},
-        { text: 'Расскажи про свои моды', next: null, effect: () => { GameState.scene = 'ch1_cheb_mods'; }},
-        { text: 'Ты знаешь Коба?', next: null, effect: () => { GameState.scene = 'ch1_cheb_about_kob'; }},
-    ]
-},
-
-'ch1_cheb_coronation': {
-    speaker: 'Чеб', text: 'Опять коронация? Ахах, Орсон каждый месяц это устраивает. Художник с чернилами из крови дракона, звёзды на плечах... Ладно, пусть повеселится. Я без гарема, кстати.',
-    choices: [
-        { text: 'Пойдём к нему', next: null, effect: () => { F.cheb_met = true; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_cheb_fly': {
-    speaker: 'Чеб', text: 'Конечно! Садись! Только держись крепче, тут ветер сильный! Вперёд, в небо! Казахстан → Чатик, класс бизнес!',
-    choices: [
-        { text: '(Летите над чатиком)', next: null, effect: () => { F.flew_delta = true; S.wisdom += 10; GameState.scene = 'ch1_flying'; }},
-    ]
-},
-
-'ch1_flying': {
-    speaker: '', text: 'С высоты видно весь мир: Чатик, Храм Пятёрки, Войс-Каньон, секретная дверь Коба, Поле Яблок Вайтуза... И далеко на горизонте — Финальная Башня. Красиво.',
-    choices: [
-        { text: 'Потрясающе!', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
-        { text: 'Что за Финальная Башня?', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch1_about_tower'; }},
-    ]
-},
-
-'ch1_about_tower': {
-    speaker: 'Чеб', text: 'Финальная Башня? Туда все пути сходятся. Говорят, там решается судьба чатика. Но путь туда долгий... Пять глав минимум!',
-    choices: [
-        { text: 'Интересно...', next: null, effect: () => { F.knows_tower = true; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_cheb_mods': {
-    speaker: 'Чеб', text: 'Мои моды — это искусство! Я каждый делаю с нуля. Не как Коб, который чужие воруёт и подписывает. Я на дельтаплане вдохновение ловлю — там, в небе, приходят идеи!',
-    choices: [
-        { text: 'Можно посмотреть?', next: null, effect: () => { F.saw_cheb_mods = true; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_cheb_about_kob': {
-    speaker: 'Чеб', text: 'Коб? Он... ну, как сказать. Пьёт, ворует моды, пиарится. Просит 200 монет на ресторан. Нарцисс. Но если подружиться — он знает ВСЕ секреты чатика. Вообще все.',
-    choices: [
-        { text: 'Интересно...', next: null, effect: () => { GameState.kobSecrets++; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_examine_delta': {
-    speaker: '', text: 'Дельтаплан Чеба. Самодельный, но крепкий. На крыле надпись: "Казахстан → Мир". Под сиденьем — VIP-карта ресторана с надписью "КОБ — Почётный гость".',
-    choices: [
-        { text: 'Взять VIP-карту', next: null, effect: () => { F.has_vip_card = true; GameState.kobSecrets++; GameState.inventory.push({ id: 'vip_card', name: 'VIP-карта Коба', desc: 'Секретный предмет' }); GameState.scene = 'ch1_found_vip'; }},
-        { text: 'Оставить', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
-    ]
-},
-
-'ch1_found_vip': {
-    speaker: '', text: 'Вы подобрали VIP-карту ресторана. На обороте: "Бургеры за счёт заведения. Чаевые: 200 монет (обязательно)". (Секретный предмет 3/3)',
-    choices: [
-        { text: 'Продолжить', next: null, effect: () => {
-            if (F.has_kob_flask && F.has_stolen_mod && F.has_vip_card) {
-                GameState.scene = 'ch1_kob_unlocked';
-            } else {
-                GameState.scene = 'ch1_chebovka';
-            }
-        }},
-    ]
-},
-
-'ch1_kob_unlocked': {
-    speaker: '', text: '!! Три предмета Коба собраны! Фляжка, краденый мод и VIP-карта начинают светиться! Секретная линия РАЗБЛОКИРОВАНА!',
-    choices: [
-        { text: 'Открыть секретный путь!', next: null, effect: () => { F.kob_line_unlocked = true; GameState.scene = 'ch1_kob_secret_start'; }},
-    ]
-},
-
-'ch1_kob_secret_start': {
-    speaker: '', text: 'Предметы указывают путь к двери Коба. Дверь открывается сама...',
-    choices: [
-        { text: 'Войти', next: null, effect: () => { GameState.scene = 'ch1_kob_lair'; }},
-    ]
-},
-
-'ch1_kob_lair': {
-    speaker: 'Коб', text: 'А-а-а, ты нашёл мои вещички! Неплохо, неплохо. Я Коб. Модмейкер... ну, в своём роде. Ресторанный критик. VIP-персона. Подписывайся! И да, у меня тут лучшие бургеры Москвы. Хочешь?',
-    choices: [
-        { text: 'Расскажи о себе', next: null, effect: () => { GameState.scene = 'ch1_kob_story'; }},
-        { text: 'Дай бургер!', next: null, effect: () => { GameState.inventory.push({ id: 'burger', name: 'Бургер Коба', desc: '+15 HP' }); GameState.scene = 'ch1_kob_burger'; }},
-        { text: 'Зачем ты воруешь моды?', next: null, effect: () => { R.kob -= 5; GameState.scene = 'ch1_kob_mods_truth'; }},
-    ]
-},
-
-'ch1_kob_story': {
-    speaker: 'Коб', text: 'Я — легенда. Самопровозглашённая, но всё же. Люблю выпить, люблю моды, люблю хорошие рестораны. 200 монет — это не много за мою компанию! Я знаю секреты этого мира. ВСЕ секреты. Хочешь узнать?',
-    choices: [
-        { text: 'Да! Расскажи!', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch1_kob_secrets'; }},
-        { text: 'Ты нарцисс', next: null, effect: () => { R.kob -= 10; GameState.scene = 'ch1_kob_narcissist'; }},
-    ]
-},
-
-'ch1_kob_secrets': {
-    speaker: 'Коб', text: 'Секрет чатика: все тут — и Орсон, и Вайтуз, и Чеб, и я — мы все ищем одно. Связь. Дружбу. Просто... по-разному. Орсон — через контроль. Вайтуз — через доверие. Чеб — через творчество. А я... через бургеры и чужие моды. Не суди.',
-    choices: [
-        { text: 'Это... глубоко', next: null, effect: () => { S.wisdom += 15; F.kob_wisdom = true; GameState.scene = 'ch1_chapter1_end'; }},
-        { text: 'Философ из тебя так себе', next: null, effect: () => { R.kob -= 5; S.chaos += 3; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_kob_narcissist': {
-    speaker: 'Коб', text: 'Нарцисс? Я предпочитаю термин "самодостаточная личность с повышенным чувством собственной важности". А теперь... 200 монет за бургер. Или уходи.',
-    choices: [
-        { text: 'Ладно-ладно', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_kob_burger': {
-    speaker: 'Коб', text: 'Вот! Лучший бургер в Москве! ...Ну, может не лучший, но точно самый дорогой. 200 монет, помнишь? Ладно, за счёт VIP-карты, так и быть.',
-    choices: [
-        { text: 'Спасибо!', next: null, effect: () => { R.kob += 10; GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-'ch1_kob_mods_truth': {
-    speaker: 'Коб', text: '...Ворую? Я ЗАИМСТВУЮ. С доработкой! Это как... ремикс. Да. Ремикс. Творчество. Подписывайся на канал, кстати. Лайк, шер, репост.',
-    choices: [
-        { text: 'Ладно, "ремикс"...', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
-    ]
-},
-
-// === BATTLES ===
-'ch1_battle_orson': {
-    speaker: '', text: '* Орсон преграждает путь! "Шиз-Колян, Fake news maker!" *',
-    choices: [
-        { text: 'БИТВА!', next: null, effect: () => {
+        { text: '⚔️ СРАЖАТЬСЯ', next: null, effect: () => {
+            GameState.battleData = { enemy: 'Вильгефортс', hp: 40, atk: 8, def: 5, sprite: 'vilgefortz',
+                attacks: ['Зеркальный удар', 'Слова правды', 'Отражение'], flavor: 'Вильгефортс смотрит сквозь вас.' };
+            GameState.afterBattle = 'ch5_after_vilgefortz';
             GameState.scene = 'battle';
-            GameState.battleData = {
-                id: 'orson', name: 'ОРСОН', hp: 25,
-                acts: ['Обсудить Героев', 'Комплимент', 'Подколоть', 'Игнор'],
-                actResponses: {
-                    talk: 'Орсон начинает рассказывать о Heroes 5... Его глаза горят!',
-                    praise: 'Орсон польщён! "Классно, классно, брат!"',
-                    troll: 'Орсон в ЯРОСТИ! "У ВАС 3 СУТОК!!!"',
-                    ignore: '"Собирался написать что-то. Удалил."',
-                },
-                patterns: ['horizontal', 'spiral', 'random'],
-            };
-            GameState.afterBattle = 'ch1_after_orson_battle';
         }},
+        { text: '🕊️ ОТСТУПИТЬ', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch5_after_vilgefortz'; }},
     ]
 },
 
-'ch1_battle_orson_angry': {
-    speaker: '', text: '* РАЗЪЯРЁННЫЙ Орсон атакует! "КТО УДАЛИЛ МОЙ ФАЙЛ?!" *',
+'ch5_after_vilgefortz': {
+    speaker: '', text: 'Вильгефортс отступает в сторону. Следующие — Коб и компания.',
     choices: [
-        { text: 'БИТВА!', next: null, effect: () => {
+        { text: '(К Кобу)', next: null, effect: () => { GameState.scene = 'ch5_kob_start'; }},
+        { text: '(К Акулботу)', next: null, effect: () => { GameState.scene = 'ch5_akulbot_start'; }},
+        { text: '(К Мадьяру)', next: null, effect: () => { GameState.scene = 'ch5_madyar_start'; }},
+    ]
+},
+
+'ch5_kob_start': {
+    speaker: 'Коб', text: '*поднимает бокал* Орсон! Дружище! Я тут подумал — ты мне должен. За все те моды, которые ты критиковал. За все те стримы, где ты меня высмеивал. 200 монет. На ресторан. В центре.',
+    choices: [
+        { text: 'Ты КРАДЁШЬ моды у людей!', next: null, effect: () => { R.kob -= 10; GameState.scene = 'ch5_kob_mods'; }},
+        { text: 'Ладно, вот 200 монет', next: null, effect: () => { R.kob += 15; F.paid_kob = true; GameState.scene = 'ch5_kob_paid'; }},
+        { text: 'Ты нарцисс, Коб', next: null, effect: () => { S.troll += 3; R.kob -= 15; GameState.scene = 'ch5_kob_narcissist'; }},
+    ]
+},
+
+'ch5_kob_mods': {
+    speaker: 'Коб', text: 'КРАДУ?! Я ДОРАБАТЫВАЮ! Это АПГРЕЙД! Когда Пикассо рисовал поверх чужих картин — это было искусство! Когда я беру чужой мод и ставлю своё имя — это... это...',
+    choices: [
+        { text: 'Кража?', next: null, effect: () => { GameState.scene = 'ch5_kob_theft'; }},
+        { text: 'Коб, ты слышишь себя?', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch5_kob_selfaware'; }},
+    ]
+},
+
+'ch5_kob_theft': {
+    speaker: 'Коб', text: '...Нет! Ну... может... немного. Но! 200 монет. Ресторан. Центр. Тогда забудем об этом. Деловое предложение.',
+    choices: [
+        { text: 'Нет.', next: null, effect: () => { GameState.scene = 'ch5_kob_end'; }},
+    ]
+},
+
+'ch5_kob_selfaware': {
+    speaker: 'Коб', text: '...Слышу. К сожалению. Ладно, может я немного... увлекаюсь. Но 200 монет — это объективная потребность! Ресторан в центре сам себя не оплатит!',
+    choices: [
+        { text: '(Уйти от Коба)', next: null, effect: () => { GameState.scene = 'ch5_kob_end'; }},
+    ]
+},
+
+'ch5_kob_paid': {
+    speaker: 'Коб', text: 'ВОТ ЭТО РАЗГОВОР! Орсон, ты лучший! Теперь я могу заказать устрицы! И вино! И... *уже забыл о конфликте*',
+    choices: [
+        { text: '(Идти дальше)', next: null, effect: () => { GameState.scene = 'ch5_kob_end'; }},
+    ]
+},
+
+'ch5_kob_narcissist': {
+    speaker: 'Коб', text: 'Нарцисс?! Я?! Ахахаха! Нарциссизм — это когда ты думаешь что лучше всех! А я ЗНАЮ что лучше всех! Это разные вещи! ...Или нет. Ну и что.',
+    choices: [
+        { text: '(Идти дальше)', next: null, effect: () => { GameState.scene = 'ch5_kob_end'; }},
+    ]
+},
+
+'ch5_kob_end': {
+    speaker: '', text: 'Коб пожимает плечами и возвращается к вину.',
+    choices: [
+        { text: '(К Чебу)', next: null, effect: () => { GameState.scene = 'ch5_cheb_start'; }},
+        { text: '(К Акулботу)', next: null, effect: () => { GameState.scene = 'ch5_akulbot_start'; }},
+        { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+    ]
+},
+
+'ch5_cheb_start': {
+    speaker: 'Чеб', text: '*в лётной форме, с ноутбуком* Орсон, я прилетел из Казахстана на дельтаплане специально ради этого разговора. Ты знаешь сколько модов я сделал для Heroes? А ты ни одного не оценил.',
+    choices: [
+        { text: 'Ты лётчик и моддер?', next: null, effect: () => { GameState.scene = 'ch5_cheb_pilot'; }},
+        { text: 'Моды были нормальные', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch5_cheb_happy'; }},
+        { text: 'Из Казахстана на дельтаплане?!', next: null, effect: () => { GameState.scene = 'ch5_cheb_delta'; }},
+    ]
+},
+
+'ch5_cheb_pilot': {
+    speaker: 'Чеб', text: 'Да! Днём летаю, ночью кодирую. Знаешь как тяжело делать моды на высоте 3000 метров? Турбулентность! Ноутбук падает! Но я всё равно делаю! Ради комьюнити!',
+    choices: [
+        { text: 'Это... впечатляет', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch5_cheb_end'; }},
+    ]
+},
+
+'ch5_cheb_happy': {
+    speaker: 'Чеб', text: '*расплывается в улыбке* Правда?! Серьёзно?! Ну... ладно тогда. Может ты не такой плохой, Орсон. Может я зря прилетел 4000 км на дельтаплане чтобы орать на тебя.',
+    choices: [
+        { text: '(Пожать руку)', next: null, effect: () => { F.cheb_friend = true; GameState.scene = 'ch5_cheb_end'; }},
+    ]
+},
+
+'ch5_cheb_delta': {
+    speaker: 'Чеб', text: 'Да! 4000 километров! Три дня! С посадкой на заправке и в "Макдональдсе"! Дельтаплан назвал "Герой-5"! Потому что это ПЯТЫЙ дельтаплан — первые четыре разбил!',
+    choices: [
+        { text: 'Ты безумец', next: null, effect: () => { R.cheb += 5; GameState.scene = 'ch5_cheb_end'; }},
+    ]
+},
+
+'ch5_cheb_end': {
+    speaker: '', text: 'Чеб салютует и отходит в сторону.',
+    choices: [
+        { text: '(К Акулботу)', next: null, effect: () => { GameState.scene = 'ch5_akulbot_start'; }},
+        { text: '(К Мадьяру)', next: null, effect: () => { GameState.scene = 'ch5_madyar_start'; }},
+        { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+    ]
+},
+
+'ch5_akulbot_start': {
+    speaker: 'Акулбот', text: '*показывает планшет* Орсон! Смотри! Я собрал ВСЕ мемы про тебя. 347 штук. Есть классика: "Орсон vs Здравый Смысл", "Тряска.gif", и мой любимый — "Я просто шучу (нет)".',
+    choices: [
+        { text: 'УДАЛИ ЭТО!', next: null, effect: () => { S.chaos += 5; R.akulbot -= 10; GameState.scene = 'ch5_akulbot_refuse'; }},
+        { text: '...Покажи "Тряска.gif"', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch5_akulbot_show'; }},
+        { text: 'Ты зарабатываешь на мне?', next: null, effect: () => { GameState.scene = 'ch5_akulbot_money'; }},
+    ]
+},
+
+'ch5_akulbot_refuse': {
+    speaker: 'Акулбот', text: 'Удалить?! Это ИСКУССТВО, Орсон! Это ДОКУМЕНТАЦИЯ! Через 100 лет историки будут изучать эти мемы как артефакты эпохи! Ты — живой мем! Гордись!',
+    choices: [
+        { text: '(Сражаться с Акулботом)', next: null, effect: () => {
+            GameState.battleData = { enemy: 'Акулбот', hp: 25, atk: 6, def: 3, sprite: 'akulbot',
+                attacks: ['Мем-атака', 'Скриншот позора', 'Вирусный ролик'], flavor: 'Акулбот листает мемы.' };
+            GameState.afterBattle = 'ch5_akulbot_end';
             GameState.scene = 'battle';
-            GameState.battleData = {
-                id: 'orson', name: 'ОРСОН (ЯРОСТЬ)', hp: 35,
-                acts: ['Извиниться', 'Показать план', 'Убежать', 'Потроллить'],
-                actResponses: {
-                    talk: '"Мне плевать! Ты удалил мой РЕБОРН!"',
-                    praise: '"Не подлизывайся!"',
-                    troll: '"ВСЁ! ТЫ СЛИТ НАВЕЧНО!"',
-                    ignore: '"ТЫ НЕ МОЖЕШЬ МЕНЯ ИГНОРИТЬ!"',
-                },
-                patterns: ['spiral', 'spiral', 'horizontal'],
-            };
-            GameState.afterBattle = 'ch1_after_orson_battle';
         }},
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch5_akulbot_end'; }},
     ]
 },
 
-'ch1_after_orson_battle': {
-    speaker: '', text: 'Битва окончена. Орсон тяжело дышит.',
+'ch5_akulbot_show': {
+    speaker: 'Акулбот', text: '*показывает* Вот! Это когда ты 17 часов подряд спорил и начал трясти всех в войсе! Кто-то записал! 2 миллиона просмотров! Ты ВИРУСНЫЙ, Орсон!',
     choices: [
-        { text: 'Протянуть руку', next: null, effect: () => { R.orson += 10; S.friendship += 5; GameState.scene = 'ch1_chapter1_end'; }},
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '...2 миллиона?', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch5_akulbot_end'; }},
     ]
 },
 
-'ch1_orson_angry_chase': {
-    speaker: 'Орсон', text: 'СТОООООЙ! У ВАС 3 СУТОК, ЧТОБЫ ВЗЯТЬСЯ ЗА ГОЛОВУ!!! *гонится*',
+'ch5_akulbot_money': {
+    speaker: 'Акулбот', text: 'Зарабатываю? Ну... мемы сами себя не делают. Но! Я готов платить тебе 10% от рекламы! Это... *считает* ...4 рубля 37 копеек.',
     choices: [
-        { text: 'Бежать к Войс-Каньону!', next: null, effect: () => { GameState.scene = 'ch1_escape_to_canyon'; }},
-        { text: 'Остановиться и сражаться', next: null, effect: () => { GameState.scene = 'ch1_battle_orson_angry'; }},
+        { text: 'Щедро', next: null, effect: () => { GameState.scene = 'ch5_akulbot_end'; }},
     ]
 },
 
-'ch1_escape_to_canyon': {
-    speaker: '', text: 'Вы убегаете в Войс-Каньон! Эхо скрывает ваши шаги. Орсон теряет вас в лабиринте голосов.',
+'ch5_akulbot_end': {
+    speaker: '', text: 'Акулбот фотографирует вашу реакцию для нового мема.',
     choices: [
-        { text: 'Отдышаться и продолжить', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(К Мадьяру)', next: null, effect: () => { GameState.scene = 'ch5_madyar_start'; }},
+        { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+        { text: '(Ко всем сразу)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
-'ch1_orson_mute': {
-    speaker: 'Орсон', text: 'Не зайдёшь?! Ладно, посидишь недельку в чарующем муте! Я устал слышать оправдания от 30-летнего мужика!',
+'ch5_madyar_start': {
+    speaker: 'Мадьяр', text: '*открывает ноутбук* Орсон. Я разработчик. Ты знаешь что такое код? Настоящий код? Не те фантазии про "исходный код Нивал", а реальный работающий код?',
     choices: [
-        { text: '(Получить мут)', next: null, effect: () => { F.muted = true; GameState.scene = 'ch1_chapter1_end'; }},
+        { text: 'Я знаю про код больше тебя!', next: null, effect: () => { S.shiza += 5; R.madyar -= 10; GameState.scene = 'ch5_madyar_argue'; }},
+        { text: 'Покажи', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch5_madyar_show'; }},
     ]
 },
 
-'ch1_orson_forgive': {
-    speaker: 'Орсон', text: '...Хм. Ладно. Прости, Никита. То есть... не Никита. Ладно, прощаю. Пятёрка — это святое, шутки неуместны. Пойдём в Храм.',
+'ch5_madyar_argue': {
+    speaker: 'Мадьяр', text: '*тяжёлый вздох* Орсон. Ты скачал PDF с форума и думаешь что нашёл исходный код. Это как найти инструкцию к микроволновке и думать что ты физик-ядерщик.',
     choices: [
-        { text: 'Пойдём', next: null, effect: () => { R.orson += 5; GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'ЭТО ДРУГОЕ!', next: null, effect: () => { GameState.scene = 'ch5_madyar_battle'; }},
+        { text: '...Может ты прав', next: null, effect: () => { S.charisma += 10; R.madyar += 10; GameState.scene = 'ch5_madyar_end'; }},
     ]
 },
 
-'ch1_orson_interrogate': {
-    speaker: 'Орсон', text: 'Точно не ты?! Бог есть и он всё видит! Карма тебя найдёт! Ладно... верю. Пока. Но я слежу.',
+'ch5_madyar_show': {
+    speaker: 'Мадьяр', text: '*показывает экран* Вот. Настоящий код. Модификация Heroes 5. Рабочая. Протестированная. Без теорий заговора. Просто... код. Который работает. Скучно, да?',
     choices: [
-        { text: 'Ок', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'Добавь туда Реборн!', next: null, effect: () => { S.shiza += 3; R.madyar -= 5; GameState.scene = 'ch5_madyar_end'; }},
+        { text: 'Уважаю работу', next: null, effect: () => { R.madyar += 15; GameState.scene = 'ch5_madyar_end'; }},
     ]
 },
 
-'ch1_orson_ally': {
-    speaker: 'Орсон', text: 'Ты теперь часть команды Реборна! Записывай: 1) Собрать исходники. 2) Переписать движок. 3) PROFIT! Пойдём, покажу тебе Храм!',
+'ch5_madyar_battle': {
+    speaker: '', text: 'МИНИ-БОСС: МАДЬЯР — Архитектор Кода!',
     choices: [
-        { text: 'За Реборн!', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: '⚔️ СРАЖАТЬСЯ', next: null, effect: () => {
+            GameState.battleData = { enemy: 'Мадьяр', hp: 30, atk: 7, def: 4, sprite: 'madyar',
+                attacks: ['Компиляция', 'Дебаг-луч', 'Сегфолт'], flavor: 'Мадьяр компилирует контраргументы.' };
+            GameState.afterBattle = 'ch5_madyar_end';
+            GameState.scene = 'battle';
+        }},
+        { text: '🕊️ ОТСТУПИТЬ', next: null, effect: () => { GameState.scene = 'ch5_madyar_end'; }},
     ]
 },
 
-'ch1_orson_reward': {
-    speaker: 'Орсон', text: 'Тебе за это будет... уважение! И VIP-доступ в Чебовку! Кто не в Чебовке, тот лол! Ну, и может видеокарту подарю. Может.',
+'ch5_madyar_end': {
+    speaker: '', text: 'Мадьяр закрывает ноутбук и кивает.',
     choices: [
-        { text: 'Годится!', next: null, effect: () => { R.orson += 15; GameState.scene = 'ch1_temple_h5'; }},
+        { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+        { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
-'ch1_help_reborn': {
-    speaker: 'Орсон', text: 'ПОМОЧЬ?! Ты хочешь ПОМОЧЬ Реборну?! Брат! Классно! Нам нужны люди! Чеб делает моды, ты поможешь с кодом! Коронация нового свидетеля!',
+'ch5_vaituz_start': {
+    speaker: 'Вайтуз', text: 'Эээ... Орсон... ты... *жуёт яблоко* ...ты помнишь тот раз, когда ты на меня орал 3 часа потому что я сказал что Тройка тоже неплохая? Я... эээ... я обиделся. Немного. На три года.',
     choices: [
-        { text: 'Готов!', next: null, effect: () => { F.reborn_helper = true; R.orson += 20; GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'Прости, Витус', next: null, effect: () => { R.vaituz += 20; S.charisma += 10; GameState.scene = 'ch5_vaituz_forgive'; }},
+        { text: 'Тройка ДЕЙСТВИТЕЛЬНО хуже!', next: null, effect: () => { S.shiza += 3; R.vaituz -= 10; GameState.scene = 'ch5_vaituz_again'; }},
+        { text: 'Три года?!', next: null, effect: () => { GameState.scene = 'ch5_vaituz_years'; }},
     ]
 },
 
-'ch1_reborn_plan': {
-    speaker: 'Орсон', text: 'План? 1) Получить исходники Нивала. 2) Переписать ВСЮ игру. 3) Запустить Реборн. 4) Мир увидит истину. 5) Все извинятся. Все. Особенно Вильгефорц.',
+'ch5_vaituz_forgive': {
+    speaker: 'Вайтуз', text: '...Правда? Ты... извинился? *роняет яблоко* Никто... эээ... ни разу не извинялся передо мной. *подбирает яблоко* Спасибо, Орсон.',
     choices: [
-        { text: 'Амбициозно', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: '(Обнять Вайтуза)', next: null, effect: () => { F.vaituz_friend = true; R.vaituz += 10; GameState.scene = 'ch5_vaituz_end'; }},
     ]
 },
 
-'ch1_find_cheb': {
-    speaker: '', text: 'Вы натыкаетесь на человека в лётной форме с ноутбуком.',
+'ch5_vaituz_again': {
+    speaker: 'Вайтуз', text: '...Вот. Опять. *вздыхает* У меня мозг не кипит, но сердце кипит. Иногда. Ладно, я привык. *грустно жуёт яблоко*',
     choices: [
-        { text: 'Привет!', next: null, effect: () => { GameState.scene = 'ch1_meet_cheb'; }},
+        { text: '(Идти дальше)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_end'; }},
     ]
 },
 
-'ch1_orson_about_cheb': {
-    speaker: 'Орсон', text: 'Чеб? Путешествия Чебика по серверам комьюнити! Лётчик, моддер, красавчик! Из Казахстана на дельтаплане прилетел! Я его коронацию готовлю — звёзды на плечах, крылья на спине! Девушек не звать!',
+'ch5_vaituz_years': {
+    speaker: 'Вайтуз', text: 'Да. Три. Года. Я каждый вечер вспоминал и жевал яблоко. Яблоко помогает. Когда жуёшь — не плачешь. Эээ... это мудрость.',
     choices: [
-        { text: 'Хочу на коронацию!', next: null, effect: () => { F.coronation_planned = true; GameState.scene = 'ch1_temple_h5'; }},
-        { text: 'Пойдём в Храм', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
+        { text: 'Мне жаль', next: null, effect: () => { R.vaituz += 10; S.charisma += 5; GameState.scene = 'ch5_vaituz_end'; }},
+        { text: '(Молча отойти)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_end'; }},
     ]
 },
 
-'ch1_wait_kob': {
-    speaker: '', text: 'Через 5 минут появляется Коб. Он слегка пошатывается и держит в руках пакет из ресторана.',
+'ch5_vaituz_end': {
+    speaker: '', text: 'Вайтуз отходит, жуя яблоко.',
     choices: [
-        { text: 'Привет, Коб!', next: null, effect: () => { R.kob += 5; GameState.scene = 'ch1_kob_arrives'; }},
+        { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
-'ch1_kob_arrives': {
-    speaker: 'Коб', text: 'Йо! Коб в деле! Принёс бургеры — 200 монет каждый, но для друзей... 180. Скидка! Кста, у меня новый мод готов. Ну, почти мой. Процентов на 60. Подписывайтесь!',
+'ch5_everyone_attacks': {
+    speaker: '', text: 'Все персонажи окружают Орсона. Говорят одновременно. Обвинения, претензии, упрёки — со всех сторон. Уровень ТРЯСКИ растёт.',
     choices: [
-        { text: 'Расскажи про мод', next: null, effect: () => { GameState.scene = 'ch1_kob_mod_talk'; }},
-        { text: 'Дай бургер!', next: null, effect: () => { GameState.inventory.push({ id: 'burger', name: 'Бургер Коба', desc: '+15 HP' }); R.kob += 5; GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '(Кричать в ответ)', next: null, effect: () => { S.chaos += 15; GameState.tshake += 20; GameState.scene = 'ch5_chaos_peak'; }},
+        { text: '(Молчать)', next: null, effect: () => { S.charisma += 15; GameState.scene = 'ch5_silence_power'; }},
+        { text: '(Сказать "Я просто шучу")', next: null, effect: () => { S.troll += 10; GameState.scene = 'ch5_just_joking'; }},
     ]
 },
 
-'ch1_kob_mod_talk': {
-    speaker: 'Коб', text: 'Этот мод добавляет новую фракцию в Heroes 5! Я его... нашёл. В интернете. И доработал! Добавил свою подпись. Это творчество! Не кража!',
+'ch5_chaos_peak': {
+    speaker: 'Орсон', text: 'ВЫ ВСЕ ПРОТИВ МЕНЯ! ЗАГОВОР! Я ЗНАЛ! ВИЛЬГЕФОРТС — ПРЕДАТЕЛЬ! КОБ — ВОР! ВАЙТУЗ — ТОРМОЗ! ВЫ ВСЕ... ВЫ ВСЕ... *голос срывается* ...вы все правы. И я это знаю.',
     choices: [
-        { text: 'Конечно, "творчество"', next: null, effect: () => { GameState.scene = 'ch1_chapter1_end'; }},
+        { text: '...', next: null, effect: () => { GameState.scene = 'ch5_breakdown'; }},
     ]
 },
 
-'ch1_chat_while_waiting': {
-    speaker: 'Вайтуз', text: 'Пока ждём Коба... Знаешь, Орсон — он не плохой. Просто... шизоидный. Но у него сердце на месте. Иногда. Когда про Пятёрку не говорит. То есть... всегда говорит. Ну ладно.',
+'ch5_silence_power': {
+    speaker: '', text: '*Орсон молчит. Впервые — молчит. Все замолкают тоже. Тишина. Минута. Две. Периклес тихо плачет в углу. Вайтуз перестаёт жевать.*',
     choices: [
-        { text: 'Ты добрый, Вайтуз', next: null, effect: () => { R.vaituz += 10; GameState.scene = 'ch1_wait_kob'; }},
-        { text: 'Ты слишком доверчивый', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_wait_kob'; }},
+        { text: '...Я устал', next: null, effect: () => { S.charisma += 10; GameState.scene = 'ch5_tired'; }},
     ]
 },
 
-'ch1_free_roam': {
+'ch5_just_joking': {
+    speaker: '', text: '*Все одновременно:* "НЕТ. НЕ ШУТИШЬ. ТЫ НИКОГДА НЕ ШУТИШЬ. ТЫ ПРОСТО НЕ УМЕЕШЬ ИЗВИНЯТЬСЯ."',
+    choices: [
+        { text: '(Замолчать)', next: null, effect: () => { GameState.scene = 'ch5_breakdown'; }},
+    ]
+},
+
+'ch5_breakdown': {
+    speaker: 'Орсон', text: '...Я не хотел... Я просто хотел чтобы меня услышали. Заметили. Что кто-то ответит. Что кто-то не проигнорирует. Тишина — хуже смерти. Понимаете?',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ch5_catharsis'; }},
+    ]
+},
+
+'ch5_tired': {
+    speaker: 'Орсон', text: 'Я устал спорить. Устал доказывать. Устал быть самым умным в комнате. Может потому что я не самый умный. Может потому что комнаты нет. Может потому что... *пауза* ...забудьте.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ch5_catharsis'; }},
+    ]
+},
+
+'ch5_catharsis': {
+    speaker: 'Периклес', text: '*тихо* Вот и всё, герой. Ты прошёл через них. Теперь — последнее испытание. Ты сам.',
+    choices: [
+        { text: '(Идти к финалу)', next: null, effect: () => { GameState.chapter = 6; GameState.scene = 'ch6_start'; }},
+    ]
+},
+
+// ============== ГЛАВА 6: ОДИНОЧЕСТВО И ПРОШЛОЕ ==============
+'ch6_start': {
+    speaker: '', text: 'ГЛАВА 6: ЭКРАН ЗАГРУЗКИ.\n\nПустая комната. Компьютер. Heroes 5 на экране. Орсон один. Впервые — осознанно один.',
+    choices: [
+        { text: '(Сесть за компьютер)', next: null, effect: () => { GameState.scene = 'ch6_heroes'; }},
+        { text: '(Просто сидеть)', next: null, effect: () => { GameState.scene = 'ch6_sit'; }},
+    ]
+},
+
+'ch6_heroes': {
+    speaker: '', text: 'Heroes 5. Главное меню. Музыка. Та самая. 30-35 фпс. Орсон помнит. Ему было 15. Мир был проще. Форумов не было. Споров не было. Была только игра.',
+    choices: [
+        { text: '(Начать новую игру)', next: null, effect: () => { GameState.scene = 'ch6_new_game'; }},
+        { text: '(Загрузить сохранение)', next: null, effect: () => { GameState.scene = 'ch6_load_save'; }},
+        { text: '(Выключить)', next: null, effect: () => { GameState.scene = 'ch6_shutdown'; }},
+    ]
+},
+
+'ch6_new_game': {
+    speaker: 'Орсон', text: 'Новая игра... Как тогда. Когда всё только начиналось. Когда Heroes 5 была просто игрой, а не идеологией. Когда Реборн был просто фантазией, а не... *замолкает*',
+    choices: [
+        { text: '(Играть молча)', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch6_memories'; }},
+    ]
+},
+
+'ch6_load_save': {
+    speaker: '', text: 'Сохранение: "Кампания Орсона — День 1". Дата: 2009 год. Орсон загружает. На экране — его старый герой. Тот самый. До форумов. До споров. До всего.',
+    choices: [
+        { text: '(Вспомнить)', next: null, effect: () => { GameState.scene = 'ch6_memories'; }},
+    ]
+},
+
+'ch6_memories': {
+    speaker: 'Орсон', text: '...Помню. Первый замок. Первая армия. Первая победа. Тогда не нужно было никому ничего доказывать. Просто играл. Просто... был счастлив. Когда это изменилось?',
+    choices: [
+        { text: 'Когда начал спорить', next: null, effect: () => { S.charisma += 10; GameState.scene = 'ch6_when_changed'; }},
+        { text: 'Ничего не изменилось', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch6_denial_final'; }},
+    ]
+},
+
+'ch6_when_changed': {
+    speaker: 'Орсон', text: 'Да... Когда первый раз написал "ты неправ" на форуме. И получил ответ. Внимание. Реакцию. Это было... как наркотик. Чем больше споришь — тем больше тебя замечают. Пока не перестают.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_denial_final': {
+    speaker: '', text: '*Экран мерцает. Комната начинает таять. Стены трескаются. Мир Меча и Шизофрении рассыпается.*',
+    choices: [
+        { text: 'Что происходит?!', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_shutdown': {
+    speaker: '', text: '*Орсон выключает компьютер. Тишина. Абсолютная тишина. Он сидит в тёмной комнате. Один. Без экрана. Без форума. Без голосов.*',
+    choices: [
+        { text: '(Сидеть в тишине)', next: null, effect: () => { S.charisma += 10; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_sit': {
+    speaker: 'Орсон', text: '*сидит на полу* ...Тихо. Так тихо что слышно как бьётся сердце. Оно бьётся. Значит я живой. Значит... всё это реально? Или нет?',
+    choices: [
+        { text: '(Ждать)', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_germanovna': {
+    speaker: '', text: '*Дверь открывается. Входит женщина в белом халате. Спокойная. Уверенная. С блокнотом.*',
+    choices: [
+        { text: 'Кто вы?', next: null, effect: () => { GameState.scene = 'ch6_germanovna_intro'; }},
+        { text: 'Евгения Германовна?', next: null, effect: () => { F.knows_germanovna = true; GameState.scene = 'ch6_germanovna_knows'; }},
+    ]
+},
+
+'ch6_germanovna_intro': {
+    speaker: 'Евгения Германовна', text: 'Евгения Германовна. Твой лечащий врач. Мы разговариваем каждый четверг, Орсон. Ты снова забыл?',
+    choices: [
+        { text: 'Лечащий... врач?', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch6_doctor_reveal'; }},
+    ]
+},
+
+'ch6_germanovna_knows': {
+    speaker: 'Евгения Германовна', text: 'Помнишь меня? Хорошо. Значит сегодня лучше, чем в прошлый раз. Расскажи мне — что ты видел? Замки? Героев? Форумы?',
+    choices: [
+        { text: 'Всё... всё это было...', next: null, effect: () => { GameState.scene = 'ch6_doctor_reveal'; }},
+    ]
+},
+
+'ch6_doctor_reveal': {
+    speaker: 'Евгения Германовна', text: 'Орсон, проблема не в мире. Проблема в том, что ты превращаешь любой мир в форум. Даже этот. Даже сны. Ты не можешь остановиться. Но мы можем помочь.',
+    choices: [
+        { text: 'Я не болен!', next: null, effect: () => { S.paranoia += 10; GameState.scene = 'ch6_not_sick'; }},
+        { text: '...Помогите', next: null, effect: () => { S.charisma += 15; GameState.scene = 'ch6_accept_help'; }},
+        { text: 'А что если я прав?', next: null, effect: () => { S.shiza += 10; GameState.scene = 'ch6_what_if_right'; }},
+    ]
+},
+
+'ch6_not_sick': {
+    speaker: 'Евгения Германовна', text: 'Орсон. Ты сидишь в палате номер 5 — ирония, да? — уже третий месяц. Ты видишь замки, форумы и гномов. Ты споришь с медсёстрами о Heroes 5. Часы на стене показывают 3:47 — ты остановил их в первый день.',
+    choices: [
+        { text: '...Палата номер 5?', next: null, effect: () => { GameState.scene = 'ch6_ending_choice'; }},
+    ]
+},
+
+'ch6_accept_help': {
+    speaker: 'Евгения Германовна', text: '*улыбается* Это первый шаг, Орсон. Самый тяжёлый. Признать что нужна помощь — это не слабость. Это самое храброе что ты мог сделать.',
+    choices: [
+        { text: '(Кивнуть)', next: null, effect: () => { F.accepted_help = true; GameState.scene = 'ch6_ending_choice'; }},
+    ]
+},
+
+'ch6_what_if_right': {
+    speaker: 'Евгения Германовна', text: '*пауза* ...А что если? Хороший вопрос. Но даже если ты прав — это не отменяет того, что ты несчастен, одинок, и не спал три месяца. Правота не заменяет покой.',
+    choices: [
+        { text: '(Задуматься)', next: null, effect: () => { GameState.scene = 'ch6_ending_choice'; }},
+    ]
+},
+
+// ============== ФИНАЛ: ОПРЕДЕЛЕНИЕ КОНЦОВКИ ==============
+'ch6_ending_choice': {
     speaker: '', text: (() => {
-        const events = [
-            'Вы стоите на перекрёстке чатика. Вайтуз жуёт яблоко рядом.',
-            'Перекрёсток чатика. Орсон что-то бормочет про Heroes 5.',
-            'Вы на перекрёстке. Вдалеке видно дым от дельтаплана Чеба.',
-            'Перекрёсток. Кто-то поёт "Хей, Коля Шизик" в голосовом канале.',
-        ];
-        return events[Math.floor(Math.random() * events.length)] + ' Куда пойдём?';
+        // Calculate ending based on stats
+        const totalCharisma = S.charisma || 0;
+        const totalShiza = S.shiza || 0;
+        const totalChaos = S.chaos || 0;
+        const roll = Math.random() * 100;
+
+        if (totalShiza > 50 && roll <= 1) {
+            F.ending = 'truth';
+            return '*Экран мерцает. Реальность трещит. Стены палаты растворяются...*';
+        } else if (totalCharisma > 40 && totalChaos < 30 && roll <= 9 + totalCharisma/5) {
+            F.ending = 'victory';
+            return '*Орсон чувствует прилив сил. Всё вокруг замирает...*';
+        } else {
+            F.ending = 'hospital';
+            return '*Белый свет. Запах антисептика. Звук капельницы.*';
+        }
     })(),
     choices: [
-        { text: '⛪ Храм Пятёрки', next: null, effect: () => { GameState.scene = 'ch1_temple_h5'; }},
-        { text: '🎙️ Войс-Каньон', next: null, effect: () => { GameState.scene = 'ch1_voice_canyon'; }},
-        { text: '✈️ Чебовка', next: null, effect: () => { GameState.scene = 'ch1_chebovka'; }},
-        { text: '🚪 Дверь Коба', next: null, effect: () => { GameState.scene = 'ch1_kob_door'; }},
-        { text: '💬 Флудилка', next: null, effect: () => { GameState.scene = 'ch1_floodchat'; }},
-        { text: '🎮 Поиграть с Вайтузом', next: null, effect: () => { GameState.scene = 'ch1_play_with_vaituz'; }},
-    ]
-},
-
-// === INTERACTIVE: FLOOD CHAT ===
-'ch1_floodchat': {
-    speaker: '', text: '💬 ФЛУДИЛКА. Тут все пишут одновременно. Сообщения летят быстрее, чем вы успеваете читать. Орсон спамит скриншоты Heroes 5. Вайтуз отправляет "эээ" каждые 10 секунд.',
-    choices: [
-        { text: 'Написать "Привет!"', next: null, effect: () => { GameState.scene = 'ch1_flood_hello'; }},
-        { text: 'Отправить мем', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_flood_meme'; }},
-        { text: 'Спросить про Heroes 5', next: null, effect: () => { GameState.scene = 'ch1_flood_h5'; }},
-        { text: 'Написать "Тройка лучше"', next: null, effect: () => { S.chaos += 10; R.orson -= 15; GameState.scene = 'ch1_flood_troika'; }},
-        { text: 'Назад', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_hello': {
-    speaker: '', text: 'Вы написали "Привет!" Через 0.3 секунды ваше сообщение уехало вверх под лавиной скриншотов Heroes 5 от Орсона. Никто не заметил.',
-    choices: [
-        { text: 'Написать ещё раз КАПСОМ', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_flood_caps'; }},
-        { text: 'Принять свою незаметность', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_caps': {
-    speaker: 'Орсон', text: 'О! Кто-то капсит?! КАПС = КРИК = ВОЙС! ИДИ В ВОЙС ПЖ!',
-    choices: [
-        { text: 'Ладно, пойду в войс', next: null, effect: () => { GameState.scene = 'ch1_voice_canyon'; }},
-        { text: 'Нет, спасибо', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_meme': {
-    speaker: 'Вайтуз', text: 'Эээ... хороший мем. Я тоже мемы люблю. Кстати, эээ... я как-то мем неправильно отправил и Орсон на меня 3 часа орал. Хороший был день.',
-    choices: [
-        { text: '...что?', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_h5': {
-    speaker: 'Орсон', text: 'КТО СПРОСИЛ ПРО HEROES 5?! *Орсон отправляет 47 скриншотов за 10 секунд* СМОТРИ! ЭТО! КРАСОТА! 30-35 ФПС! КЛАССНО! *ваш чат перестал отвечать*',
-    choices: [
-        { text: '*перезагрузить чат*', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_troika': {
-    speaker: 'Орсон', text: '...Что ты только что написал? *Орсон набирает текст...* *Орсон набирает текст...* *Орсон набирает текст...* (уже 5 минут)',
-    choices: [
-        { text: 'Удалить сообщение', next: null, effect: () => { R.orson += 5; GameState.scene = 'ch1_flood_delete'; }},
-        { text: 'Ждать ответа', next: null, effect: () => { GameState.scene = 'ch1_flood_orson_rage'; }},
-    ]
-},
-
-'ch1_flood_delete': {
-    speaker: 'Орсон', text: 'Удалил?! Я ВИДЕЛ! Скрин сделал! Ничего не удаляется! Обосрался — признай! Созерцаем!',
-    choices: [
-        { text: '*тихо уйти из флудилки*', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_flood_orson_rage': {
-    speaker: 'Орсон', text: '*СТЕНА ТЕКСТА НА 3000 СИМВОЛОВ* ...и вот поэтому Пятёрка объективно лучше, с математической, философской и экзистенциальной точки зрения. Тройка — для тех, у кого левое полушарие не работает! ТЫ СЛИТ!',
-    choices: [
-        { text: 'Я пошутил', next: null, effect: () => { R.orson += 5; GameState.scene = 'ch1_free_roam'; }},
-        { text: 'Вызвать на битву', next: null, effect: () => { GameState.scene = 'ch1_battle_orson'; }},
-    ]
-},
-
-// === INTERACTIVE: PLAY WITH VAITUZ ===
-'ch1_play_with_vaituz': {
-    speaker: 'Вайтуз', text: 'Эээ... поиграем? Я... эээ... ну я плохо играю. Во всё. Но я стараюсь! У меня мозг не кипит! В какую игру?',
-    choices: [
-        { text: 'Heroes 5', next: null, effect: () => { GameState.scene = 'ch1_vaituz_h5'; }},
-        { text: 'Камень-ножницы-бумага', next: null, effect: () => { GameState.scene = 'ch1_vaituz_rps'; }},
-        { text: 'Угадай число', next: null, effect: () => { GameState.scene = 'ch1_vaituz_guess'; }},
-        { text: 'Не надо, я видел как ты играешь', next: null, effect: () => { R.vaituz -= 5; GameState.scene = 'ch1_vaituz_sad'; }},
-    ]
-},
-
-'ch1_vaituz_h5': {
-    speaker: 'Вайтуз', text: 'Heroes 5? Эээ... ладно. *загружается 10 минут* Так, я беру... эээ... некроманта. Нет, мага. Нет... эээ... *ещё 5 минут* ...рыцаря? А как играть?',
-    choices: [
-        { text: '*Орсон плачет от радости*', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch1_vaituz_h5_game'; }},
-    ]
-},
-
-'ch1_vaituz_h5_game': {
-    speaker: 'Орсон', text: 'ВАЙТУЗ ИГРАЕТ В ПЯТЁРКУ! ЗАПИСЫВАЮ! ЭТО ИСТОРИЧЕСКИЙ МОМЕНТ! *Вайтуз проигрывает на 3-м ходу* ...ладно, хотя бы попробовал.',
-    choices: [
-        { text: 'Это было... что-то', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_vaituz_rps': {
-    speaker: '', text: '🎮 КАМЕНЬ-НОЖНИЦЫ-БУМАГА! Вайтуз задумался... *жуёт яблоко* ...эээ...',
-    choices: [
-        { text: '✊ Камень', next: null, effect: () => { const r = Math.random(); GameState.scene = r > 0.7 ? 'ch1_rps_win' : r > 0.3 ? 'ch1_rps_lose' : 'ch1_rps_draw'; }},
-        { text: '✌️ Ножницы', next: null, effect: () => { const r = Math.random(); GameState.scene = r > 0.7 ? 'ch1_rps_win' : r > 0.3 ? 'ch1_rps_lose' : 'ch1_rps_draw'; }},
-        { text: '✋ Бумага', next: null, effect: () => { const r = Math.random(); GameState.scene = r > 0.7 ? 'ch1_rps_win' : r > 0.3 ? 'ch1_rps_lose' : 'ch1_rps_draw'; }},
-        { text: '🍎 Яблоко', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch1_rps_apple'; }},
-    ]
-},
-
-'ch1_rps_win': {
-    speaker: 'Вайтуз', text: 'Эээ... ты выиграл. Как всегда. Я проигрываю даже в камень-ножницы-бумага. *грустно жуёт яблоко*',
-    choices: [
-        { text: 'Ещё раз?', next: null, effect: () => { GameState.scene = 'ch1_vaituz_rps'; }},
-        { text: 'Ладно, хватит', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_rps_lose': {
-    speaker: 'Вайтуз', text: 'Я... Я ВЫИГРАЛ?! ЭТО ПРАВДА?! *роняет яблоко от радости* ПЕРВЫЙ РАЗ В ЖИЗНИ! У МЕНЯ МОЗГ НЕ КИПИТ!!!',
-    choices: [
-        { text: 'Поздравляю!', next: null, effect: () => { R.vaituz += 10; GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_rps_draw': {
-    speaker: 'Вайтуз', text: 'Ничья... Эээ... это хорошо или плохо? Ну... хотя бы не проиграл.',
-    choices: [
-        { text: 'Ещё раз?', next: null, effect: () => { GameState.scene = 'ch1_vaituz_rps'; }},
-        { text: 'Пойдём дальше', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_rps_apple': {
-    speaker: 'Вайтуз', text: 'Яблоко?! Это... эээ... это нечестно! Яблоко не в правилах! Хотя... яблоко побеждает всё. Ладно, ты выиграл.',
-    choices: [
-        { text: '*довольно жевать яблоко*', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_vaituz_guess': {
-    speaker: 'Вайтуз', text: 'Угадай число! Я загадал от 1 до 5! Эээ... не подглядывай. *очевидно думает про яблоко*',
-    choices: [
-        { text: '1', next: null, effect: () => { GameState.scene = 'ch1_guess_wrong'; }},
-        { text: '3', next: null, effect: () => { GameState.scene = 'ch1_guess_wrong'; }},
-        { text: '5', next: null, effect: () => { GameState.scene = 'ch1_guess_right'; }},
-        { text: 'Яблоко', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_guess_apple'; }},
-    ]
-},
-
-'ch1_guess_right': {
-    speaker: 'Вайтуз', text: 'КАК?! Я думал про 5 потому что у яблока 5 букв! Ты читаешь мысли?! *параноидальный взгляд* Ты... ты как Орсон?!',
-    choices: [
-        { text: 'Нет, я просто угадал', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_guess_wrong': {
-    speaker: 'Вайтуз', text: 'Неа! Было 5! Потому что у яблока 5 букв! Логично, да? Эээ... наверное нет.',
-    choices: [
-        { text: '*фейспалм*', next: null, effect: () => { GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_guess_apple': {
-    speaker: 'Вайтуз', text: '...Как ты узнал что я думал про яблоко?! Но число-то не яблоко! Число — 5! Потому что... потому что у яблока... *путается* ...у меня мозг не кипит.',
-    choices: [
-        { text: 'Конечно не кипит', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_vaituz_sad': {
-    speaker: 'Вайтуз', text: '*грустно смотрит на яблоко* ...ладно. *тихо уходит в угол* *жуёт яблоко грустно* *через минуту возвращается как ни в чём не бывало* Эээ... а что мы делали?',
-    choices: [
-        { text: 'Ничего, всё хорошо', next: null, effect: () => { R.vaituz += 3; GameState.scene = 'ch1_free_roam'; }},
-    ]
-},
-
-'ch1_break_kob_door': {
-    speaker: '', text: 'Вы пытаетесь взломать дверь. Из-за неё раздаётся: "Ахахаха! Дверь бронированная! Как мой нарциссизм — непробиваемая! 200 монет или вали!"',
-    choices: [
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch1_explore_chat'; }},
-    ]
-},
-
-// === CHAPTER 1 END ===
-'ch1_chapter1_end': {
-    speaker: '', text: 'Первый день в чатике подходит к концу. Вы узнали много нового. Завтра предстоит ещё больше приключений...',
-    choices: [
-        { text: 'Продолжить → Глава 2', next: null, effect: () => { GameState.chapter = 2; GameState.scene = 'ch2_start'; }},
-    ]
-},
-
-// ============== CHAPTER 2: ВОЙНЫ ЧАТИКА ==============
-'ch2_start': {
-    speaker: '', text: 'ГЛАВА 2: ВОЙНЫ ЧАТИКА. Ночь прошла. Утром в чатике — хаос. Орсон объявил войну БТДшерам. Вайтуз в панике ест яблоки. Чеб готовит дельтаплан к вылету.',
-    choices: [
-        { text: 'Идти к Орсону', next: null, effect: () => { GameState.scene = 'ch2_orson_war'; }},
-        { text: 'Найти Вайтуза', next: null, effect: () => { GameState.scene = 'ch2_vaituz_panic'; }},
-        { text: 'Помочь Чебу', next: null, effect: () => { GameState.scene = 'ch2_cheb_prep'; }},
-        { text: 'Искать Коба (секретно)', next: null, effect: () => { if (F.kob_line_unlocked) GameState.scene = 'ch2_kob_secret'; else GameState.scene = 'ch2_kob_locked'; }},
-    ]
-},
-
-'ch2_orson_war': {
-    speaker: 'Орсон', text: 'ВОЙНА! БТДшеры зарвались! Мне кажется, ему отвечать = позволять ему оправдывать своё ничтожное неумение! Какие же вы жалкие, ребят! Ты с нами или против?!',
-    choices: [
-        { text: 'С вами!', next: null, effect: () => { R.orson += 15; S.chaos += 10; F.orson_side = true; GameState.scene = 'ch2_war_orson_side'; }},
-        { text: 'Может поговорить мирно?', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch2_peace_attempt'; }},
-        { text: 'Я нейтрален', next: null, effect: () => { GameState.scene = 'ch2_neutral'; }},
-        { text: 'Против!', next: null, effect: () => { R.orson -= 30; S.chaos += 15; GameState.scene = 'ch2_against_orson'; }},
-    ]
-},
-
-'ch2_war_orson_side': {
-    speaker: 'Орсон', text: 'Отлично! Первое задание — Передай привет всем БТДшерам. Через 4 года полегче станет. Поверьте. Без левого полушария логики тяжело жить! Идём в Войс-Каньон — дебаты!',
-    choices: [
-        { text: 'В Войс!', next: null, effect: () => { GameState.scene = 'ch2_voice_war'; }},
-        { text: 'Может сначала стратегию?', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch2_war_strategy'; }},
-    ]
-},
-
-'ch2_peace_attempt': {
-    speaker: 'Орсон', text: '...Мирно? Хм. Ну если не придираться к человеку на месте ровно, то жизнь легче. Ладно. Но если они первые начнут — я в ответе!',
-    choices: [
-        { text: 'Пойдём к Вайтузу, он поможет', next: null, effect: () => { GameState.scene = 'ch2_peace_with_vaituz'; }},
-        { text: 'Я сам попробую переговоры', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch2_solo_peace'; }},
-    ]
-},
-
-'ch2_neutral': {
-    speaker: 'Орсон', text: 'Нейтрален?! В любом споре надо сказать, что Орсон виноват — тогда можно сказать, что затащил. Ладно. Но запомни: кто не в Чебовке, тот лол.',
-    choices: [
-        { text: 'Осмотреться', next: null, effect: () => { GameState.scene = 'ch2_explore_war'; }},
-    ]
-},
-
-'ch2_against_orson': {
-    speaker: 'Орсон', text: 'ПРОТИВ?! Хорошо, ты признал, что ты пиздабол! Который не может и не хочет работать! Ему лень, впадлу! А потом посидит и поплачет! БИТВА!',
-    choices: [
-        { text: 'БИТВА!', next: null, effect: () => {
-            GameState.scene = 'battle';
-            GameState.battleData = {
-                id: 'orson', name: 'ОРСОН (ВОЙНА)', hp: 30,
-                acts: ['Перемирие', 'Аргумент', 'Провокация', 'Уклонение'],
-                actResponses: {
-                    talk: '"Перемирие?! Через мой труп!"',
-                    praise: '"Лесть не спасёт тебя!"',
-                    troll: '"Раз в год Орсон выдаёт перформанс! Мемы создают резонанс!"',
-                    ignore: '"НЕЛЬЗЯ ИГНОРИТЬ ПРАВДУ!"',
-                },
-                patterns: ['spiral', 'horizontal', 'vertical'],
-            };
-            GameState.afterBattle = 'ch2_after_war_battle';
+        { text: '(Открыть глаза)', next: null, effect: () => {
+            if (F.ending === 'truth') GameState.scene = 'ending_truth';
+            else if (F.ending === 'victory') GameState.scene = 'ending_victory';
+            else GameState.scene = 'ending_hospital';
         }},
     ]
 },
 
-'ch2_after_war_battle': {
-    speaker: '', text: 'Бой окончен. Обе стороны устали. Может, пора мириться?',
+// === КОНЦОВКА 1: БОЛЬНИЦА (90%) ===
+'ending_hospital': {
+    speaker: '', text: 'КОНЦОВКА: ПАЛАТА №5\n\nОрсон открывает глаза. Белый потолок. Капельница. За окном — не замки, не пиксели, а обычный двор больницы. Евгения Германовна сидит рядом с блокнотом.',
     choices: [
-        { text: 'Предложить мир', next: null, effect: () => { S.friendship += 10; GameState.scene = 'ch2_war_peace'; }},
-        { text: 'Победа!', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch2_war_victory'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_hospital_2'; }},
     ]
 },
 
-'ch2_vaituz_panic': {
-    speaker: 'Вайтуз', text: 'Ээээ... Война?! Я не учавствовал! То есть... я помогал. Но МЕДЛЕННО! У меня мозг не кипит! Что делать?!',
+'ending_hospital_2': {
+    speaker: 'Евгения Германовна', text: 'С возвращением, Орсон. Тебе снились замки? Опять Heroes? Расскажи мне всё. Мы работаем над этим. Вместе. Каждый четверг. Как всегда.',
     choices: [
-        { text: 'Успокойся, давай разберёмся', next: null, effect: () => { R.vaituz += 10; GameState.scene = 'ch2_calm_vaituz'; }},
-        { text: 'Бежим!', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch2_run_together'; }},
-        { text: 'Ты должен выбрать сторону', next: null, effect: () => { GameState.scene = 'ch2_vaituz_choose'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_hospital_3'; }},
     ]
 },
 
-'ch2_calm_vaituz': {
-    speaker: 'Вайтуз', text: 'Ок... ок... *ест яблоко* Бля, как же ахуенно после энергетика и яблок. Ладно. Думаю, надо попробовать помирить всех. Орсон же не плохой, он просто... параноик.',
+'ending_hospital_3': {
+    speaker: '', text: 'Орсон смотрит на часы на стене. Они идут. 3:48. Впервые за долгое время — время движется вперёд.\n\n...На тумбочке лежит яблоко. На нём записка: "Эээ... выздоравливай. — В."',
     choices: [
-        { text: 'Пойдём мирить!', next: null, effect: () => { GameState.scene = 'ch2_peace_with_vaituz'; }},
-        { text: 'Или просто подождём, пока устанут', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch2_wait_it_out'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
     ]
 },
 
-'ch2_cheb_prep': {
-    speaker: 'Чеб', text: 'Салам! Война? Опять? Я не лезу, я лётчик. Мне моды делать надо, а не воевать. Но если хочешь — могу на дельтаплане разведку провести. Или свалить в Казахстан. Что скажешь?',
+// === КОНЦОВКА 2: ПОБЕДА (9%) ===
+'ending_victory': {
+    speaker: '', text: 'КОНЦОВКА: ЗАКЛИНАТЕЛЬ ТРЯСКИ\n\nОрсон встаёт. Мир Меча и Шизофрении преклоняется перед ним. Все споры выиграны. Все форумы покорены. Все враги побеждены.',
     choices: [
-        { text: 'Давай разведку!', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch2_cheb_recon'; }},
-        { text: 'Может в Казахстан?', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch2_cheb_escape'; }},
-        { text: 'Помоги помирить всех', next: null, effect: () => { R.cheb += 5; GameState.scene = 'ch2_cheb_peace'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_victory_2'; }},
     ]
 },
 
-'ch2_kob_secret': {
-    speaker: 'Коб', text: 'А, ты пришёл! Война, говоришь? Хе-хе. Я знаю, как её закончить. Но это будет стоить... 200 монет. Шучу. На самом деле — нужен один мод. Украденный. Ну, заимствованный. Он может изменить баланс сил.',
+'ending_victory_2': {
+    speaker: 'Орсон', text: 'Я победил. Всех. Каждого. И знаете что? ...Мне скучно. Некого спорить. Некого трясти. Некого провоцировать. Это... это хуже поражения.',
     choices: [
-        { text: 'Расскажи подробнее', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch2_kob_war_plan'; }},
-        { text: 'Ты хочешь всех обмануть?', next: null, effect: () => { GameState.scene = 'ch2_kob_honest'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_victory_3'; }},
     ]
 },
 
-'ch2_kob_locked': {
-    speaker: '', text: 'Дверь Коба заперта. "200 МОНЕТ" мигает неоном.',
+'ending_victory_3': {
+    speaker: '', text: 'Орсон сидит на троне из выигранных аргументов. Вокруг — тишина. Та самая тишина, которую он боялся больше всего. Он победил мир. И остался один.\n\nНавсегда.',
     choices: [
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch2_explore_war'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
     ]
 },
 
-// Ch2 additional scenes
-'ch2_voice_war': {
-    speaker: '', text: 'В Войс-Каньоне гремят дебаты! Голоса эхом отражаются от стен. Орсон уже разогрет.',
+// === КОНЦОВКА 3: ПРАВДА (1%) ===
+'ending_truth': {
+    speaker: '', text: 'КОНЦОВКА: ИСХОДНЫЙ КОД\n\nСтены палаты рассыпаются. За ними — код. Реальный код. Нивал. Heroes 5. Всё что Орсон говорил — ПРАВДА.',
     choices: [
-        { text: 'Вступить в дебаты', next: null, effect: () => { GameState.scene = 'ch2_debate_war'; }},
-        { text: 'Наблюдать', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch2_observe_debate'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_truth_2'; }},
     ]
 },
 
-'ch2_debate_war': {
-    speaker: 'Орсон', text: 'Говори! Скажи на яйцах! Прямо! Пожалуйста! Империалист, как тебя в реале зовут?!',
+'ending_truth_2': {
+    speaker: 'Евгения Германовна', text: '...Невозможно. Ты... ты был прав? Всё это время? Исходный код... параллельная реальность... Реборн... Всё настоящее?!',
     choices: [
-        { text: 'Назвать своё имя', next: null, effect: () => { S.respect += 10; GameState.scene = 'ch2_gave_name'; }},
-        { text: 'Не скажу', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch2_no_name'; }},
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_truth_3'; }},
     ]
 },
 
-'ch2_war_strategy': {
-    speaker: 'Орсон', text: 'Стратегия? Хм. 1) Дисс. 2) Мут. 3) Победа. 4) PROFIT. Простой план. Как Реборн, только для войны.',
+'ending_truth_3': {
+    speaker: 'Орсон', text: 'Я. Был. Прав. *ухмылка превосходства* Какие же вы жалкие, ребят. Все до единого. А теперь... теперь начинается НАСТОЯЩИЙ Реборн.\n\n...30-35 фпс. Как в 2009 году.',
     choices: [
-        { text: 'Отличный план!', next: null, effect: () => { GameState.scene = 'ch2_voice_war'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
     ]
 },
 
-'ch2_peace_with_vaituz': {
-    speaker: 'Вайтуз', text: 'Я попробую... Ээээ... Орсон! Привет! Слушай, может хватит воевать? Бля, без рофлов, ты же нормальный когда про Героев не говоришь!',
-    choices: [
-        { text: 'Поддержать Вайтуза', next: null, effect: () => { R.vaituz += 10; R.orson += 5; GameState.scene = 'ch2_peace_works'; }},
-        { text: 'Молча наблюдать', next: null, effect: () => { GameState.scene = 'ch2_peace_attempt_result'; }},
-    ]
-},
-
-'ch2_peace_works': {
-    speaker: 'Орсон', text: '...Ну если не придираться к человеку на месте ровно, то жизнь легче. Ладно. ПЕРЕМИРИЕ. Но только до коронации Чеба!',
-    choices: [
-        { text: 'Отлично!', next: null, effect: () => { F.peace_achieved = true; S.friendship += 15; GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_solo_peace': {
-    speaker: '', text: 'Вы идёте к обеим сторонам и пытаетесь договориться. Это долго. Это трудно. Но в конце концов...',
-    choices: [
-        { text: 'Удалось! (Мудрость > 30)', next: null, effect: () => { if (S.wisdom > 30) { F.peace_achieved = true; GameState.scene = 'ch2_peace_success'; } else { GameState.scene = 'ch2_peace_fail'; }}},
-    ]
-},
-
-'ch2_peace_success': {
-    speaker: '', text: 'Ваша мудрость и дипломатия победили! Перемирие установлено!',
-    choices: [{ text: 'Далее', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_peace_fail': {
-    speaker: '', text: 'Увы, мудрости не хватило. Война продолжается...',
-    choices: [{ text: 'Далее', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_explore_war': {
-    speaker: '', text: 'Чатик в хаосе. Повсюду разбросаны мемы и скриншоты. Кто-то спамит "Шиз-Колян!" в общий чат.',
-    choices: [
-        { text: 'К Орсону', next: null, effect: () => { GameState.scene = 'ch2_orson_war'; }},
-        { text: 'К Вайтузу', next: null, effect: () => { GameState.scene = 'ch2_vaituz_panic'; }},
-        { text: 'К Чебу', next: null, effect: () => { GameState.scene = 'ch2_cheb_prep'; }},
-    ]
-},
-
-'ch2_run_together': {
-    speaker: 'Вайтуз', text: 'БЕЖИМ!!! *хватает яблоки и бежит* Ээээ... куда?!',
-    choices: [
-        { text: 'На Чебовку! Улетим!', next: null, effect: () => { GameState.scene = 'ch2_cheb_escape'; }},
-        { text: 'В Поле Яблок — спрячемся!', next: null, effect: () => { GameState.scene = 'ch2_apple_field'; }},
-    ]
-},
-
-'ch2_apple_field': {
-    speaker: '', text: 'Поле Яблок. Тихо. Мирно. Яблони шелестят. Вайтуз успокоился и жуёт яблоко.',
-    choices: [
-        { text: 'Поговорить о жизни', next: null, effect: () => { S.wisdom += 10; R.vaituz += 10; GameState.scene = 'ch2_deep_talk_vaituz'; }},
-        { text: 'Вернуться к войне', next: null, effect: () => { GameState.scene = 'ch2_explore_war'; }},
-    ]
-},
-
-'ch2_deep_talk_vaituz': {
-    speaker: 'Вайтуз', text: 'Знаешь... Я может и тормоз. И плохо играю. Но у меня мозг не кипит — это хорошо, правда? Значит, я спокойный. А спокойные люди... они правы чаще. Наверное. Ээээ...',
-    choices: [
-        { text: 'Ты прав, Вайтуз. Мудрость в спокойствии.', next: null, effect: () => { S.wisdom += 15; F.vaituz_wisdom = true; GameState.scene = 'ch2_chapter2_end'; }},
-        { text: 'Не знаю... пойдём обратно', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_vaituz_choose': {
-    speaker: 'Вайтуз', text: 'Выбрать?! Я... я... Моё сердце подсказывает, что все правы и неправы одновременно! А это тут причём?! Ладно, я за мир. Вот.',
-    choices: [
-        { text: 'Правильный выбор', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch2_peace_with_vaituz'; }},
-    ]
-},
-
-'ch2_cheb_recon': {
-    speaker: 'Чеб', text: '*летит на дельтаплане* Вижу! Орсон в Войс-Каньоне! Вайтуз в Поле Яблок ест яблоки! Коб... Коб сидит в ресторане и считает чужие монеты! Всё как обычно!',
-    choices: [
-        { text: 'Лети к Орсону!', next: null, effect: () => { GameState.scene = 'ch2_cheb_to_orson'; }},
-        { text: 'Вернуться', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_cheb_to_orson': {
-    speaker: 'Орсон', text: 'Чеб! Брат! Прилетел! Путешествия Чебика по серверам комьюнити! Коронация скоро!',
-    choices: [
-        { text: 'Давайте мириться!', next: null, effect: () => { S.friendship += 10; F.peace_achieved = true; GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_cheb_escape': {
-    speaker: 'Чеб', text: 'Казахстан? Хорошая идея! Там тихо, степь, дельтаплан... Но мы же вернёмся, да?',
-    choices: [
-        { text: 'Вернёмся. Обязательно.', next: null, effect: () => { F.visited_kazakhstan = true; GameState.scene = 'ch2_kazakhstan'; }},
-        { text: 'Может и нет', next: null, effect: () => { GameState.scene = 'ch2_ending_escape'; }},
-    ]
-},
-
-'ch2_kazakhstan': {
-    speaker: '', text: 'Казахстан. Бескрайняя степь. Тишина. Чеб парит на дельтаплане. Красиво. Мирно. Далеко от войн чатика.',
-    choices: [
-        { text: 'Это прекрасно', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch2_chapter2_end'; }},
-        { text: 'Скучаю по чатику', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_cheb_peace': {
-    speaker: 'Чеб', text: 'Мир? Я за! Давай соберём всех на Чебовке. Устроим коронацию, пир, фыр-фыр! Все помирятся!',
-    choices: [
-        { text: 'Отличная идея!', next: null, effect: () => { F.peace_party = true; GameState.scene = 'ch2_peace_party'; }},
-    ]
-},
-
-'ch2_peace_party': {
-    speaker: '', text: 'Вечеринка на Чебовке! Все собрались: Орсон, Вайтуз, Чеб, даже Коб (за 200 монет). Музыка, бургеры, Heroes 5 на большом экране.',
-    choices: [
-        { text: 'Предложить тост за мир!', next: null, effect: () => { S.friendship += 20; F.peace_achieved = true; GameState.scene = 'ch2_chapter2_end'; }},
-        { text: 'Тихо наблюдать', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_kob_war_plan': {
-    speaker: 'Коб', text: 'План такой: я "заимствую" мод, который объединяет все фракции Heroes 5. Орсон увидит — поймёт, что вместе сильнее. Мудро, да? Ну, и подписка на мой канал обязательна.',
-    choices: [
-        { text: 'Гениально!', next: null, effect: () => { R.kob += 10; F.kob_plan = true; GameState.scene = 'ch2_kob_execute_plan'; }},
-        { text: 'Это манипуляция', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch2_kob_caught'; }},
-    ]
-},
-
-'ch2_kob_execute_plan': {
-    speaker: '', text: 'Коб активирует мод. Heroes 5 на экране мерцает... Все фракции объединяются! Орсон видит это и замирает.',
-    choices: [
-        { text: 'Смотреть реакцию', next: null, effect: () => { GameState.scene = 'ch2_orson_sees_mod'; }},
-    ]
-},
-
-'ch2_orson_sees_mod': {
-    speaker: 'Орсон', text: '...Это... Это РЕБОРН?! Все фракции... вместе?! Это то, о чём я мечтал! КТО СДЕЛАЛ ЭТОТ МОД?!',
-    choices: [
-        { text: 'Это Коб!', next: null, effect: () => { R.kob += 15; R.orson += 5; GameState.scene = 'ch2_kob_hero'; }},
-        { text: 'Неважно кто. Главное — мир.', next: null, effect: () => { S.wisdom += 10; F.peace_achieved = true; GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_kob_hero': {
-    speaker: 'Орсон', text: 'Коб?! Тот самый вор мо— ...Модмейкер? Хм. Может я его недооценивал. Может. ПЕРЕМИРИЕ!',
-    choices: [
-        { text: 'Мир!', next: null, effect: () => { F.peace_achieved = true; F.kob_hero = true; GameState.scene = 'ch2_chapter2_end'; }},
-    ]
-},
-
-'ch2_kob_honest': {
-    speaker: 'Коб', text: '...Обмануть? Нет. Ну, может чуть-чуть. Но цель-то благая! И подписка на канал — это бонус, не условие. Почти.',
-    choices: [
-        { text: 'Ладно, давай твой план', next: null, effect: () => { GameState.scene = 'ch2_kob_war_plan'; }},
-    ]
-},
-
-'ch2_kob_caught': {
-    speaker: 'Коб', text: 'Манипуляция?! Я?! Я просто... стратегически мыслю. И да, я нарцисс. Но мой нарциссизм ПОМОГАЕТ ЛЮДЯМ. Иногда. За 200 монет.',
-    choices: [
-        { text: 'Ладно, помоги по-своему', next: null, effect: () => { GameState.scene = 'ch2_kob_execute_plan'; }},
-    ]
-},
-
-'ch2_war_peace': {
-    speaker: '', text: 'Мир восстановлен! Все пожимают руки. Орсон бурчит, но мирится.',
-    choices: [{ text: 'Далее', next: null, effect: () => { F.peace_achieved = true; GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_war_victory': {
-    speaker: '', text: 'Вы победили! Но ценой мира в чатике...',
-    choices: [{ text: 'Далее', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_gave_name': {
-    speaker: 'Орсон', text: 'Храбрый! Не как эти космонавты безъязыкие! Уважаю! Ладно, ты прошёл.',
-    choices: [{ text: 'Далее', next: null, effect: () => { S.respect += 10; GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_no_name': {
-    speaker: 'Орсон', text: 'Не скажешь?! Насколько ты фейк от 100 до 100?! Космонавт!',
-    choices: [{ text: 'Далее', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_observe_debate': {
-    speaker: '', text: 'Дебаты продолжаются часами. Итог: Пятёрка всё ещё лучше. По мнению Орсона.',
-    choices: [{ text: 'Далее', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_peace_attempt_result': {
-    speaker: '', text: 'Вайтуз старается... но Орсон упрям. Полу-перемирие.',
-    choices: [{ text: 'Далее', next: null, effect: () => { GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_wait_it_out': {
-    speaker: '', text: 'Проходит время. Война утихает сама. Все устали.',
-    choices: [{ text: 'Далее', next: null, effect: () => { F.peace_achieved = true; GameState.scene = 'ch2_chapter2_end'; }}],
-},
-
-'ch2_ending_escape': {
-    speaker: '', text: 'Вы решили остаться в Казахстане навсегда.',
-    choices: [{ text: 'ФИНАЛ: Побег в степь', next: null, effect: () => { GameState.scene = 'ending_escape_steppe'; }}],
-},
-
-'ch2_chapter2_end': {
-    speaker: '', text: 'Глава 2 завершена. Ваш выбор определил дальнейший путь...',
-    choices: [
-        { text: 'Продолжить → Глава 3', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
-    ]
-},
-
-// ============== CHAPTER 3: КОРОНАЦИЯ ==============
-'ch3_start': {
-    speaker: '', text: `ГЛАВА 3: КОРОНАЦИЯ ЧЕБА. ${F.peace_achieved ? 'Мир восстановлен.' : 'Война ещё тлеет.'} Но сегодня — особый день. Коронация Чеба!`,
-    choices: [
-        { text: 'Идти на коронацию!', next: null, effect: () => { GameState.scene = 'ch3_coronation'; }},
-        { text: 'Сначала подготовиться', next: null, effect: () => { GameState.scene = 'ch3_prepare'; }},
-    ]
-},
-
-'ch3_coronation': {
-    speaker: 'Орсон', text: '@everyone! Ребят, коронация Чеба начнётся сегодня в 8 часов вечера! Художник-татуировщик немного опоздает — звёзды на плечах и крылья на спине Чеба потребуют редкие чернила из крови дракона! Не опоздайте! Девушек не зовите — Чеб сказал, гарем не нужен!',
-    choices: [
-        { text: 'Это будет эпично!', next: null, effect: () => { GameState.scene = 'ch3_ceremony'; }},
-        { text: 'Зачем коронация лётчику?', next: null, effect: () => { S.wisdom += 3; GameState.scene = 'ch3_why_coronation'; }},
-        { text: 'А Коб придёт?', next: null, effect: () => { GameState.scene = 'ch3_kob_at_coronation'; }},
-    ]
-},
-
-'ch3_ceremony': {
-    speaker: '', text: 'Все собрались в Храме Пятёрки. Чеб сидит на золотом троне. Орсон произносит речь. Вайтуз стоит с яблоком. Даже Коб тут (за 200 монет).',
-    choices: [
-        { text: 'Аплодировать', next: null, effect: () => { R.cheb += 10; R.orson += 5; GameState.scene = 'ch3_coronation_speech'; }},
-        { text: 'Тихо наблюдать', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch3_coronation_observe'; }},
-        { text: 'Устроить свою коронацию!', next: null, effect: () => { S.chaos += 15; GameState.scene = 'ch3_rival_coronation'; }},
-    ]
-},
-
-'ch3_coronation_speech': {
-    speaker: 'Орсон', text: 'ЧЕБА КОРОНУЕМ! Лётчик из Казахстана, моддер, герой чатика! Его дельтаплан — символ свободы! Обильное празднество и активное фыр-фыр на Чебовке! Да здравствует Король Чеб!',
-    choices: [
-        { text: 'Да здравствует!', next: null, effect: () => { F.cheb_crowned = true; GameState.scene = 'ch3_after_coronation'; }},
-        { text: 'Подождите... у меня речь!', next: null, effect: () => { GameState.scene = 'ch3_player_speech'; }},
-    ]
-},
-
-'ch3_player_speech': {
-    speaker: '', text: 'Все смотрят на вас. Тишина.',
-    choices: [
-        { text: 'За дружбу! За чатик! За Героев!', next: null, effect: () => { S.friendship += 20; S.respect += 10; GameState.scene = 'ch3_great_speech'; }},
-        { text: 'Тройка лучше Пятёрки!', next: null, effect: () => { S.chaos += 30; GameState.scene = 'ch3_chaos_speech'; }},
-        { text: '*забыть слова*', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch3_forget_speech'; }},
-        { text: 'Шиз-Колян! Fake news maker!', next: null, effect: () => { S.shiza += 10; GameState.scene = 'ch3_sing_speech'; }},
-    ]
-},
-
-'ch3_great_speech': {
-    speaker: '', text: 'Зал взрывается аплодисментами! Даже Орсон хлопает. Вайтуз плачет от радости. Чеб улыбается. Коб... считает, сколько можно заработать на видео с этой речью.',
-    choices: [{ text: 'Далее', next: null, effect: () => { F.great_speech = true; GameState.scene = 'ch3_after_coronation'; }}],
-},
-
-'ch3_chaos_speech': {
-    speaker: 'Орсон', text: 'ЧТО?! НА КОРОНАЦИИ?! ТРОЙКА?! Ты бы набил ебало за тройку?! БИТВА!!!',
-    choices: [
-        { text: 'БИТВА!', next: null, effect: () => {
-            GameState.scene = 'battle';
-            GameState.battleData = {
-                id: 'orson', name: 'ОРСОН (ЯРОСТЬ КОРОНАЦИИ)', hp: 40,
-                acts: ['Извиниться', 'Шутка', 'Философия', 'Бежать'],
-                actResponses: {
-                    talk: '"НЕ ВРЕМЯ ДЛЯ РАЗГОВОРОВ!"',
-                    praise: '"ПОЗДНО ЛЬСТИТЬ!"',
-                    troll: '"ЕЩЁ ЧЁ ПРИДУМАЛ, ТУПАЯ ТЫ МОРДА НА!"',
-                    ignore: '"НЕЛЬЗЯ ИГНОРИТЬ ИСТИНУ!"',
-                },
-                patterns: ['spiral', 'spiral', 'horizontal', 'vertical'],
-            };
-            GameState.afterBattle = 'ch3_after_chaos_battle';
-        }},
-    ]
-},
-
-'ch3_after_chaos_battle': {
-    speaker: '', text: 'Коронация испорчена. Чеб грустно смотрит с трона.',
-    choices: [
-        { text: 'Извиниться перед всеми', next: null, effect: () => { R.orson += 5; R.cheb += 5; GameState.scene = 'ch3_after_coronation'; }},
-        { text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch3_after_coronation'; }},
-    ]
-},
-
-'ch3_forget_speech': {
-    speaker: 'Вайтуз', text: 'Ээээ... Бывает. У меня мозг тоже не кипит.',
-    choices: [{ text: '...', next: null, effect: () => { GameState.scene = 'ch3_after_coronation'; }}],
-},
-
-'ch3_sing_speech': {
-    speaker: '', text: 'Вы начинаете петь! "Шиз-Колян! Fake news maker! Хей, безликий хер ты!" Орсон... подпевает? Все подпевают! Это стало гимном коронации!',
-    choices: [{ text: 'Ещё куплет!', next: null, effect: () => { S.shiza += 10; F.song_at_coronation = true; GameState.scene = 'ch3_after_coronation'; }}],
-},
-
-'ch3_coronation_observe': {
-    speaker: '', text: 'Вы тихо наблюдаете. Церемония проходит гладко. Чеб коронован. Орсон доволен.',
-    choices: [{ text: 'Далее', next: null, effect: () => { F.cheb_crowned = true; GameState.scene = 'ch3_after_coronation'; }}],
-},
-
-'ch3_rival_coronation': {
-    speaker: 'Орсон', text: 'СВОЮ КОРОНАЦИЮ?! ТУТ ТОЛЬКО ОДИН КОРОНУЕТСЯ! И ЭТО ЧЕБ! БИТВА!',
-    choices: [
-        { text: 'Шучу-шучу!', next: null, effect: () => { GameState.scene = 'ch3_ceremony'; }},
-        { text: 'НЕТ! Я ТОЖЕ ХОЧУ КОРОНУ!', next: null, effect: () => { S.chaos += 20; GameState.scene = 'ch3_chaos_speech'; }},
-    ]
-},
-
-'ch3_why_coronation': {
-    speaker: 'Орсон', text: 'Зачем?! Потому что Чеб — это ЛЁТЧИК! Он летает на ДЕЛЬТАПЛАНЕ! Из КАЗАХСТАНА! И делает НАСТОЯЩИЕ моды! Не как Коб!',
-    choices: [{ text: 'Понятно', next: null, effect: () => { GameState.scene = 'ch3_ceremony'; }}],
-},
-
-'ch3_kob_at_coronation': {
-    speaker: 'Коб', text: 'Я тут! За 200 монет, конечно. VIP-место. Бургеры принёс. Подписывайтесь на канал! Прямая трансляция коронации! Лайк!',
-    choices: [
-        { text: 'Коб, ты неисправим', next: null, effect: () => { R.kob += 3; GameState.scene = 'ch3_ceremony'; }},
-    ]
-},
-
-'ch3_prepare': {
-    speaker: '', text: 'Перед коронацией можно подготовиться.',
-    choices: [
-        { text: 'Поговорить с Вайтузом', next: null, effect: () => { GameState.scene = 'ch3_vaituz_prep'; }},
-        { text: 'Найти подарок для Чеба', next: null, effect: () => { GameState.scene = 'ch3_find_gift'; }},
-        { text: 'Идти на коронацию', next: null, effect: () => { GameState.scene = 'ch3_coronation'; }},
-    ]
-},
-
-'ch3_vaituz_prep': {
-    speaker: 'Вайтуз', text: 'Коронация! Круто! Я надену смокинг! И возьму яблоко! Бля, как же ахуенно!',
-    choices: [
-        { text: 'Ты отлично выглядишь!', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch3_coronation'; }},
-    ]
-},
-
-'ch3_find_gift': {
-    speaker: '', text: 'Вы ищете подарок. Находите: старую карту Heroes 5, мини-дельтаплан из бумаги, или бургер Коба (за 200 монет).',
-    choices: [
-        { text: 'Карта Heroes 5', next: null, effect: () => { F.gift_heroes = true; R.cheb += 10; GameState.scene = 'ch3_coronation'; }},
-        { text: 'Мини-дельтаплан', next: null, effect: () => { F.gift_delta = true; R.cheb += 15; GameState.scene = 'ch3_coronation'; }},
-        { text: 'Бургер Коба', next: null, effect: () => { F.gift_burger = true; R.cheb += 5; R.kob += 5; GameState.scene = 'ch3_coronation'; }},
-    ]
-},
-
-'ch3_after_coronation': {
-    speaker: '', text: 'Коронация завершена. Чеб — Король Чебовки. Но впереди — ещё более серьёзные испытания...',
-    choices: [
-        { text: 'Продолжить → Глава 4', next: null, effect: () => { GameState.chapter = 4; GameState.scene = 'ch4_start'; }},
-    ]
-},
-
-// ============== CHAPTER 4: РЕБОРН ==============
-'ch4_start': {
-    speaker: '', text: 'ГЛАВА 4: РЕБОРН. Орсон наконец нашёл то, что искал — мифический исходный код Нивал. Или так ему кажется...',
-    choices: [
-        { text: 'К Орсону!', next: null, effect: () => { GameState.scene = 'ch4_orson_found_code'; }},
-        { text: 'К друзьям сначала', next: null, effect: () => { GameState.scene = 'ch4_gather_friends'; }},
-    ]
-},
-
-'ch4_orson_found_code': {
-    speaker: 'Орсон', text: 'Я НАШЁЛ! ИСХОДНЫЙ КОД! РЕБОРН НАЧИНАЕТСЯ! Heroes 5 будет ПЕРЕРОЖДЕНА! В моей интерпретации! Шизоидной? Может! Но ВЕЛИКОЙ! Мне нужна помощь! Все! В Храм!',
-    choices: [
-        { text: 'Помочь Орсону с Реборном!', next: null, effect: () => { R.orson += 15; F.help_reborn_ch4 = true; GameState.scene = 'ch4_reborn_work'; }},
-        { text: 'Орсон, это не исходный код...', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch4_orson_truth'; }},
-        { text: 'Позвать друзей', next: null, effect: () => { GameState.scene = 'ch4_gather_friends'; }},
-    ]
-},
-
-'ch4_reborn_work': {
-    speaker: 'Орсон', text: 'ДА! Вместе мы сделаем Пятёрку великой! Чеб — моды! Вайтуз — тестирование (медленное)! Коб — маркетинг (и бургеры)! Ты — кодинг!',
-    choices: [
-        { text: 'За работу!', next: null, effect: () => { GameState.scene = 'ch4_work_montage'; }},
-        { text: 'А это реально?', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch4_reborn_doubt'; }},
-    ]
-},
-
-'ch4_work_montage': {
-    speaker: '', text: '*монтаж работы* Чеб делает арт. Вайтуз медленно тестирует. Коб пиарит (и ворует идеи). Орсон командует. Проходят дни...',
-    choices: [
-        { text: 'Результат?', next: null, effect: () => { GameState.scene = 'ch4_reborn_result'; }},
-    ]
-},
-
-'ch4_reborn_result': {
-    speaker: '', text: 'Реборн... получился? На экране — Heroes 5, но другая. Странная. Шизоидная интерпретация Орсона. Все фракции перемешаны. Баланс безумный. Но... красиво.',
-    choices: [
-        { text: 'Это шедевр!', next: null, effect: () => { S.shiza += 10; R.orson += 20; GameState.scene = 'ch4_reborn_success'; }},
-        { text: 'Это... хаос', next: null, effect: () => { S.wisdom += 5; GameState.scene = 'ch4_reborn_chaos'; }},
-        { text: 'Мне нравится, но нужны правки', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch4_reborn_improve'; }},
-    ]
-},
-
-'ch4_reborn_success': {
-    speaker: 'Орсон', text: 'Я ЗНАЛ! РЕБОРН ЖИВ! ПЯТЁРКА ВЕРНУЛАСЬ! Классно, классно, брат! Мы сделали это! ВСЕ УВИДЯТ!',
-    choices: [{ text: 'Далее', next: null, effect: () => { F.reborn_complete = true; GameState.scene = 'ch4_chapter4_end'; }}],
-},
-
-'ch4_reborn_chaos': {
-    speaker: 'Орсон', text: 'Хаос?! Это не хаос! Это ВИДЕНИЕ! Ты не понимаешь искусство! Как Вильгефорц — только критикуешь!',
-    choices: [
-        { text: 'Ладно, может ты прав', next: null, effect: () => { GameState.scene = 'ch4_chapter4_end'; }},
-        { text: 'Нет, Орсон, тут проблемы', next: null, effect: () => { R.orson -= 10; GameState.scene = 'ch4_reborn_argue'; }},
-    ]
-},
-
-'ch4_reborn_improve': {
-    speaker: 'Орсон', text: 'Правки? Хм... Ну если не придираться к человеку на месте ровно... Ладно. Давай. Что предлагаешь?',
-    choices: [
-        { text: 'Сбалансировать фракции', next: null, effect: () => { S.wisdom += 5; F.reborn_balanced = true; GameState.scene = 'ch4_chapter4_end'; }},
-        { text: 'Добавить новый контент', next: null, effect: () => { F.reborn_new_content = true; GameState.scene = 'ch4_chapter4_end'; }},
-        { text: 'Оставить как есть — это уникально', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch4_reborn_success'; }},
-    ]
-},
-
-'ch4_reborn_argue': {
-    speaker: 'Орсон', text: 'ПРОБЛЕМЫ?! Я пошёл. У вас 3 суток, чтобы взяться за голову! БИТВА!',
-    choices: [
-        { text: 'БИТВА!', next: null, effect: () => {
-            GameState.scene = 'battle';
-            GameState.battleData = {
-                id: 'orson', name: 'ОРСОН (РЕБОРН)', hp: 35,
-                acts: ['Похвалить Реборн', 'Конструктивная критика', 'Мудрость', 'Пощада'],
-                actResponses: {
-                    talk: '"Реборн — это МОЯ жизнь!"',
-                    praise: '"...Правда нравится?"',
-                    troll: '"Ты как Вильгефорц!"',
-                    ignore: '"Не игнорь мечту!"',
-                },
-                patterns: ['spiral', 'vertical', 'random'],
-            };
-            GameState.afterBattle = 'ch4_after_reborn_battle';
-        }},
-    ]
-},
-
-'ch4_after_reborn_battle': {
-    speaker: 'Орсон', text: '...Ладно. Может... может ты прав. Может Реборн не идеален. Но это моя мечта, понимаешь?',
-    choices: [
-        { text: 'Понимаю. Давай доработаем вместе.', next: null, effect: () => { R.orson += 15; F.reborn_together = true; GameState.scene = 'ch4_chapter4_end'; }},
-        { text: 'Мечты важны.', next: null, effect: () => { S.wisdom += 10; GameState.scene = 'ch4_chapter4_end'; }},
-    ]
-},
-
-'ch4_orson_truth': {
-    speaker: 'Орсон', text: '...Не исходный код? А что тогда?! Я... я был уверен! Мифы исходного кода Нивал! Первый шаг для разоблачения!',
-    choices: [
-        { text: 'Это просто readme файл...', next: null, effect: () => { R.orson -= 5; S.wisdom += 10; GameState.scene = 'ch4_orson_sad'; }},
-        { text: 'Но идея Реборна — хорошая!', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch4_reborn_from_scratch'; }},
-    ]
-},
-
-'ch4_orson_sad': {
-    speaker: 'Орсон', text: '...Readme? Просто... readme? Я столько лет... Голова не репа. Голова не репа...',
-    choices: [
-        { text: 'Не грусти. Давай сделаем Реборн по-настоящему!', next: null, effect: () => { R.orson += 20; GameState.scene = 'ch4_reborn_from_scratch'; }},
-        { text: '...Извини', next: null, effect: () => { GameState.scene = 'ch4_chapter4_end'; }},
-    ]
-},
-
-'ch4_reborn_from_scratch': {
-    speaker: 'Орсон', text: 'С нуля?! ДАААА! Но теперь — по-настоящему! С командой! Чеб — моды! Вайтуз — яблоки! То есть тестирование!',
-    choices: [
-        { text: 'За работу!', next: null, effect: () => { F.reborn_real = true; GameState.scene = 'ch4_work_montage'; }},
-    ]
-},
-
-'ch4_reborn_doubt': {
-    speaker: 'Орсон', text: 'Реально?! Конечно реально! Надеюсь ты реально будешь поддерживать игру на Unreal Engine 5, а не Silent Storm 2002 года! Шутка. Или нет.',
-    choices: [
-        { text: 'Ладно, начнём!', next: null, effect: () => { GameState.scene = 'ch4_work_montage'; }},
-    ]
-},
-
-'ch4_gather_friends': {
-    speaker: '', text: 'Вы собираете друзей.',
-    choices: [
-        { text: 'Позвать Вайтуза', next: null, effect: () => { GameState.scene = 'ch4_vaituz_join'; }},
-        { text: 'Позвать Чеба', next: null, effect: () => { GameState.scene = 'ch4_cheb_join'; }},
-        { text: 'Позвать Коба', next: null, effect: () => { if (F.kob_line_unlocked) GameState.scene = 'ch4_kob_join'; else GameState.scene = 'ch4_kob_locked'; }},
-        { text: 'Идти к Орсону', next: null, effect: () => { GameState.scene = 'ch4_orson_found_code'; }},
-    ]
-},
-
-'ch4_vaituz_join': {
-    speaker: 'Вайтуз', text: 'Ээээ... Реборн? Ну я могу помочь! Я МЕДЛЕННО тестирую, но зато тщательно! У меня мозг не кипит — значит, баги найду!',
-    choices: [{ text: 'Отлично!', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch4_orson_found_code'; }}],
-},
-
-'ch4_cheb_join': {
-    speaker: 'Чеб', text: 'Реборн? Я за! Моды — моя специальность! Настоящие моды, не как у Коба! Я готов!',
-    choices: [{ text: 'Отлично!', next: null, effect: () => { R.cheb += 5; GameState.scene = 'ch4_orson_found_code'; }}],
-},
-
-'ch4_kob_join': {
-    speaker: 'Коб', text: 'Реборн? Интересно... Могу помочь с маркетингом. И бургерами. 200 монет за консультацию. Шучу. 150.',
-    choices: [{ text: 'Идёт!', next: null, effect: () => { R.kob += 5; GameState.scene = 'ch4_orson_found_code'; }}],
-},
-
-'ch4_kob_locked': {
-    speaker: '', text: '200 МОНЕТ. Дверь заперта.',
-    choices: [{ text: 'Уйти', next: null, effect: () => { GameState.scene = 'ch4_orson_found_code'; }}],
-},
-
-'ch4_chapter4_end': {
-    speaker: '', text: 'Глава 4 завершена. Реборн — мечта или безумие? Ответ ждёт в финале...',
-    choices: [
-        { text: 'Продолжить → Глава 5 (Финал)', next: null, effect: () => { GameState.chapter = 5; GameState.scene = 'ch5_start'; }},
-    ]
-},
-
-// ============== CHAPTER 5: ФИНАЛЬНАЯ БАШНЯ ==============
-'ch5_start': {
-    speaker: '', text: 'ГЛАВА 5: ФИНАЛЬНАЯ БАШНЯ. Все пути сходятся здесь. Впереди — Башня, где решится судьба чатика. За спиной — всё, что вы пережили.',
-    choices: [
-        { text: 'Войти в Башню', next: null, effect: () => { GameState.scene = 'ch5_tower_entrance'; }},
-        { text: 'Поговорить с друзьями перед входом', next: null, effect: () => { GameState.scene = 'ch5_final_talks'; }},
-    ]
-},
-
-'ch5_tower_entrance': {
-    speaker: '', text: 'Финальная Башня. Массивная. Перед входом стоят все: Орсон, Вайтуз, Чеб, и может Коб.',
-    choices: [
-        { text: 'Войти всем вместе', next: null, effect: () => { GameState.scene = 'ch5_together'; }},
-        { text: 'Войти одному', next: null, effect: () => { GameState.scene = 'ch5_alone'; }},
-    ]
-},
-
-'ch5_final_talks': {
-    speaker: '', text: 'Последний шанс поговорить.',
-    choices: [
-        { text: 'Орсон', next: null, effect: () => { GameState.scene = 'ch5_talk_orson'; }},
-        { text: 'Вайтуз', next: null, effect: () => { GameState.scene = 'ch5_talk_vaituz'; }},
-        { text: 'Чеб', next: null, effect: () => { GameState.scene = 'ch5_talk_cheb'; }},
-        { text: 'Войти в Башню', next: null, effect: () => { GameState.scene = 'ch5_tower_entrance'; }},
-    ]
-},
-
-'ch5_talk_orson': {
-    speaker: 'Орсон', text: 'Брат... Спасибо. За всё. За Реборн. За то, что слушал. Я знаю, я параноик и шизик. Но... Бог есть и он всё видит. И он видит, что ты — друг.',
-    choices: [{ text: 'И ты, Орсон. Пойдём.', next: null, effect: () => { R.orson += 10; GameState.scene = 'ch5_tower_entrance'; }}],
-},
-
-'ch5_talk_vaituz': {
-    speaker: 'Вайтуз', text: 'Ээээ... Знаешь... У меня мозг не кипит, и мне кажется, это хорошо. Спокойные люди видят больше. Бля, как же ахуенно прожить такое приключение!',
-    choices: [{ text: 'Ты прав, Вайтуз. Пойдём.', next: null, effect: () => { R.vaituz += 10; GameState.scene = 'ch5_tower_entrance'; }}],
-},
-
-'ch5_talk_cheb': {
-    speaker: 'Чеб', text: 'Из Казахстана сюда — долгий путь. Но он того стоил. Дельтаплан, моды, друзья. Давай закончим это дело!',
-    choices: [{ text: 'За небо! Пойдём.', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch5_tower_entrance'; }}],
-},
-
-'ch5_together': {
-    speaker: '', text: 'Все вместе входят в Башню. Внутри — зеркала. В каждом отражается другая версия событий. Другой путь. Другой выбор. Тысячи путей, ведущих сюда.',
-    choices: [
-        { text: 'Подняться на вершину', next: null, effect: () => { GameState.scene = 'ch5_summit'; }},
-    ]
-},
-
-'ch5_alone': {
-    speaker: '', text: 'Вы входите один. Тишина. Только эхо ваших шагов.',
-    choices: [
-        { text: 'Подняться на вершину', next: null, effect: () => { GameState.scene = 'ch5_summit_alone'; }},
-    ]
-},
-
-'ch5_summit': {
-    speaker: '', text: 'Вершина Башни. Панорама всего мира: Чатик, Храм, Каньон, Чебовка, Поле Яблок... Здесь нужно сделать ФИНАЛЬНЫЙ ВЫБОР.',
-    choices: [
-        { text: 'МИР — помирить всех навсегда', next: null, effect: () => { GameState.scene = computeEnding(); }},
-        { text: 'ХАОС — пусть будет как будет', next: null, effect: () => { S.chaos += 20; GameState.scene = computeEnding(); }},
-        { text: 'МУДРОСТЬ — каждый сам решает', next: null, effect: () => { S.wisdom += 20; GameState.scene = computeEnding(); }},
-        { text: 'РЕБОРН — перерождение всего', next: null, effect: () => { S.shiza += 20; GameState.scene = computeEnding(); }},
-    ]
-},
-
-'ch5_summit_alone': {
-    speaker: '', text: 'На вершине — только вы и ветер. Без друзей. Один.',
-    choices: [
-        { text: 'Принять одиночество', next: null, effect: () => { GameState.scene = 'ending_lone_wolf'; }},
-        { text: 'Позвать друзей!', next: null, effect: () => { GameState.scene = 'ch5_summit'; }},
-    ]
-},
-
-// ============== ENDINGS ==============
-'ending_peace': {
-    speaker: '', text: 'ФИНАЛ: МИР В ЧАТИКЕ\n\nВсе помирились. Орсон извинился (первый раз в жизни). Вайтуз раздал всем яблоки. Чеб устроил авиашоу на дельтаплане. Коб открыл бесплатную бургерную (врёт, 200 монет). Heroes 5 живёт. Дружба побеждает.\n\n"Если не придираться к человеку на месте ровно, то жизнь легче." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_war': {
-    speaker: '', text: 'ФИНАЛ: ВЕЧНАЯ ВОЙНА\n\nКонфликт не решён. Чатик погряз в войне. Орсон рассылает ультиматумы. "У ВАС 3 СУТОК!" Никто не мирится. Но... может так и надо? Войны — тоже часть жизни.\n\n"Какие же вы жалкие, ребят." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_escape': {
-    speaker: '', text: 'ФИНАЛ: ПОБЕГ\n\nВы ушли из чатика. Навсегда. Тишина. Покой. Но иногда по ночам снится: "Зайди в войс, пж..."',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_king_cheb': {
-    speaker: '', text: 'ФИНАЛ: КОРОЛЬ ЧЕБ\n\nЧеб правит мудро. Его дельтаплан — символ свободы. Моды процветают. Из Казахстана пришёл золотой век. Орсон — главный советник. Вайтуз — придворный дегустатор яблок. Коб — министр финансов (200 монет налог).\n\n"Салам!" — Король Чеб',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_shiza': {
-    speaker: '', text: 'ФИНАЛ: ШИЗА ПОБЕДИЛА\n\nРеборн поглотил всё. Орсон создал свою Heroes 5 — безумную, хаотичную, прекрасную. Секта свидетелей Реборна стала официальной религией чатика. Все играют в 30-35 фпс и счастливы.\n\n"Шиз-Колян! Fake news maker! Хей, безликий хер ты!" — Гимн Реборна',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_brain_no_boil': {
-    speaker: '', text: 'ФИНАЛ: У МЕНЯ МОЗГ НЕ КИПИТ\n\nВайтуз случайно спас всех. Как? Он МЕДЛЕННО нёс аптечку, споткнулся об яблоко, упал на рубильник и выключил серверы войны. Случайность? Судьба? У него мозг не кипит.\n\n"Ээээ... Что?" — Вайтуз',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_burger_zen': {
-    speaker: '', text: 'ФИНАЛ: БУРГЕРНЫЙ ДЗЕН\n\nКоб научил всех готовить бургеры. Оказалось, что за бургером все споры утихают. Орсон забыл про войну. Вайтуз нашёл смысл жизни (бургер + яблоко = совершенство). Чеб доставляет бургеры на дельтаплане.\n\n"200 монет. Но для друзей... 199." — Коб',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_mod_reality': {
-    speaker: '', text: 'ФИНАЛ: МОД РЕАЛЬНОСТИ\n\nЧеб модифицировал саму реальность. Теперь чатик — это игра, а игра — это чатик. Мета-петля. Вы играете в игру про людей, которые играют в игру. Которые играют в Heroes 5. Рекурсия.\n\n"Мод установлен. Перезагрузка..." — Чеб',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_song': {
-    speaker: '', text: 'ФИНАЛ: ПЕСНЯ ШИЗ-КОЛЯН\n\n♪ Шиз-Колян, Fake news maker! ♪\n♪ Хей, безликий хер ты! ♪\n♪ Зум-зум, шиз-шиз! ♪\n♪ Хей, Коля Шизик! ♪\n♪ Прощенье хер те! ♪\n\nВся история стала песней. И песня — стала историей.\n\nЗанавес.',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_heroes6': {
-    speaker: '', text: 'ФИНАЛ: HEROES 6\n\nОрсон наконец создал идеальную игру. Heroes 6: Реборн. 60 фпс (не 30-35!). Все фракции сбалансированы. Вайтуз даже выигрывает! Иногда. Мир счастлив.\n\n"Классно, классно, брат!" — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_apple_discord': {
-    speaker: '', text: 'ФИНАЛ: ЯБЛОКО РАЗДОРА\n\nЯблоко Вайтуза оказалось ключом ко всему. Золотое яблоко. Кто его держит — тот решает судьбу чатика. Вайтуз выбрал: никому. Съел.\n\n"Бля, как же ахуенно после энергетика и яблок!" — Вайтуз',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_reborn': {
-    speaker: '', text: 'ФИНАЛ: РЕБОРН\n\nHeroes 5 перерождена. Не как игра — как идея. Идея о том, что даже самые безумные мечты могут стать реальностью. Орсон доказал всем. Или всем всё равно. Но ему — нет.\n\n"Секта свидетелей Реборна — это не секта. Это ИСТИНА." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_voice_forever': {
-    speaker: '', text: 'ФИНАЛ: ВОЙС НАВСЕГДА\n\nВсе застряли в войсе на вечность. Орсон спорит бесконечно. Вайтуз говорит "ээээ" каждые 5 секунд. Чеб комментирует погоду в Казахстане. Коб просит 200 монет.\n\n"Зайди в войс, пж. Продолжим там. Навсегда." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_videocard': {
-    speaker: '', text: 'ФИНАЛ: 4090 VS 5090\n\nФинальная битва решилась выбором видеокарты. 4090 — ноутбук, путешествует до дивана за 2 секунды. 5090 — ПК, основа гейминга. Орсон выбрал ноутбук. Как всегда.\n\n"Ноуты игровые кайф!" — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_forgiveness': {
-    speaker: '', text: 'ФИНАЛ: ПРОЩЕНЬЕ ХЕР ТЕ!\n\nНикто никого не простил. И это нормально. Не все истории заканчиваются прощением. Иногда достаточно просто... жить дальше.\n\n"Прощенье хер те! Прощенье хер те!" — Хор чатика',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_left_brain': {
-    speaker: '', text: 'ФИНАЛ: ЛЕВОЕ ПОЛУШАРИЕ\n\nФилософский финал. О логике и чувствах. О левом и правом полушарии. О том, что быть умным — не значит быть правым. И быть глупым — не значит быть неправым.\n\nВайтуз: "У меня мозг не кипит."\nОрсон: "Умная голова с точки зрения логики... Левое полушарие. Или правое."\n\nМудрость — в балансе.',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_undertale': {
-    speaker: '', text: 'ФИНАЛ: ПАЦИФИСТ\n\nВы никого не обидели. Ни разу. Даже когда Орсон кричал. Даже когда Коб просил 200 монет. Вы были добры ко всем.\n\n* Вы чувствуете... что-то тёплое.\n* Это дружба.\n* Или яблоко.\n\n♥ КОНЕЦ ♥',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_speedrun': {
-    speaker: '', text: 'ФИНАЛ: СПИДРАН\n\nВы прошли всё за рекордное время! Орсон бы гордился (если бы успел сказать). Время: БЫСТРО.\n\n"Ты обосрался, бро. Но быстро." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_100percent': {
-    speaker: '', text: 'ФИНАЛ: 100% ПРОХОЖДЕНИЕ\n\nВы нашли ВСЁ. Каждый секрет. Каждый путь. Каждый бургер Коба. Каждое яблоко Вайтуза. Каждый дисс Орсона. Каждый мод Чеба.\n\nВы — легенда чатика.',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_new_game_plus': {
-    speaker: '', text: 'ФИНАЛ: НОВАЯ ИГРА+\n\nВсё начинается сначала. Но вы помните. Все помнят. "Дежавю," — говорит Вайтуз. "Ээээ... Мы уже тут были?"',
-    choices: [{ text: 'НАЧАТЬ ЗАНОВО', next: null, effect: () => { resetGame(); GameState.scene = 'intro'; }}],
-},
-
-'ending_escape_steppe': {
-    speaker: '', text: 'ФИНАЛ: ПОБЕГ В СТЕПЬ\n\nВы и Чеб улетели в Казахстан навсегда. Дельтаплан парит над бескрайней степью. Тишина. Свобода. Никаких споров о видеокартах.\n\n"Салам, друг. Мы свободны." — Чеб',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_lone_wolf': {
-    speaker: '', text: 'ФИНАЛ: ОДИНОКИЙ ВОЛК\n\nВы решили идти один. Без друзей. Без чатика. Без Героев. Только вы и тишина. Иногда это нужно.\n\n"..." — Тишина',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_kob_secret': {
-    speaker: '', text: 'ФИНАЛ: СЕКРЕТ КОБА\n\nВы прошли секретную линию Коба. Оказалось, за его нарциссизмом скрывался... ещё больший нарциссизм. Но также — мудрость. "Все ищут связь. Дружбу. Просто по-разному."\n\n"200 монет. За мудрость. Скидка для друзей: 199." — Коб',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_karma': {
-    speaker: '', text: 'ФИНАЛ: КАРМА\n\nКарма настигла всех. Орсон получил то, что заслужил — мир. Вайтуз получил яблоки. Чеб — небо. Коб — 200 монет.\n\n"Карма и обычное человеческое желание отомстить всегда тебя преследует." — Орсон',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-'ending_god_sees': {
-    speaker: '', text: 'ФИНАЛ: БОГ ВИДИТ\n\n"Бог есть и он всё видит." Орсон был прав. Кто-то наблюдает за всем этим. Может это вы. Может — игрок за экраном.\n\n"Если есть что сказать, пожалуйста. Но... Я никогда тебя не прощу за это!" — Орсон\n\n...Или прощу.',
-    choices: [{ text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }}],
-},
-
-// ============== CREDITS ==============
+// === CREDITS ===
 'credits': {
-    speaker: '', text: `ГЕРОИ ЧАТИКА\n\nПерсонажи: Орсон, Вайтуз, Коб, Чеб\nПройдено путей: ${GameState.pathCount}\nСтатистика:\n  Уважение: ${S.respect}\n  Дружба: ${S.friendship}\n  Хаос: ${S.chaos}\n  Мудрость: ${S.wisdom}\n  Шиза: ${S.shiza}\n\nСпасибо за игру!`,
+    speaker: '', text: 'МЕЧ И ШИЗОФРЕНИЯ\n\nСпасибо за игру!\n\nОрсон — провокатор, манипулятор, гений, одиночка.\nИ иногда — действительно бывает прав.\n\nЭто самое страшное.',
     choices: [
-        { text: 'В ГЛАВНОЕ МЕНЮ', next: null, effect: () => { resetGame(); GameState.scene = 'title'; }},
+        { text: 'В ГЛАВНОЕ МЕНЮ', next: null, effect: () => { location.reload(); }},
     ]
 },
 
-'secrets_menu': {
-    speaker: '', text: `СЕКРЕТЫ:\n- Соберите 3 предмета Коба (фляжка, мод, VIP-карта)\n- Каждый выбор меняет статистику\n- 30+ финалов зависят от ваших решений\n- Секретная линия Коба\n- Пасхалки в каждой локации\n\nНайдено путей: ${GameState.pathCount}`,
-    choices: [
-        { text: 'Назад', next: null, effect: () => { GameState.scene = 'title'; }},
-    ]
-},
+        }; // end nodes
 
-        };
-
-        return nodes[sceneId] || nodes['title'];
+        const node = nodes[sceneId];
+        if (!node) return { speaker: '', text: 'Сцена не найдена: ' + sceneId, choices: [{ text: 'Назад', next: null, effect: () => { GameState.scene = 'title'; }}] };
+        return node;
     }
 
-    function computeEnding() {
-        const S = GameState.stats;
-        const R = GameState.reputation;
-        const F = GameState.flags;
-
-        if (F.kob_line_unlocked && F.kob_wisdom) return 'ending_kob_secret';
-        if (S.chaos === 0 && S.friendship > 50) return 'ending_undertale';
-        if (GameState.pathCount > 200) return 'ending_100percent';
-        if (GameState.chapter <= 3 && GameState.pathCount < 30) return 'ending_speedrun';
-
-        if (S.shiza > 40) return 'ending_shiza';
-        if (S.wisdom > 60 && S.friendship > 40) return 'ending_left_brain';
-        if (F.peace_achieved && S.friendship > 50) return 'ending_peace';
-        if (F.cheb_crowned && R.cheb > 20) return 'ending_king_cheb';
-        if (F.reborn_complete || F.reborn_real) return 'ending_reborn';
-        if (F.song_at_coronation || F.song_friend) return 'ending_song';
-        if (S.chaos > 40) return 'ending_war';
-        if (F.kob_hero) return 'ending_burger_zen';
-        if (F.flew_delta) return 'ending_mod_reality';
-        if (F.vaituz_wisdom) return 'ending_brain_no_boil';
-        if (R.orson > 30) return 'ending_heroes6';
-        if (R.orson < -20) return 'ending_forgiveness';
-        if (S.wisdom > 40) return 'ending_god_sees';
-        if (F.visited_kazakhstan) return 'ending_escape_steppe';
-
-        return 'ending_karma';
-    }
-
-    function resetGame() {
-        GameState.hp = 20;
-        GameState.maxHp = 20;
-        GameState.chapter = 0;
-        GameState.scene = 'title';
-        GameState.stats = { respect: 50, friendship: 50, chaos: 0, wisdom: 0, shiza: 0 };
-        GameState.reputation = { orson: 0, vaituz: 0, kob: 0, cheb: 0 };
-        GameState.inventory = [];
-        GameState.flags = {};
-        GameState.choices = [];
-        GameState.kobSecrets = 0;
-        GameState.endingId = null;
-        GameState.pathCount = 0;
-    }
-
-    return { getNode, computeEnding, resetGame };
+    return { getNode };
 })();
