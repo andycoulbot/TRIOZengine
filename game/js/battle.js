@@ -249,15 +249,30 @@ const Battle = (() => {
 
     function doItem() {
         const inv = GameState.inventory || [];
-        const apple = inv.find(i => i.id === 'apple');
-        if (apple) {
-            playerHP = Math.min(playerMaxHP, playerHP + 8);
-            GameState.hp = playerHP;
-            GameState.inventory = inv.filter(i => i !== apple);
-            Audio8Bit.heal();
-            showMessage('Съели яблоко! (+8 HP)');
-        } else {
+        if (inv.length === 0) {
             showMessage('В инвентаре пусто...');
+            return;
+        }
+        const healItems = {
+            'bread': { hp: 5, msg: 'Съели багет! (+5 HP)' },
+            'baguette': { hp: 3, msg: 'Ударили багетом! (+3 к морали)' },
+            'apple': { hp: 8, msg: 'Съели яблоко! (+8 HP)' },
+            'energy': { hp: 10, msg: 'Выпили энергетик! (+10 HP)' },
+            'clear_mind': { hp: 0, msg: 'Ясный ум! Тряска -20!', shake: -20 },
+        };
+        const usable = inv.find(i => healItems[i.id]);
+        if (usable) {
+            const effect = healItems[usable.id];
+            if (effect.hp > 0) {
+                playerHP = Math.min(playerMaxHP, playerHP + effect.hp);
+                GameState.hp = playerHP;
+            }
+            if (effect.shake) GameState.tshake = Math.max(0, GameState.tshake + effect.shake);
+            GameState.inventory = inv.filter(i => i !== usable);
+            Audio8Bit.heal();
+            showMessage(effect.msg);
+        } else {
+            showMessage('Нет подходящих предметов для боя!');
         }
     }
 

@@ -8,7 +8,11 @@ const GameState = {
     choices: [],
     endingId: null,
     pathCount: 0,
-    tshake: 0, // "тряска" meter
+    tshake: 0,
+    karma: 0,       // hidden: positive = empathy, negative = cruelty
+    secretItems: 0,  // hidden: count of secret collectibles found
+    liesCount: 0,    // hidden: how many times Orson lied
+    silenceCount: 0, // hidden: how many times player chose silence
 };
 
 const Story = (() => {
@@ -30,7 +34,29 @@ const Story = (() => {
 'intro': {
     speaker: '', text: 'Франция. Квартира миллионера неизвестного происхождения. 3:47 ночи. На экране ноутбука — 47 открытых вкладок: форумы, дискорд, Heroes 5. Рядом — пустые банки от энергетика и дорогие часы.',
     choices: [
-        { text: 'Продолжить', next: null, effect: () => { GameState.chapter = 1; GameState.scene = 'ch1_wake'; }},
+        { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'intro_2'; }},
+    ]
+},
+
+'intro_2': {
+    speaker: '', text: 'Орсон печатает. Быстро. Яростно. Ответ на форуме. 2847 слов. Контраргумент, который никто не просил. В соседней вкладке — его собственный пост с нулём лайков.',
+    choices: [
+        { text: '(Отправить ответ)', next: null, effect: () => { GameState.scene = 'intro_3'; }},
+        { text: '(Удалить и лечь спать)', next: null, effect: () => { GameState.karma += 1; GameState.scene = 'intro_3'; }},
+    ]
+},
+
+'intro_3': {
+    speaker: 'Орсон', text: '*зевает* ...Ещё одна вкладка. Последняя. Ладно — предпоследняя. Ладно — ещё час. Ладно — до рассвета. Кому нужен сон когда есть ИСТИНА...',
+    choices: [
+        { text: '(Экран мерцает...)', next: null, effect: () => { GameState.scene = 'intro_blackout'; }},
+    ]
+},
+
+'intro_blackout': {
+    speaker: '', text: '*Экран гаснет. Свет мерцает. Квартира растворяется. Последнее что видит Орсон — часы. 3:47. Всегда 3:47.*\n\n. . .',
+    choices: [
+        { text: '(Темнота)', next: null, effect: () => { GameState.chapter = 1; GameState.scene = 'ch1_wake'; }},
     ]
 },
 
@@ -197,11 +223,12 @@ const Story = (() => {
 },
 
 'ch1_castle_loot': {
-    speaker: '', text: 'Вы обыскиваете замок. Находите: потрёпанный багет (может использоваться как оружие), зарядку (без розетки), и свиток с надписью: "Если ты это читаешь — беги."',
+    speaker: '', text: 'Вы обыскиваете замок. Находите: потрёпанный багет (может использоваться как оружие), зарядку (без розетки), и свиток с надписью: "Если ты это читаешь — беги." За гобеленом что-то виднеется...',
     choices: [
-        { text: '🍞 Взять багет-оружие', next: null, effect: () => { GameState.inventory.push({id:'baguette', name:'Боевой Багет', desc:'+3 к атаке, -5 к достоинству'}); GameState.scene = 'ch1_castle_exit'; }},
-        { text: '🔌 Взять зарядку', next: null, effect: () => { GameState.inventory.push({id:'charger', name:'Зарядка', desc:'Нет розетки в средневековье'}); GameState.scene = 'ch1_castle_exit'; }},
+        { text: '🍞 Взять багет-оружие', next: null, effect: () => { GameState.inventory.push({id:'baguette', name:'Боевой Багет', desc:'+3 к атаке, -5 к достоинству'}); GameState.scene = 'ch1_castle_armory'; }},
+        { text: '🔌 Взять зарядку', next: null, effect: () => { GameState.inventory.push({id:'charger', name:'Зарядка', desc:'Нет розетки в средневековье'}); GameState.scene = 'ch1_castle_armory'; }},
         { text: '📜 Прочитать свиток', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch1_scroll_warning'; }},
+        { text: '🔍 Проверить гобелен', next: null, effect: () => { GameState.scene = 'ch1_hidden_door'; }},
     ]
 },
 
@@ -210,6 +237,68 @@ const Story = (() => {
     choices: [
         { text: 'Кто такая Е.Г.?', next: null, effect: () => { F.noticed_eg = true; GameState.scene = 'ch1_castle_exit'; }},
         { text: 'Тряска? Какая тряска?', next: null, effect: () => { GameState.scene = 'ch1_castle_exit'; }},
+    ]
+},
+
+'ch1_hidden_door': {
+    speaker: '', text: 'За гобеленом на стене вы обнаруживаете скрытую дверь. Она покрыта символами, похожими на код. Замок — в виде головоломки из цифр: 3, 4, 7.',
+    choices: [
+        { text: '(Ввести 347)', next: null, effect: () => { GameState.secretItems++; F.found_hidden_room = true; GameState.scene = 'ch1_secret_room'; }},
+        { text: '(Ввести 573)', next: null, effect: () => { S.paranoia += 2; GameState.scene = 'ch1_wrong_code'; }},
+        { text: '(Не трогать)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
+    ]
+},
+
+'ch1_wrong_code': {
+    speaker: '', text: '*Из двери раздаётся звук: "Неверный код. Попробуйте подумать. Как время на часах."*',
+    choices: [
+        { text: '3:47! (Ввести 347)', next: null, effect: () => { GameState.secretItems++; F.found_hidden_room = true; GameState.scene = 'ch1_secret_room'; }},
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
+    ]
+},
+
+'ch1_secret_room': {
+    speaker: '', text: 'Тайная комната. На стенах — фрески с историей этого мира. В центре — алтарь с зеркалом. На алтаре записка: "Тот кто найдёт это место — ближе к истине, чем думает. — Е.Г." Под запиской — странный предмет.',
+    choices: [
+        { text: '🔮 Взять "Осколок правды"', next: null, effect: () => { GameState.inventory.push({id:'truth_shard', name:'Осколок правды', desc:'Светится когда рядом ложь'}); GameState.scene = 'ch1_secret_room_2'; }},
+        { text: '(Посмотреть в зеркало)', next: null, effect: () => { GameState.scene = 'ch1_secret_mirror'; }},
+    ]
+},
+
+'ch1_secret_room_2': {
+    speaker: 'Орсон', text: '*осматривает предмет* Осколок правды... Светится... Это не Heroes 5, это что-то другое. Что-то... настоящее? Кто такая Е.Г.?',
+    choices: [
+        { text: '(Запомнить инициалы)', next: null, effect: () => { F.eg_curious = true; GameState.scene = 'ch1_corridor'; }},
+    ]
+},
+
+'ch1_secret_mirror': {
+    speaker: '', text: 'В зеркале — не ваше отражение. Там — Орсон. Но другой. В больничной рубашке. С браслетом на руке. Он смотрит на вас и говорит беззвучно: "Проснись."',
+    choices: [
+        { text: '...ЧТО?!', next: null, effect: () => { S.paranoia += 10; S.shiza += 5; F.saw_hospital_vision = true; GameState.scene = 'ch1_mirror_shock'; }},
+    ]
+},
+
+'ch1_mirror_shock': {
+    speaker: 'Орсон', text: '*отшатывается* Нет. Нет нет нет. Это глюк. Зеркало сломанное. Я миллионер из Франции, а не... не... *трёт глаза* ...Показалось. Точно показалось.',
+    choices: [
+        { text: '(Уйти быстро)', next: null, effect: () => { GameState.scene = 'ch1_corridor'; }},
+    ]
+},
+
+'ch1_castle_armory': {
+    speaker: '', text: 'Оружейная комната замка. На стенах — мечи, щиты, арбалеты. Один меч отличается от остальных — он деревянный и на нём написано: "Меч и Шизофрения". Лезвие сделано из клавиш клавиатуры.',
+    choices: [
+        { text: '⚔️ Взять Меч Шизофрении', next: null, effect: () => { GameState.inventory.push({id:'schizo_sword', name:'Меч Шизофрении', desc:'Наносит урон аргументами'}); S.shiza += 3; GameState.scene = 'ch1_took_sword'; }},
+        { text: '🛡️ Взять щит "Игнор"', next: null, effect: () => { GameState.inventory.push({id:'ignore_shield', name:'Щит Игнора', desc:'+5 к защите от провокаций'}); GameState.scene = 'ch1_castle_exit'; }},
+        { text: '(Пройти мимо)', next: null, effect: () => { GameState.scene = 'ch1_castle_exit'; }},
+    ]
+},
+
+'ch1_took_sword': {
+    speaker: 'Орсон', text: '*берёт меч* Меч из клавиш клавиатуры. Моё идеальное оружие. Каждый удар — аргумент. Каждый блок — контраргумент. Это... ВЕЛИКОЛЕПНО.',
+    choices: [
+        { text: '(Идти к выходу)', next: null, effect: () => { GameState.scene = 'ch1_castle_exit'; }},
     ]
 },
 
@@ -429,12 +518,157 @@ const Story = (() => {
     ]
 },
 
+'ch2_tavern': {
+    speaker: '', text: 'Таверна "Оффтопик". Тёмная, дымная, шумная. У стойки — бармен полирует кружку. В углу — спор на повышенных тонах. На стене — доска объявлений.',
+    choices: [
+        { text: '(К бармену)', next: null, effect: () => { GameState.scene = 'ch2_bartender'; }},
+        { text: '(Посмотреть на спор)', next: null, effect: () => { GameState.scene = 'ch2_tavern_argument'; }},
+        { text: '(Доска объявлений)', next: null, effect: () => { GameState.scene = 'ch2_board'; }},
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_bartender': {
+    speaker: 'Бармен', text: 'О, свежее лицо! Обычно тут одни и те же. Что будешь? Чай "Антитролль", пиво "404 Not Found", или коктейль "Бан Хаммер"?',
+    choices: [
+        { text: 'Чай "Антитролль"', next: null, effect: () => { GameState.hp = Math.min(GameState.hp + 5, GameState.maxHp); GameState.scene = 'ch2_bartender_chat'; }},
+        { text: 'Коктейль "Бан Хаммер"', next: null, effect: () => { S.chaos += 3; GameState.tshake += 5; GameState.scene = 'ch2_bartender_chat'; }},
+        { text: 'Инфу давай', next: null, effect: () => { GameState.scene = 'ch2_bartender_info'; }},
+    ]
+},
+
+'ch2_bartender_chat': {
+    speaker: 'Бармен', text: 'Ты же Орсон, да? Тот самый? У нас тут ставки — сколько минут ты продержишься без спора. Рекорд — 7 минут. Побьёшь?',
+    choices: [
+        { text: 'ЭТО ОСКОРБЛЕНИЕ!', next: null, effect: () => { S.chaos += 5; GameState.tshake += 5; GameState.scene = 'ch2_tavern_argue'; }},
+        { text: '...Может побью', next: null, effect: () => { S.charisma += 5; GameState.karma += 2; GameState.scene = 'ch2_bartender_respect'; }},
+    ]
+},
+
+'ch2_bartender_info': {
+    speaker: 'Бармен', text: '*наклоняется* Слушай... видел тут одного типа. В тёмном плаще. Спрашивал о тебе. Имя — Вильгефортс. Сказал что будет ждать на Площади. И ещё — "передай ему что зеркало не врёт". Странный мужик.',
+    choices: [
+        { text: 'Зеркало?!', next: null, effect: () => { S.paranoia += 5; F.heard_about_vilgefortz = true; GameState.scene = 'ch2_park'; }},
+        { text: 'Спасибо за инфу', next: null, effect: () => { F.heard_about_vilgefortz = true; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_bartender_respect': {
+    speaker: 'Бармен', text: '*удивлён* Ого. Не ожидал. Знаешь что — на дорожку. Бесплатно. *ставит на стол флягу* Эликсир "Ясный Ум". Пригодится когда Тряска зашкалит.',
+    choices: [
+        { text: '(Взять)', next: null, effect: () => { GameState.inventory.push({id:'clear_mind', name:'Эликсир "Ясный Ум"', desc:'Снижает Тряску на 20'}); GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_tavern_argue': {
+    speaker: 'Бармен', text: '4 секунды. Новый антирекорд. *записывает на доске* Ладно, допивай и иди. Тут не место для твоей энергии, приятель.',
+    choices: [
+        { text: '(Уйти, хлопнув дверью)', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_tavern_argument': {
+    speaker: '', text: 'Двое спорят о том, что лучше — Heroes 3 или Heroes 5. Спор идёт уже 4 дня. Оба выглядят ужасно. Вокруг них — стена из распечатанных аргументов.',
+    choices: [
+        { text: 'ПЯТЁРКА ЛУЧШЕ!', next: null, effect: () => { S.chaos += 5; S.troll += 3; GameState.tshake += 10; GameState.scene = 'ch2_tavern_chaos'; }},
+        { text: '(Наблюдать молча)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch2_tavern_observe'; }},
+        { text: 'Ребята, может хватит?', next: null, effect: () => { S.charisma += 5; GameState.karma += 3; GameState.scene = 'ch2_tavern_peace'; }},
+    ]
+},
+
+'ch2_tavern_chaos': {
+    speaker: '', text: '*Оба спорщика замолкают. Смотрят на Орсона. Потом — друг на друга. Потом — снова на Орсона. И говорят хором: "А вот и главный токсик пришёл."*',
+    choices: [
+        { text: 'Я НЕ ТОКСИК!', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch2_park'; }},
+        { text: '...Ладно, ладно. Ухожу.', next: null, effect: () => { GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_tavern_observe': {
+    speaker: '', text: '*Орсон молча слушает. Через 5 минут понимает: он слышит себя. Те же аргументы. Те же интонации. Те же "ты неправ и вот почему". Это как смотреть в зеркало, только хуже.*',
+    choices: [
+        { text: '(Уйти потрясённым)', next: null, effect: () => { S.charisma += 5; F.saw_himself_in_others = true; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_tavern_peace': {
+    speaker: 'Спорщик 1', text: '*оба замолкают* ...Он прав. 4 дня. Я не ел. Я забыл как зовут жену. ...Спасибо, незнакомец. *обнимает второго спорщика*',
+    choices: [
+        { text: '(Улыбнуться)', next: null, effect: () => { GameState.karma += 5; GameState.scene = 'ch2_tavern_reward'; }},
+    ]
+},
+
+'ch2_tavern_reward': {
+    speaker: 'Спорщик 2', text: 'Держи. *даёт предмет* Это "Камень Согласия". Древний артефакт. Когда его держишь — хочется перестать спорить. Мы больше не будем. Обещаем.',
+    choices: [
+        { text: '(Взять)', next: null, effect: () => { GameState.secretItems++; GameState.inventory.push({id:'agree_stone', name:'Камень Согласия', desc:'Снижает агрессию вокруг'}); GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_board': {
+    speaker: '', text: 'Доска объявлений:\n- "ВНИМАНИЕ: Разыскивается тролль по кличке OrsonGPT. Награда: 0 монет. Мотивация: покой"\n- "Продам мод для Heroes 5 (краденый) — Коб"\n- "Дельтаплан б/у. Казахстан. Почти не бит. — Чеб"\n- "Приём пациентов по четвергам. — Е.Г."',
+    choices: [
+        { text: 'Пациентов?! Е.Г.?!', next: null, effect: () => { S.paranoia += 5; F.eg_board = true; GameState.scene = 'ch2_tavern'; }},
+        { text: 'Краденый мод?! Это КОБ!', next: null, effect: () => { S.troll += 2; GameState.scene = 'ch2_tavern'; }},
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_fountain': {
+    speaker: '', text: 'В центре площади — фонтан. Вода течёт... текстом. Буквально — вместо воды льются строки кода. На дне фонтана — монеты и записки с желаниями.',
+    choices: [
+        { text: '(Бросить монету и загадать)', next: null, effect: () => { GameState.scene = 'ch2_fountain_wish'; }},
+        { text: '(Прочитать записки)', next: null, effect: () => { GameState.scene = 'ch2_fountain_notes'; }},
+        { text: '(Идти дальше)', next: null, effect: () => { GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_fountain_wish': {
+    speaker: '', text: 'Что загадать?',
+    choices: [
+        { text: 'Чтобы все признали мою правоту', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch2_fountain_response_ego'; }},
+        { text: 'Чтобы вернуться домой', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch2_fountain_response_home'; }},
+        { text: 'Чтобы перестать спорить', next: null, effect: () => { S.charisma += 10; GameState.karma += 5; GameState.scene = 'ch2_fountain_response_peace'; }},
+    ]
+},
+
+'ch2_fountain_response_ego': {
+    speaker: '', text: '*Фонтан булькает. Из воды выскакивает рыбка-текст: "Ваше желание отклонено. Причина: неосуществимо. Подпись: Реальность."*',
+    choices: [
+        { text: 'Даже ФОНТАН против меня!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_fountain_response_home': {
+    speaker: '', text: '*Фонтан светится. Тёплый свет. На секунду кажется что вы видите свою квартиру... ноутбук... 47 вкладок... Потом — исчезает.*',
+    choices: [
+        { text: '...', next: null, effect: () => { GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_fountain_response_peace': {
+    speaker: '', text: '*Фонтан замирает. Тишина. Потом шёпот: "Это желание... возможно. Но цена — молчание. Ты готов?" Из воды появляется "Жетон тишины".*',
+    choices: [
+        { text: '(Взять жетон)', next: null, effect: () => { GameState.secretItems++; GameState.inventory.push({id:'silence_token', name:'Жетон тишины', desc:'Мощный артефакт. Что он делает?'}); F.has_silence_token = true; GameState.scene = 'ch2_park'; }},
+        { text: 'Нет. Молчание — смерть.', next: null, effect: () => { S.paranoia += 3; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
+'ch2_fountain_notes': {
+    speaker: '', text: 'Записки:\n- "Хочу чтобы Орсон перестал спорить" — Вайтуз\n- "Хочу 200 монет на ресторан" — Коб\n- "Хочу чтобы мой дельтаплан не разбивался" — Чеб\n- "Хочу чтобы он проснулся" — Е.Г.',
+    choices: [
+        { text: '...проснулся?', next: null, effect: () => { S.paranoia += 5; F.eg_note = true; GameState.scene = 'ch2_park'; }},
+    ]
+},
+
 'ch2_park': {
-    speaker: '', text: 'Парк Форум-Сити. Деревья из ASCII-арта. Скамейки с табличками: "Модератор сидел здесь". На одной скамейке сидит человек в зелёных наушниках и жуёт яблоко.',
+    speaker: '', text: 'Парк Форум-Сити. Деревья из ASCII-арта. Скамейки с табличками: "Модератор сидел здесь". На одной скамейке сидит человек в зелёных наушниках и жуёт яблоко. В центре — фонтан. Рядом — вход в таверну.',
     choices: [
         { text: '(Подойти к человеку)', next: null, effect: () => { GameState.scene = 'ch2_meet_vaituz_park'; }},
         { text: '(Сесть на другую скамейку)', next: null, effect: () => { GameState.scene = 'ch2_bench_rest'; }},
-        { text: '(Идти дальше к магазину)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
+        { text: '(К фонтану)', next: null, effect: () => { GameState.scene = 'ch2_fountain'; }},
+        { text: '(В таверну "Оффтопик")', next: null, effect: () => { GameState.scene = 'ch2_tavern'; }},
+        { text: '(Идти к магазину)', next: null, effect: () => { GameState.chapter = 3; GameState.scene = 'ch3_start'; }},
     ]
 },
 
@@ -535,7 +769,7 @@ const Story = (() => {
     speaker: 'Орсон', text: 'ТЫ ПРОДАВЕЦ В МАГАЗИНЕ ФИГУРОК! ЧТО ТЫ МОЖЕШЬ ЗНАТЬ О МНЕ?! Я МИЛЛИОНЕР! Я ИЗ ФРАНЦИИ! У МЕНЯ ДОРОГИЕ ЧАСЫ!',
     choices: [
         { text: '(Продолжать орать)', next: null, effect: () => { GameState.tshake += 10; GameState.scene = 'ch3_seller_calm'; }},
-        { text: '(Остыть)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+        { text: '(Остыть)', next: null, effect: () => { GameState.scene = 'ch3_basement'; }},
     ]
 },
 
@@ -570,11 +804,89 @@ const Story = (() => {
     ]
 },
 
+'ch3_basement': {
+    speaker: 'Аркадий', text: '*оглядывается* Слушай... У меня внизу кое-что есть. Для особых клиентов. Хочешь посмотреть?',
+    choices: [
+        { text: 'Показывай', next: null, effect: () => { GameState.scene = 'ch3_basement_enter'; }},
+        { text: 'Нет, спасибо', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_basement_enter': {
+    speaker: '', text: 'Подвал магазина. На полках — странные предметы. "Записи терапевтических сессий — 2023". "Дневник пациента К.". Фотографии людей, которых вы не знаете. Или знаете?',
+    choices: [
+        { text: '(Читать "Дневник пациента К.")', next: null, effect: () => { S.paranoia += 10; GameState.secretItems++; GameState.scene = 'ch3_diary'; }},
+        { text: '(Посмотреть фотографии)', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch3_photos'; }},
+        { text: '(Быстро уйти)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_diary': {
+    speaker: '', text: '"Дневник пациента К." Запись 47:\n"Он снова видит замки. Говорит что нашёл код. Настаивает что мир игры — реальный. Диагноз без изменений. Рекомендовано увеличить дозировку. — Е.Г."',
+    choices: [
+        { text: '...Пациент К.?', next: null, effect: () => { F.read_diary = true; S.shiza += 5; GameState.scene = 'ch3_diary_reaction'; }},
+    ]
+},
+
+'ch3_diary_reaction': {
+    speaker: 'Орсон', text: 'Кто... кто этот "пациент К."? Почему инициалы К.? Коля? ...НЕТ. Это совпадение. Это ДРУГОЙ человек. Я не пациент. Я миллионер. Из ФРАНЦИИ.',
+    choices: [
+        { text: '(Выйти из подвала)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_photos': {
+    speaker: '', text: 'Фотографии: палата больницы (белая, стерильная), человек за столом (лицо размыто), женщина в белом халате (знакомая?), часы на стене — 3:47.',
+    choices: [
+        { text: 'Это те же часы!', next: null, effect: () => { S.paranoia += 10; F.saw_hospital_photos = true; GameState.scene = 'ch3_after_shop'; }},
+        { text: '(Не думать об этом)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_arkadiy_truth': {
+    speaker: 'Аркадий', text: 'Орсон... Я скажу тебе кое-что. Этот магазин — не магазин. Это... перекрёсток. Место, где ты можешь услышать правду. Если захочешь. Большинство не хочет.',
+    choices: [
+        { text: 'Скажи мне правду', next: null, effect: () => { S.charisma += 10; GameState.scene = 'ch3_truth_told'; }},
+        { text: 'Мне не нужна твоя правда', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_truth_told': {
+    speaker: 'Аркадий', text: 'Всё что ты видишь... замки, гномы, мечи... это декорации. Настоящий мир — за ними. И он не такой красивый. Но зато — настоящий. Ты готов его увидеть?',
+    choices: [
+        { text: 'Не сейчас', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+        { text: '...Покажи', next: null, effect: () => { F.arkadiy_truth = true; S.charisma += 15; GameState.scene = 'ch3_glimpse'; }},
+    ]
+},
+
+'ch3_glimpse': {
+    speaker: '', text: '*На секунду стены магазина исчезают. Вы видите белую комнату. Капельницу. Кровать. Блокнот с надписью "сессия 47". Потом — всё возвращается.* ...Что это было?',
+    choices: [
+        { text: '(Молчать)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_pericles_worried': {
+    speaker: 'Периклес', text: '*тянет за рукав* Герой... ты бледный. Что ты видел в подвале? Не надо туда ходить. Аркадий... он не тот за кого себя выдаёт. Он не продавец.',
+    choices: [
+        { text: 'А кто он?', next: null, effect: () => { GameState.scene = 'ch3_pericles_who'; }},
+        { text: '(Проигнорировать)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
+'ch3_pericles_who': {
+    speaker: 'Периклес', text: '*шёпотом* Никто не знает. Одни говорят — он бывший модератор. Другие — что он из реального мира. Третьи — что его не существует. Выбирай что нравится. Но будь осторожен.',
+    choices: [
+        { text: '(Запомнить)', next: null, effect: () => { GameState.scene = 'ch3_after_shop'; }},
+    ]
+},
+
 'ch3_after_shop': {
     speaker: 'Периклес', text: 'Ну что, закупился? Дальше нам надо... *замечает что Орсон задумался* ...Ты в порядке?',
     choices: [
         { text: 'Мне нужен интернет. Срочно.', next: null, effect: () => { GameState.chapter = 4; GameState.scene = 'ch4_start'; }},
         { text: 'Просто идём дальше', next: null, effect: () => { GameState.chapter = 4; GameState.scene = 'ch4_start'; }},
+        { text: 'Периклес... что тут происходит?', next: null, effect: () => { GameState.scene = 'ch3_pericles_worried'; }},
     ]
 },
 
@@ -680,7 +992,8 @@ const Story = (() => {
         { text: '▶️ Смотреть видео про Реборн', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch4_reborn_video'; }},
         { text: '▶️ Смотреть про исходный код', next: null, effect: () => { S.shiza += 3; GameState.scene = 'ch4_source_video'; }},
         { text: '▶️ Смотреть "Как перестать спорить"', next: null, effect: () => { S.charisma += 10; F.watched_peace = true; GameState.scene = 'ch4_peace_video'; }},
-        { text: '(Выключить компьютер)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+        { text: '💬 Открыть Discord', next: null, effect: () => { GameState.scene = 'ch4_discord'; }},
+        { text: '(Выключить компьютер)', next: null, effect: () => { GameState.scene = 'ch4_dream_sequence'; }},
     ]
 },
 
@@ -704,6 +1017,171 @@ const Story = (() => {
     choices: [
         { text: 'Хм... может в этом что-то есть', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
         { text: 'Этот человек неправ и вот почему—', next: null, effect: () => { S.troll += 3; S.chaos += 3; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord': {
+    speaker: '', text: 'Рядом с форумом — портал с надписью "DISCORD". Из него доносятся голоса. Много голосов. Одновременно. Хаос.',
+    choices: [
+        { text: '(Войти в Discord)', next: null, effect: () => { GameState.scene = 'ch4_discord_enter'; }},
+        { text: '(Не надо)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_enter': {
+    speaker: '', text: 'Discord-сервер "HEROES_ULTIMATE". Каналы: #общий (47 непрочитанных), #споры (∞ непрочитанных), #мемы-орсона (закреплено: "не кормите"), #войс-караоке.',
+    choices: [
+        { text: '#общий', next: null, effect: () => { GameState.scene = 'ch4_discord_general'; }},
+        { text: '#споры', next: null, effect: () => { GameState.scene = 'ch4_discord_arguments'; }},
+        { text: '#мемы-орсона', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch4_discord_memes'; }},
+        { text: '#войс-караоке', next: null, effect: () => { GameState.scene = 'ch4_discord_voice'; }},
+    ]
+},
+
+'ch4_discord_general': {
+    speaker: '', text: '#общий:\nKob420: "кто хочет мод? дёшево (краденый, но качественный)"\nCheb_Pilot: "я сделал карту казахстана для Heroes 5! (и разбил ноутбук)"\nVaituz: "эээ... привет... у меня яблоко"\nModerBot: "Орсон забанен на 24 часа (причина: существование)"',
+    choices: [
+        { text: 'Я ЗАБАНЕН?! ЗА СУЩЕСТВОВАНИЕ?!', next: null, effect: () => { S.paranoia += 10; S.chaos += 5; GameState.scene = 'ch4_discord_banned'; }},
+        { text: '(Читать молча)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch4_discord_lurk'; }},
+    ]
+},
+
+'ch4_discord_banned': {
+    speaker: 'Орсон', text: 'ЗАБАНЕН ЗА СУЩЕСТВОВАНИЕ?! ЭТО ДИСКРИМИНАЦИЯ! ЭТО ЦЕНЗУРА! ЭТО... *создаёт альт-аккаунт за 3 секунды* ...ЭТО ОБХОД БАНА!',
+    choices: [
+        { text: '(Написать от альта)', next: null, effect: () => { S.troll += 5; S.chaos += 5; GameState.scene = 'ch4_discord_alt'; }},
+    ]
+},
+
+'ch4_discord_alt': {
+    speaker: '', text: 'TotallyNotOrson: "Привет! Я новенький! Кстати, все кто тут сидят — жалкие, а Heroes 5 — лучшая игра..."\nModerBot: "Орсон, мы узнали тебя за 4 слова. Бан на 48 часов."',
+    choices: [
+        { text: '...Как?!', next: null, effect: () => { GameState.scene = 'ch4_discord_arguments'; }},
+    ]
+},
+
+'ch4_discord_lurk': {
+    speaker: '', text: '*Орсон молча читает чат 20 минут. Видит: люди общаются. Шутят. Смеются. Без него. Мир продолжается без Орсона. И это... больно.*',
+    choices: [
+        { text: '...', next: null, effect: () => { S.charisma += 5; GameState.karma += 3; F.discord_lurked = true; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_arguments': {
+    speaker: '', text: '#споры:\nТема дня: "Орсон — гений или шизофреник?"\nОпрос: Гений: 3 голоса. Шизофреник: 847 голосов. Третий вариант "и то и другое": 1 голос (Вайтуз).',
+    choices: [
+        { text: 'ГЕНИЙ! КОНЕЧНО ГЕНИЙ!', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch4_discord_debate'; }},
+        { text: '...847', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_debate': {
+    speaker: '', text: '*Орсон пишет 3000 слов почему он гений. Через минуту — 12 ответов: "не читал", "tldr", "кто это?", "опять он", и один "респект за упорство" (Вайтуз).*',
+    choices: [
+        { text: '(Закрыть Discord)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_memes': {
+    speaker: '', text: '#мемы-орсона. Закреплено: 347 мемов. Топ-3:\n1. "Орсон_спорит_со_стеной.gif" — 2М просмотров\n2. "Какие_же_вы_жалкие.mp4" — 1.5М\n3. "Тряска_в_войсе_17часов.webm" — 847К',
+    choices: [
+        { text: 'УДАЛИТЕ ВСЁ!', next: null, effect: () => { S.chaos += 10; GameState.tshake += 10; GameState.scene = 'ch4_discord_memes_rage'; }},
+        { text: '...2 миллиона просмотров?', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch4_discord_memes_fame'; }},
+    ]
+},
+
+'ch4_discord_memes_rage': {
+    speaker: '', text: '*Орсон пытается удалить мемы. У него нет прав. Пытается забанить Акулбота. У него нет прав. Пытается удалить сервер. У него нет прав.* "У ВАС НЕТ ПРАВ" — написано красным.',
+    choices: [
+        { text: '(Закрыть в ярости)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_memes_fame': {
+    speaker: 'Орсон', text: '...Два миллиона. Два МИЛЛИОНА людей видели как я... *задумывается* ...Это слава? Или это позор? В чём разница вообще?',
+    choices: [
+        { text: '(Закрыть)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_discord_voice': {
+    speaker: '', text: 'Войс-канал "Караоке-Конфликт". Внутри: Коб поёт (фальшиво), Чеб комментирует (из Казахстана, связь ужасная), Вайтуз говорит "эээ" каждые 3 секунды.',
+    choices: [
+        { text: '(Присоединиться)', next: null, effect: () => { GameState.scene = 'ch4_voice_join'; }},
+        { text: '(Послушать молча)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch4_voice_listen'; }},
+    ]
+},
+
+'ch4_voice_join': {
+    speaker: 'Коб', text: 'О! Орсон! Споёшь? У нас тут караоке! Я только что спел "Шиз-Колян"! Все плакали! От радости! ...Или от боли.',
+    choices: [
+        { text: 'НЕ СМЕЙ ПЕТЬ ЭТУ ПЕСНЮ!', next: null, effect: () => { S.chaos += 10; GameState.tshake += 10; GameState.scene = 'ch4_voice_rage'; }},
+        { text: '...Давайте что-нибудь другое', next: null, effect: () => { GameState.karma += 2; GameState.scene = 'ch4_voice_karaoke'; }},
+    ]
+},
+
+'ch4_voice_rage': {
+    speaker: '', text: '*Орсон кричит в микрофон 5 минут. Все мутят его. Продолжает кричать. Его кикают. Заходит снова. Кикают. Заходит. Кикают. 47 раз.*',
+    choices: [
+        { text: '(Сдаться)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_voice_karaoke': {
+    speaker: '', text: '*Неожиданно — момент мира. Коб поёт. Фальшиво, но искренне. Чеб подпевает из Казахстана. Вайтуз говорит "эээ" в ритм. И это... почти красиво.*',
+    choices: [
+        { text: '(Подпеть)', next: null, effect: () => { S.charisma += 10; GameState.karma += 5; F.sang_karaoke = true; GameState.scene = 'ch4_voice_peace'; }},
+        { text: '(Молча слушать)', next: null, effect: () => { GameState.silenceCount++; S.charisma += 5; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_voice_peace': {
+    speaker: 'Вайтуз', text: 'Орсон... ты... поёшь? *восторженный шёпот* У тебя... эээ... красивый голос. Я серьёзно. Без шуток.',
+    choices: [
+        { text: '...Спасибо, Витус', next: null, effect: () => { R.vaituz += 5; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_voice_listen': {
+    speaker: '', text: '*Орсон слушает. Просто слушает. Впервые за долгое время — не говорит. Не спорит. Не доказывает. Просто... является частью чего-то. Тихо.*',
+    choices: [
+        { text: '(Выйти)', next: null, effect: () => { S.charisma += 5; GameState.karma += 3; GameState.scene = 'ch4_end'; }},
+    ]
+},
+
+'ch4_dream_sequence': {
+    speaker: '', text: '*Экран мерцает. Орсон моргает. Он в другом месте. Discord превратился в лабиринт. Коридоры из сообщений. Все адресованы ему. Все — негативные.*',
+    choices: [
+        { text: '(Идти по лабиринту)', next: null, effect: () => { GameState.scene = 'ch4_dream_maze'; }},
+    ]
+},
+
+'ch4_dream_maze': {
+    speaker: '', text: 'Стены из комментариев:\n"Ты неправ"\n"Выйди на улицу"\n"Кто это вообще"\n"Шизик"\n"Прости Орсон, но..."\n\nВ конце коридора — дверь. На ней: "ВЫХОД. или ПРОБУЖДЕНИЕ."',
+    choices: [
+        { text: '(Открыть дверь)', next: null, effect: () => { GameState.scene = 'ch4_dream_door'; }},
+        { text: '(Сесть и ждать)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch4_dream_sit'; }},
+    ]
+},
+
+'ch4_dream_door': {
+    speaker: '', text: 'За дверью — клавиатура. Огромная. Как поле. Клавиши размером с человека. Орсон пытается нажать "Enter". Клавиша превращается в багет. Остальные тоже.',
+    choices: [
+        { text: '...Это сон, да?', next: null, effect: () => { F.dream_awareness = true; GameState.scene = 'ch4_dream_wake'; }},
+    ]
+},
+
+'ch4_dream_sit': {
+    speaker: '', text: '*Орсон сидит среди комментариев. Тишина. Потом — голос: "Орсон, ты опять ушёл. Вернись. Мы продолжим сессию в четверг." Голос Германовны.*',
+    choices: [
+        { text: '...Четверг?', next: null, effect: () => { F.heard_germanovna_voice = true; S.paranoia += 10; GameState.scene = 'ch4_dream_wake'; }},
+    ]
+},
+
+'ch4_dream_wake': {
+    speaker: '', text: '*Рывок. Орсон снова перед компьютером. Периклес трясёт его за плечо. "Ты заснул! За компьютером! Как обычно!" Руки трясутся. На часах 3:47.*',
+    choices: [
+        { text: '(Потереть глаза)', next: null, effect: () => { GameState.scene = 'ch4_end'; }},
     ]
 },
 
@@ -1085,11 +1563,16 @@ const Story = (() => {
 
 // ============== ГЛАВА 6: ОДИНОЧЕСТВО И ПРОШЛОЕ ==============
 'ch6_start': {
-    speaker: '', text: 'ГЛАВА 6: ЭКРАН ЗАГРУЗКИ.\n\nПустая комната. Компьютер. Heroes 5 на экране. Орсон один. Впервые — осознанно один.',
-    choices: [
-        { text: '(Сесть за компьютер)', next: null, effect: () => { GameState.scene = 'ch6_heroes'; }},
-        { text: '(Просто сидеть)', next: null, effect: () => { GameState.scene = 'ch6_sit'; }},
-    ]
+    speaker: '', text: 'ГЛАВА 6: ЭКРАН ЗАГРУЗКИ.\n\nПустая комната. Компьютер. Heroes 5 на экране. Орсон один. Впервые — осознанно один. Стены комнаты — то ли каменные, то ли больничные.',
+    choices: (() => {
+        const c = [
+            { text: '(Сесть за компьютер)', next: null, effect: () => { GameState.scene = 'ch6_heroes'; }},
+            { text: '(Просто сидеть)', next: null, effect: () => { GameState.scene = 'ch6_sit'; }},
+            { text: '(Осмотреть комнату)', next: null, effect: () => { GameState.scene = 'ch6_walk_hospital'; }},
+        ];
+        if (GameState.tshake >= 60) c.push({ text: '(Голос из тени?)', next: null, effect: () => { GameState.scene = 'ch6_shadowban'; }});
+        return c;
+    })()
 },
 
 'ch6_heroes': {
@@ -1097,6 +1580,7 @@ const Story = (() => {
     choices: [
         { text: '(Начать новую игру)', next: null, effect: () => { GameState.scene = 'ch6_new_game'; }},
         { text: '(Загрузить сохранение)', next: null, effect: () => { GameState.scene = 'ch6_load_save'; }},
+        { text: '(Вспомнить прошлое)', next: null, effect: () => { GameState.scene = 'ch6_memory_childhood'; }},
         { text: '(Выключить)', next: null, effect: () => { GameState.scene = 'ch6_shutdown'; }},
     ]
 },
@@ -1151,8 +1635,116 @@ const Story = (() => {
     ]
 },
 
+'ch6_memory_childhood': {
+    speaker: '', text: '*Вспышка. Орсону 12. Компьютерный класс. Первая установка Heroes 5. Диск с трещиной, но работает. Мир открывается. Замки. Герои. Магия. Ощущение бесконечных возможностей.*',
+    choices: [
+        { text: '(Вспоминать дальше)', next: null, effect: () => { GameState.scene = 'ch6_memory_first_post'; }},
+    ]
+},
+
+'ch6_memory_first_post': {
+    speaker: '', text: '*Орсону 17. Первый пост на форуме. "Привет! Я новичок! Heroes 5 — лучшая игра!" 3 лайка. 2 ответа. "Добро пожаловать!" Такие простые слова. Такие тёплые.*',
+    choices: [
+        { text: '(Дальше...)', next: null, effect: () => { GameState.scene = 'ch6_memory_turn'; }},
+    ]
+},
+
+'ch6_memory_turn': {
+    speaker: '', text: '*Орсону 20. Пост номер 500. "Вы все неправы и вот почему:" Первый бан. Первый спор на 17 часов. Первая бессонная ночь ради ответа, который никто не прочитает.*',
+    choices: [
+        { text: '(Дальше...)', next: null, effect: () => { GameState.scene = 'ch6_memory_spiral'; }},
+    ]
+},
+
+'ch6_memory_spiral': {
+    speaker: '', text: '*Орсону 23. Пост 2847. Теория Реборна. Исходный код Нивал. "Я нашёл правду!" Никто не верит. 847 негативных комментариев. Орсон пишет ещё больше. Круг замыкается.*',
+    choices: [
+        { text: '(Дальше...)', next: null, effect: () => { GameState.scene = 'ch6_memory_now'; }},
+    ]
+},
+
+'ch6_memory_now': {
+    speaker: '', text: '*Орсону 25. Миллионер. Франция. Дорогие часы. 47 вкладок. 0 друзей. Красные глаза. 3:47 ночи. Всегда 3:47.*\n\n...Когда это перестало быть игрой и стало жизнью?',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_walk_hospital': {
+    speaker: '', text: 'Коридор. Белые стены. Лампы гудят. Двери с номерами. Палата 1. Палата 2. Палата 3. Палата 4. Палата 5 — дверь открыта. Внутри — кровать, тумбочка, часы (3:47).',
+    choices: [
+        { text: '(Войти в палату)', next: null, effect: () => { GameState.scene = 'ch6_ward'; }},
+        { text: '(Идти дальше по коридору)', next: null, effect: () => { GameState.scene = 'ch6_corridor_end'; }},
+    ]
+},
+
+'ch6_ward': {
+    speaker: '', text: 'На тумбочке: блокнот (ваш почерк), ручка, фото (вы с кем-то, лицо стёрто), таблетки и... яблоко с запиской.',
+    choices: [
+        { text: '(Читать блокнот)', next: null, effect: () => { GameState.scene = 'ch6_ward_notebook'; }},
+        { text: '(Читать записку на яблоке)', next: null, effect: () => { GameState.scene = 'ch6_ward_apple'; }},
+        { text: '(Посмотреть на фото)', next: null, effect: () => { GameState.scene = 'ch6_ward_photo'; }},
+    ]
+},
+
+'ch6_ward_notebook': {
+    speaker: '', text: 'Блокнот. Ваш почерк, но... странный. Записи:\n"День 1: Они не понимают. Я НОРМАЛЬНЫЙ."\n"День 15: Германовна сказала что прогресс. Вру ей."\n"День 47: Может она права. Может я..."\n"День 48: НЕТ. Я ПРАВ. НИВАЛ СКРЫВАЕТ."',
+    choices: [
+        { text: '...День 47', next: null, effect: () => { GameState.liesCount++; S.charisma += 5; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_ward_apple': {
+    speaker: '', text: 'Записка: "Эээ... привет. Это Витус. Я прихожу каждый вторник. Ты не узнаёшь меня, но я всё равно прихожу. Яблоко помогает. Мне. Надеюсь тебе тоже. — В."',
+    choices: [
+        { text: '...Каждый вторник?', next: null, effect: () => { R.vaituz += 10; GameState.karma += 5; F.vaituz_visits = true; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_ward_photo': {
+    speaker: '', text: 'Фото. Вы узнаёте себя — моложе, улыбаетесь. Рядом — кто-то. Лицо стёрто. Но... зелёные наушники? Яблоко в руке? ...Вайтуз?',
+    choices: [
+        { text: '...Мы были друзьями?', next: null, effect: () => { S.charisma += 5; F.old_friendship = true; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_corridor_end': {
+    speaker: '', text: 'В конце коридора — окно. За окном — двор. Скамейка. На скамейке сидит человек в зелёных наушниках и жуёт яблоко. Он смотрит вверх — на ваше окно. И машет.',
+    choices: [
+        { text: '(Помахать в ответ)', next: null, effect: () => { GameState.karma += 10; R.vaituz += 10; GameState.scene = 'ch6_germanovna'; }},
+        { text: '(Отойти от окна)', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_shadowban': {
+    speaker: '???', text: '*шёпот из ниоткуда* Псс... Орсон. Ты слышишь? Это я. Shadowban. Я — то, что происходит когда тебя забывают. Когда посты не видит никто. Когда крик уходит в пустоту.',
+    choices: [
+        { text: 'Кто ты?!', next: null, effect: () => { GameState.scene = 'ch6_shadowban_reveal'; }},
+        { text: '(Игнорировать)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_shadowban_reveal': {
+    speaker: 'Shadowban', text: 'Я — твоя тень. Та часть тебя, которую забанили навсегда. Я знаю правду, Орсон. Хочешь услышать? Бесплатно. Без споров. Просто... правда.',
+    choices: [
+        { text: 'Говори', next: null, effect: () => { GameState.scene = 'ch6_shadowban_truth'; }},
+        { text: 'Мне достаточно правды', next: null, effect: () => { GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
+'ch6_shadowban_truth': {
+    speaker: 'Shadowban', text: 'Все миры одинаковы, Орсон. Форумы, Discord, этот мир, палата — везде ты делаешь одно и то же. Спор. Тряска. Одиночество. Единственный способ выйти — перестать играть.',
+    choices: [
+        { text: 'Перестать... играть?', next: null, effect: () => { F.shadowban_advice = true; GameState.secretItems++; GameState.scene = 'ch6_germanovna'; }},
+    ]
+},
+
 'ch6_germanovna': {
-    speaker: '', text: '*Дверь открывается. Входит женщина в белом халате. Спокойная. Уверенная. С блокнотом.*',
+    speaker: '', text: (() => {
+        if (GameState.tshake > 80) return '*Дверь открывается. Входит женщина в белом халате. Руки Орсона трясутся. Тряска зашкаливает.*';
+        if (F.saw_hospital_vision) return '*Дверь открывается. Входит женщина в белом халате. Вы её узнаёте. Из зеркала. Из видений.*';
+        return '*Дверь открывается. Входит женщина в белом халате. Спокойная. Уверенная. С блокнотом.*';
+    })(),
     choices: [
         { text: 'Кто вы?', next: null, effect: () => { GameState.scene = 'ch6_germanovna_intro'; }},
         { text: 'Евгения Германовна?', next: null, effect: () => { F.knows_germanovna = true; GameState.scene = 'ch6_germanovna_knows'; }},
@@ -1206,19 +1798,40 @@ const Story = (() => {
 // ============== ФИНАЛ: ОПРЕДЕЛЕНИЕ КОНЦОВКИ ==============
 'ch6_ending_choice': {
     speaker: '', text: (() => {
-        // Calculate ending based on stats
         const totalCharisma = S.charisma || 0;
         const totalShiza = S.shiza || 0;
         const totalChaos = S.chaos || 0;
+        const karma = GameState.karma || 0;
+        const secrets = GameState.secretItems || 0;
+        const silence = GameState.silenceCount || 0;
         const roll = Math.random() * 100;
 
-        if (totalShiza > 50 && roll <= 1) {
+        // Hidden mechanic: collecting 3+ secret items unlocks secret ending path
+        if (secrets >= 3 && F.shadowban_advice && roll <= 5) {
+            F.ending = 'truth';
+            return '*Осколок правды в кармане светится. Жетон тишины вибрирует. Камень Согласия тёплый. Мир трескается...*';
+        }
+        // 1% base + bonus from high shiza
+        else if (totalShiza > 50 && roll <= 1 + totalShiza/20) {
             F.ending = 'truth';
             return '*Экран мерцает. Реальность трещит. Стены палаты растворяются...*';
-        } else if (totalCharisma > 40 && totalChaos < 30 && roll <= 9 + totalCharisma/5) {
+        }
+        // Hidden: silence path - choosing silence 5+ times + high karma
+        else if (silence >= 5 && karma >= 15 && roll <= 15) {
+            F.ending = 'victory';
+            return '*Тишина. Но не пустая. Наполненная. Орсон улыбается впервые за долгое время...*';
+        }
+        // 9% base + bonus from charisma
+        else if (totalCharisma > 40 && totalChaos < 30 && roll <= 9 + totalCharisma/5) {
             F.ending = 'victory';
             return '*Орсон чувствует прилив сил. Всё вокруг замирает...*';
-        } else {
+        }
+        // Hidden: empathy ending variant (hospital but hopeful)
+        else if (karma >= 20 && F.accepted_help) {
+            F.ending = 'hospital_good';
+            return '*Тёплый свет. Не холодный больничный — а утренний. Запах кофе. Звук шагов.*';
+        }
+        else {
             F.ending = 'hospital';
             return '*Белый свет. Запах антисептика. Звук капельницы.*';
         }
@@ -1227,6 +1840,7 @@ const Story = (() => {
         { text: '(Открыть глаза)', next: null, effect: () => {
             if (F.ending === 'truth') GameState.scene = 'ending_truth';
             else if (F.ending === 'victory') GameState.scene = 'ending_victory';
+            else if (F.ending === 'hospital_good') GameState.scene = 'ending_hospital_good';
             else GameState.scene = 'ending_hospital';
         }},
     ]
@@ -1249,6 +1863,28 @@ const Story = (() => {
 
 'ending_hospital_3': {
     speaker: '', text: 'Орсон смотрит на часы на стене. Они идут. 3:48. Впервые за долгое время — время движется вперёд.\n\n...На тумбочке лежит яблоко. На нём записка: "Эээ... выздоравливай. — В."',
+    choices: [
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
+    ]
+},
+
+// === СКРЫТАЯ КОНЦОВКА: БОЛЬНИЦА С НАДЕЖДОЙ ===
+'ending_hospital_good': {
+    speaker: '', text: 'СКРЫТАЯ КОНЦОВКА: РАССВЕТ\n\nОрсон открывает глаза. Палата. Но... другая. Светлая. Окна открыты. Свежий воздух. На тумбочке — не таблетки, а цветы. И яблоко.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_hospital_good_2'; }},
+    ]
+},
+
+'ending_hospital_good_2': {
+    speaker: 'Евгения Германовна', text: 'Доброе утро, Орсон. *улыбается* Ты сегодня не спорил во сне. Впервые за три месяца. Я думаю... мы делаем прогресс. Настоящий.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_hospital_good_3'; }},
+    ]
+},
+
+'ending_hospital_good_3': {
+    speaker: '', text: 'За окном — двор. Скамейка. На ней сидят: Вайтуз (с яблоком), Чеб (без дельтаплана, но в лётной форме), и даже Коб (с кофе, не с вином). Они ждут. Они пришли навестить.\n\nОрсон улыбается. Часы показывают 8:00. Утро. Новое утро.',
     choices: [
         { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
     ]
