@@ -118,6 +118,7 @@ const Sprites = (() => {
     }
 
     function kobPortrait() {
+        // Коб — нарцисс с деньгами
         if (cache.kob) return cache.kob;
         const _ = null;
         const s = '#d4a88c', s2 = '#c49880', s3 = '#b48870';
@@ -126,10 +127,10 @@ const Sprites = (() => {
         const e = '#6644aa', ew = C.eye_white, es = C.eye_shine;
         const cl = C.kob_cloak, cl2 = C.kob_cloak2, p = C.kob_purple;
         const mo = C.mouth, my = C.mystery, my2 = C.mystery2;
-        const gld = C.pilot_gold;
+        const gld = '#ccaa22', gd2 = '#eebb33'; // gold coins
         const data = [
-            [_,_,_,_,cl2,cl,cl,cl,cl,cl,cl,cl2,_,_,_,_],
-            [_,_,_,cl2,cl,cl,my,cl,cl,my,cl,cl,cl2,_,_,_],
+            [_,_,_,gld,cl2,cl,cl,cl,cl,cl,cl,cl2,gd2,_,_,_],
+            [_,_,gd2,cl2,cl,cl,my,cl,cl,my,cl,cl,cl2,gld,_,_],
             [_,_,cl2,cl,h2,h,h,h,h,h,h,h2,cl,cl2,_,_],
             [_,cl2,cl,h,h,h2,h,h,h,h2,h,h,h,cl,cl2,_],
             [_,cl,h,h,s,s,s,s,s,s,s,s,h,h,cl,_],
@@ -142,10 +143,10 @@ const Sprites = (() => {
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
             [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
             [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
-            [_,_,cl2,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl2,_,_,_],
-            [_,cl2,cl,cl,cl,cl,my,my2,cl,cl,cl,cl,cl,cl2,_,_],
-            [cl2,cl,cl,cl,cl,cl,gld,gld,cl,cl,cl,cl,cl,cl,cl2,_],
-            [cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl,_],
+            [gld,_,cl2,cl,cl,cl,cl,cl,cl,cl,cl,cl,cl2,_,gd2,_],
+            [gd2,cl2,cl,cl,gld,cl,my,my2,cl,gld,cl,cl,cl,cl2,gld,_],
+            [cl2,cl,cl,gd2,cl,cl,gld,gld,cl,cl,gd2,cl,cl,cl,cl2,_],
+            [cl,cl,gld,cl,cl,gd2,cl,cl,gd2,cl,cl,gld,cl,cl,cl,_],
         ];
         const c = createCanvas(64, 72);
         const ctx = c.getContext('2d');
@@ -155,21 +156,177 @@ const Sprites = (() => {
     }
 
     function chebPortrait() {
+        // Чеб — человек в костюме креветки
         if (cache.cheb) return cache.cheb;
         const _ = null;
         const s = '#e0b898', s2 = '#d0a888', s3 = '#c09878';
         const h = '#5a4030', h2 = '#4a3020';
         const b = C.black, w = C.white;
         const e = '#446688', ew = C.eye_white, es = C.eye_shine;
-        const pb = C.pilot_blue, pb2 = C.pilot_blue2;
-        const pg = C.pilot_gold, pg2 = C.pilot_gold2;
-        const mo = C.mouth, lp = C.laptop, lp2 = C.laptop2;
-        const sc = '#4488cc';
+        const mo = C.mouth;
+        const sh = '#ff7744', sh2 = '#ee5533', sh3 = '#cc4422'; // shrimp colors
+        const wh = '#ffccbb', wh2 = '#eebb99'; // shrimp white belly
+        const ant = '#ff9966'; // antenna
         const data = [
-            [_,_,_,_,pb2,pb,pb,pb,pb,pb,pb,pb2,_,_,_,_],
-            [_,_,_,pb2,pg,pb,pb,pb,pb,pb,pg,pb2,_,_,_,_],
-            [_,_,pb2,pb,h2,h,h,h,h,h,h,h2,pb,pb2,_,_],
-            [_,_,_,h2,h,h,h2,h,h2,h,h,h,h2,_,_,_],
+            [_,_,_,ant,_,_,_,_,_,_,_,_,ant,_,_,_],
+            [_,_,ant,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,ant,_,_],
+            [_,ant,sh,sh2,sh,sh,sh,sh,sh,sh,sh,sh2,sh,sh,ant,_],
+            [_,sh,sh,sh,h2,h,h,h,h,h,h,h2,sh,sh,sh,_],
+            [_,sh,sh,s,s,s,s,s,s,s,s,s,s,sh,sh,_],
+            [_,sh2,s,s,s,s,s,s,s,s,s,s,s,s,sh2,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,sh3,sh,wh,wh,wh,wh,wh,wh,wh,sh,sh3,_,_,_],
+            [_,sh3,sh,sh,wh,wh2,wh,wh,wh,wh2,wh,sh,sh,sh3,_,_],
+            [_,sh,sh2,sh,wh,wh,wh,wh,wh,wh,wh,sh,sh2,sh,_,_],
+            [sh,sh2,sh3,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh3,sh2,sh,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.cheb = c;
+        return c;
+    }
+
+    function periclesPortrait() {
+        // Периклес — лысый гном
+        if (cache.pericles) return cache.pericles;
+        const _ = null;
+        const s = '#d4a88c', s2 = '#c49880', s3 = '#b48870';
+        const b = C.black;
+        const e = '#556644', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const br = '#8b6543', br2 = '#6a4a30'; // brown robe
+        const bd = '#aaa090'; // bald head shine
+        const bt = '#c4a07a'; // beard tan
+        const data = [
+            [_,_,_,_,_,bd,bd,bd,bd,bd,bd,_,_,_,_,_],
+            [_,_,_,_,bd,s,s,s,s,s,s,bd,_,_,_,_],
+            [_,_,_,bd,s,s,s,s,s,s,s,s,bd,_,_,_],
+            [_,_,bd,s,s,s,s,s,s,s,s,s,s,bd,_,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,bt,bt,bt,bt,bt,bt,bt,bt,bt,bt,s,_,_],
+            [_,_,s,bt,bt,mo,mo,mo,mo,mo,bt,bt,s,_,_,_],
+            [_,_,_,s,bt,bt,bt,bt,bt,bt,bt,s,_,_,_,_],
+            [_,_,_,s,s2,bt,bt,bt,bt,bt,s2,s,_,_,_,_],
+            [_,_,br2,br,br,br,br,br,br,br,br,br,br2,_,_,_],
+            [_,br2,br,br,br,br,br,br,br,br,br,br,br,br2,_,_],
+            [br2,br,br,br,br,br,br,br,br,br,br,br,br,br,br2,_],
+            [br,br,br,br,br,br,br,br,br,br,br,br,br,br,br,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.pericles = c;
+        return c;
+    }
+
+    function madyarPortrait() {
+        // Мадьяр — большой айтишник с лёгкой щетиной
+        if (cache.madyar) return cache.madyar;
+        const _ = null;
+        const s = '#d8a890', s2 = '#c89880', s3 = '#b88870';
+        const h = '#4a3a2a', h2 = '#3a2a1a';
+        const b = C.black;
+        const e = '#445566', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const st = '#a09080'; // stubble
+        const sh = '#334455', sh2 = '#223344'; // hoodie/shirt dark
+        const gl = '#88aacc'; // glasses
+        const data = [
+            [_,_,_,_,h2,h,h,h,h,h,h,h2,_,_,_,_],
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
+            [_,_,h2,h,h,h,h,h,h,h,h,h,h,h2,_,_],
+            [_,h2,h,h,h,h,h,h,h,h,h,h,h,h,h2,_],
+            [_,h,s,s,s,s,s,s,s,s,s,s,s,s,h,_],
+            [_,s,s,s,s,s,s,s,s,s,s,s,s,s,s,_],
+            [_,s,gl,gl,gl,gl,s,s,s,gl,gl,gl,gl,s,_,_],
+            [_,s,gl,ew,ew,e,gl,b,gl,ew,ew,e,gl,s,_,_],
+            [_,s,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,st,st,s3,st,st,s,s,s,s,_,_],
+            [_,_,s,st,st,st,st,st,st,st,st,st,s,_,_,_],
+            [_,_,s,st,mo,mo,mo,mo,mo,mo,st,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,sh2,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh2,_,_],
+            [sh2,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh2,_],
+            [sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh],
+            [sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh,sh],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.madyar = c;
+        return c;
+    }
+
+    function akulbotPortrait() {
+        // Акулбот — молодой парень с белыми волосами
+        if (cache.akulbot) return cache.akulbot;
+        const _ = null;
+        const s = '#f0c0a0', s2 = '#e0b090', s3 = '#d0a080';
+        const h = '#e8e8f0', h2 = '#d0d0e0'; // white/platinum hair
+        const b = C.black;
+        const e = '#5566dd', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const hd = '#555577', hd2 = '#444466'; // hoodie
+        const sh = '#6688ff'; // shark accent
+        const data = [
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
+            [_,_,h2,h,h,h,h,h,h,h,h,h,h,h2,_,_],
+            [_,h2,h,h,h,h,h,h,h,h,h,h,h,h,h2,_],
+            [_,h,h,h,h,h,h,h,h,h,h,h,h,h,h,_],
+            [_,h,h,s,s,s,s,s,s,s,s,s,s,h,h,_],
+            [h,h,s,s,s,s,s,s,s,s,s,s,s,s,h,h],
+            [_,h,s,s,s,s,s,s,s,s,s,s,s,s,h,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,hd2,hd,hd,hd,hd,hd,hd,hd,hd,hd,hd2,_,_,_],
+            [_,hd2,hd,hd,sh,hd,hd,hd,hd,hd,sh,hd,hd,hd2,_,_],
+            [hd2,hd,hd,hd,sh,sh,hd,hd,hd,sh,sh,hd,hd,hd,hd2,_],
+            [hd,hd,hd,hd,hd,sh,hd,hd,hd,sh,hd,hd,hd,hd,hd,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.akulbot = c;
+        return c;
+    }
+
+    function chekistPortrait() {
+        // Чекист — форма коммуниста
+        if (cache.chekist) return cache.chekist;
+        const _ = null;
+        const s = '#d8a890', s2 = '#c89880', s3 = '#b88870';
+        const h = '#4a3020', h2 = '#3a2010';
+        const b = C.black;
+        const e = '#556644', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const rd = '#cc2222', rd2 = '#aa1111'; // red uniform
+        const gd = '#ccaa22'; // gold star/buttons
+        const cp = '#882222'; // cap
+        const st = '#ffcc33'; // star
+        const data = [
+            [_,_,_,_,cp,cp,cp,cp,cp,cp,cp,cp,_,_,_,_],
+            [_,_,cp,cp,cp,cp,st,st,st,cp,cp,cp,cp,_,_,_],
+            [_,_,_,cp,h2,h,h,h,h,h,h,h2,cp,_,_,_],
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
             [_,_,h,s,s,s,s,s,s,s,s,s,s,h,_,_],
             [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
             [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
@@ -180,15 +337,130 @@ const Sprites = (() => {
             [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
             [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
             [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
-            [_,_,pb2,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb2,_,_,_],
-            [_,pb2,pb,pg,pb,pb,pb,pb,pb,pb,pg,pb,pb,pb2,_,_],
-            [_,pb,pb,pg2,pb,pb,pb,pb,pb,pb,pg2,pb,pb,pb,_,_],
-            [lp,lp2,sc,lp,pb,pb,pb,pb,pb,pb,pb,pb,pb,pb,_,_],
+            [_,_,rd2,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd2,_,_,_],
+            [_,rd2,rd,gd,rd,rd,st,st,rd,rd,gd,rd,rd,rd2,_,_],
+            [rd2,rd,rd,gd,rd,rd,st,st,rd,rd,gd,rd,rd,rd,rd2,_],
+            [rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,rd,_],
         ];
         const c = createCanvas(64, 72);
         const ctx = c.getContext('2d');
         drawPixels(ctx, data, 4);
-        cache.cheb = c;
+        cache.chekist = c;
+        return c;
+    }
+
+    function gerostratPortrait() {
+        // Герострат — футболист
+        if (cache.gerostrat) return cache.gerostrat;
+        const _ = null;
+        const s = '#e0b898', s2 = '#d0a888', s3 = '#c09878';
+        const h = '#3a2a1a', h2 = '#2a1a0a';
+        const b = C.black;
+        const e = '#665544', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const jy = '#44aa44', jy2 = '#338833'; // jersey green
+        const wt = '#ffffff', wt2 = '#dddddd'; // white stripes
+        const nm = '#ffcc33'; // number
+        const data = [
+            [_,_,_,_,h2,h,h,h,h,h,h,h2,_,_,_,_],
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
+            [_,_,h2,h,h,h,h,h,h,h,h,h,h,h2,_,_],
+            [_,_,h,h,h,h,h,h,h,h,h,h,h,h,_,_],
+            [_,_,h,s,s,s,s,s,s,s,s,s,s,h,_,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,b,e,s,s,s,es,b,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,jy2,jy,wt,jy,jy,jy,jy,jy,wt,jy,jy2,_,_,_],
+            [_,jy2,jy,jy,wt,jy,nm,nm,jy,jy,wt,jy,jy,jy2,_,_],
+            [jy2,jy,jy,jy,wt,jy,nm,nm,jy,jy,wt,jy,jy,jy,jy2,_],
+            [jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,jy,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.gerostrat = c;
+        return c;
+    }
+
+    function auromolinPortrait() {
+        // Ауромолин — таинственная фигура
+        if (cache.auromolin) return cache.auromolin;
+        const _ = null;
+        const s = '#c8a888', s2 = '#b89878', s3 = '#a88868';
+        const b = C.black;
+        const e = '#8866cc', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const dk = '#1a1a2e', dk2 = '#0e0e1e'; // dark cloak
+        const gl = '#8866ff', gl2 = '#6644dd'; // glow purple
+        const cd = '#2a2a4e'; // code color
+        const data = [
+            [_,_,_,dk2,dk,dk,dk,dk,dk,dk,dk,dk,dk2,_,_,_],
+            [_,_,dk2,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk2,_,_],
+            [_,dk2,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk2,_],
+            [_,dk,dk,dk,s,s,s,s,s,s,s,s,dk,dk,dk,_],
+            [_,dk,dk,s,s,s,s,s,s,s,s,s,s,dk,dk,_],
+            [_,dk,s,s,s,s,s,s,s,s,s,s,s,s,dk,_],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,gl,e,s,s,s,es,gl,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,dk2,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk2,_,_],
+            [dk2,dk,dk,gl,dk,cd,gl2,gl,cd,dk,gl,dk,dk,dk,dk2,_],
+            [dk,dk,dk,gl2,dk,cd,dk,dk,cd,dk,gl2,dk,dk,dk,dk,_],
+            [dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,dk,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.auromolin = c;
+        return c;
+    }
+
+    function vilgefortzPortrait() {
+        // Вильгефортс — злой маг/босс
+        if (cache.vilgefortz) return cache.vilgefortz;
+        const _ = null;
+        const s = '#c8a080', s2 = '#b89070', s3 = '#a88060';
+        const h = '#1a1a2e', h2 = '#0e0e1e';
+        const b = C.black;
+        const e = '#ff4444', ew = C.eye_white, es = C.eye_shine;
+        const mo = C.mouth;
+        const robe = '#2a1a4e', rb2 = '#1a0a3e';
+        const fire = '#ff6633', fr2 = '#ff4411', fr3 = '#ffaa33';
+        const data = [
+            [_,_,_,_,h2,h,h,h,h,h,h,h2,_,_,_,_],
+            [_,_,_,h2,h,h,h,h,h,h,h,h,h2,_,_,_],
+            [_,_,h2,h,h,h,h,h,h,h,h,h,h,h2,_,_],
+            [_,h2,h,h,h,h,h,h,h,h,h,h,h,h,h2,_],
+            [_,h,h,s,s,s,s,s,s,s,s,s,s,h,h,_],
+            [h,h,s,s,s,s,s,s,s,s,s,s,s,s,h,h],
+            [_,_,s,s,s,s,s,s,s,s,s,s,s,s,_,_],
+            [_,_,s,ew,ew,e,s,s,s,ew,ew,e,s,s,_,_],
+            [_,_,s,es,e,e,s,s,s,es,e,e,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s2,s3,s2,s,s,s,s,s,_,_],
+            [_,_,s,s,s,s,s,s2,s,s,s,s,s,s,_,_],
+            [_,_,s,s,mo,mo,mo,mo,mo,mo,s,s,s,_,_,_],
+            [_,_,_,s,s2,s,s,s,s,s,s2,s,_,_,_,_],
+            [_,_,rb2,robe,robe,robe,robe,robe,robe,robe,robe,robe,rb2,_,_,_],
+            [fire,rb2,robe,robe,robe,robe,robe,robe,robe,robe,robe,robe,robe,rb2,fr2,_],
+            [fr3,fire,robe,robe,robe,robe,robe,robe,robe,robe,robe,robe,fire,fr3,_,_],
+            [_,fr2,fire,robe,robe,robe,robe,robe,robe,robe,robe,robe,fr2,fire,_,_],
+        ];
+        const c = createCanvas(64, 72);
+        const ctx = c.getContext('2d');
+        drawPixels(ctx, data, 4);
+        cache.vilgefortz = c;
         return c;
     }
 
@@ -776,6 +1048,8 @@ const Sprites = (() => {
 
     return {
         orsonPortrait, vaituzPortrait, kobPortrait, chebPortrait,
+        periclesPortrait, madyarPortrait, akulbotPortrait,
+        chekistPortrait, gerostratPortrait, auromolinPortrait, vilgefortzPortrait,
         orsonWalk, vaituzWalk, kobWalk, chebWalk, playerWalk,
         createTile, createHeartSprite, createMenuCursor, itemSprite,
         particles, addParticle, updateParticles, renderParticles, emitBurst,

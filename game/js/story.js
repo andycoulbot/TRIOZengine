@@ -161,7 +161,7 @@ const Story = (() => {
 },
 
 'ch1_meet_pericles': {
-    speaker: 'Периклес', text: 'Приветствую, путник! Я Периклес, гном-проводник! Ты наконец проснулся! Мы ждали тебя три дня! Твоя миссия — пройти через мир Меча и Шизофрении и найти путь домой!',
+    speaker: 'Периклес', text: 'Путь начинается с первого шага. Или с правого. Я всегда путаю. Я Периклес, гном-проводник! Позволь старому гному дать тебе совет... ты наконец проснулся! Три дня ждали! Твоя миссия — пройти через мир Меча и Шизофрении!',
     choices: [
         { text: 'Какой ещё мир?', next: null, effect: () => { GameState.scene = 'ch1_pericles_explain'; }},
         { text: 'Отойди, коротышка', next: null, effect: () => { S.troll += 3; R.pericles -= 10; GameState.scene = 'ch1_pericles_insulted'; }},
@@ -1217,11 +1217,14 @@ const Story = (() => {
 },
 
 'ch5_enter_square': {
-    speaker: '', text: 'На площади стоят: Вильгефортс (в тёмном плаще, скрестив руки), Коб (с бутылкой вина), Чеб (в лётной форме, жуёт сушёный конь), Вайтуз (с яблоком), Акулбот (с планшетом мемов), Мадьяр (ноутбук под мышкой), и гном Периклес позади.',
+    speaker: '', text: 'На площади собрались ВСЕ. Вильгефортс (тёмный плащ, скрестив руки). Коб (бутылка вина, золотые часы). Чеб (в костюме креветки, с глайдером). Вайтуз (яблоко, зелёные наушники). Акулбот (планшет с мемами, белые волосы). Мадьяр (ноутбук, очки, щетина). Периклес (лысый гном, прищурился). Чекист (красная форма, серьёзный). Герострат (в футболке, ухмыляется). Ауромолин (тёмный капюшон, молчит).',
     choices: [
-        { text: '(Подойти к Вильгефортсу)', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_start'; }},
-        { text: '(Подойти к Кобу)', next: null, effect: () => { GameState.scene = 'ch5_kob_start'; }},
-        { text: '(Подойти к Чебу)', next: null, effect: () => { GameState.scene = 'ch5_cheb_start'; }},
+        { text: '(К Вильгефортсу)', next: null, effect: () => { GameState.scene = 'ch5_vilgefortz_start'; }},
+        { text: '(К Кобу)', next: null, effect: () => { GameState.scene = 'ch5_kob_start'; }},
+        { text: '(К Чебу)', next: null, effect: () => { GameState.scene = 'ch5_cheb_start'; }},
+        { text: '(К Чекисту)', next: null, effect: () => { GameState.scene = 'ch5_chekist_start'; }},
+        { text: '(К Герострату)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_start'; }},
+        { text: '(К Ауромолину)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_start'; }},
         { text: '(Крикнуть: "Ну что, начнём?!")', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
@@ -1290,7 +1293,7 @@ const Story = (() => {
 },
 
 'ch5_kob_start': {
-    speaker: 'Коб', text: '*поднимает бокал* Орсон! Дружище! Я тут подумал — ты мне должен. За все те моды, которые ты критиковал. За все те стримы, где ты меня высмеивал. 200 монет. На ресторан. В центре.',
+    speaker: 'Коб', text: '*поднимает бокал, монеты сыплются из карманов* Орсон! Дружище! Я тут подумал — ты мне должен. Я не украл — я вдохновился. 200 монет. На ресторан. В центре. Они пожалеют что не донатили.',
     choices: [
         { text: 'Ты КРАДЁШЬ моды у людей!', next: null, effect: () => { R.kob -= 10; GameState.scene = 'ch5_kob_mods'; }},
         { text: 'Ладно, вот 200 монет', next: null, effect: () => { R.kob += 15; F.paid_kob = true; GameState.scene = 'ch5_kob_paid'; }},
@@ -1328,7 +1331,7 @@ const Story = (() => {
 },
 
 'ch5_kob_narcissist': {
-    speaker: 'Коб', text: 'Нарцисс?! Я?! Ахахаха! Нарциссизм — это когда ты думаешь что лучше всех! А я ЗНАЮ что лучше всех! Это разные вещи! ...Или нет. Ну и что.',
+    speaker: 'Коб', text: 'Нарцисс?! Я не проиграл — я стратегически вышел. *поправляет золотые часы* Это не читы — это честный читерский труд. Я вернусь. Они пожалеют. *напевает* Я на тусовку подрываю свои пятки!',
     choices: [
         { text: '(Идти дальше)', next: null, effect: () => { GameState.scene = 'ch5_kob_end'; }},
     ]
@@ -1344,7 +1347,7 @@ const Story = (() => {
 },
 
 'ch5_cheb_start': {
-    speaker: 'Чеб', text: '*в лётной форме, с ноутбуком* Орсон, я прилетел из Казахстана на дельтаплане специально ради этого разговора. Ты знаешь сколько модов я сделал для Heroes? А ты ни одного не оценил.',
+    speaker: 'Чеб', text: '*в костюме креветки, с ноутбуком и глайдером* Подожди, я щас взлечу — с высоты лучше думается. Орсон, я прилетел из Казахстана специально ради этого. Нейросеть сказала — значит правда, что ты тут.',
     choices: [
         { text: 'Ты лётчик и моддер?', next: null, effect: () => { GameState.scene = 'ch5_cheb_pilot'; }},
         { text: 'Моды были нормальные', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch5_cheb_happy'; }},
@@ -1353,7 +1356,7 @@ const Story = (() => {
 },
 
 'ch5_cheb_pilot': {
-    speaker: 'Чеб', text: 'Да! Днём летаю, ночью кодирую. Знаешь как тяжело делать моды на высоте 3000 метров? Турбулентность! Ноутбук падает! Но я всё равно делаю! Ради комьюнити!',
+    speaker: 'Чеб', text: 'Дайте взлечу, сразу думать лучше начну! Днём летаю, ночью кодирую. Это не баг мода, это фича казахского геймдизайна. Нейросеть написала — значит норм! Слишком увлекаюсь полётом и забываю о посадке...',
     choices: [
         { text: 'Это... впечатляет', next: null, effect: () => { R.cheb += 10; GameState.scene = 'ch5_cheb_end'; }},
     ]
@@ -1383,7 +1386,7 @@ const Story = (() => {
 },
 
 'ch5_akulbot_start': {
-    speaker: 'Акулбот', text: '*показывает планшет* Орсон! Смотри! Я собрал ВСЕ мемы про тебя. 347 штук. Есть классика: "Орсон vs Здравый Смысл", "Тряска.gif", и мой любимый — "Я просто шучу (нет)".',
+    speaker: 'Акулбот', text: '*показывает планшет, белые волосы развеваются* Горит? Значит попал. Я собрал ВСЕ мемы про тебя. 347 штук. Есть классика: "Орсон vs Здравый Смысл", "Тряска.gif", и мой шедевр — "Это не троллинг. Это социальный эксперимент."',
     choices: [
         { text: 'УДАЛИ ЭТО!', next: null, effect: () => { S.chaos += 5; R.akulbot -= 10; GameState.scene = 'ch5_akulbot_refuse'; }},
         { text: '...Покажи "Тряска.gif"', next: null, effect: () => { S.charisma += 5; GameState.scene = 'ch5_akulbot_show'; }},
@@ -1392,7 +1395,7 @@ const Story = (() => {
 },
 
 'ch5_akulbot_refuse': {
-    speaker: 'Акулбот', text: 'Удалить?! Это ИСКУССТВО, Орсон! Это ДОКУМЕНТАЦИЯ! Через 100 лет историки будут изучать эти мемы как артефакты эпохи! Ты — живой мем! Гордись!',
+    speaker: 'Акулбот', text: 'Мем уже в интернете. Что сделано — то сделано. Это ИСКУССТВО! Через 100 лет историки будут изучать эти мемы как артефакты эпохи! Мем уже живёт. Его не остановить.',
     choices: [
         { text: '(Сражаться с Акулботом)', next: null, effect: () => {
             GameState.battleData = { enemy: 'Акулбот', hp: 25, atk: 6, def: 3, sprite: 'akulbot',
@@ -1419,16 +1422,17 @@ const Story = (() => {
 },
 
 'ch5_akulbot_end': {
-    speaker: '', text: 'Акулбот фотографирует вашу реакцию для нового мема.',
+    speaker: '', text: 'Акулбот фотографирует вашу реакцию. "Это не я — это интернет", — бормочет он.',
     choices: [
         { text: '(К Мадьяру)', next: null, effect: () => { GameState.scene = 'ch5_madyar_start'; }},
-        { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+        { text: '(К Герострату)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_start'; }},
+        { text: '(К Ауромолину)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_start'; }},
         { text: '(Ко всем сразу)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
 'ch5_madyar_start': {
-    speaker: 'Мадьяр', text: '*открывает ноутбук* Орсон. Я разработчик. Ты знаешь что такое код? Настоящий код? Не те фантазии про "исходный код Нивал", а реальный работающий код?',
+    speaker: 'Мадьяр', text: '*открывает ноутбук, поправляет очки* Лаунчер работает. Остальное — ваши проблемы. Орсон, ты знаешь что такое код? Не фантазии про "исходный код Нивал", а реальный, работающий, тестированный код?',
     choices: [
         { text: 'Я знаю про код больше тебя!', next: null, effect: () => { S.shiza += 5; R.madyar -= 10; GameState.scene = 'ch5_madyar_argue'; }},
         { text: 'Покажи', next: null, effect: () => { S.charisma += 3; GameState.scene = 'ch5_madyar_show'; }},
@@ -1436,7 +1440,7 @@ const Story = (() => {
 },
 
 'ch5_madyar_argue': {
-    speaker: 'Мадьяр', text: '*тяжёлый вздох* Орсон. Ты скачал PDF с форума и думаешь что нашёл исходный код. Это как найти инструкцию к микроволновке и думать что ты физик-ядерщик.',
+    speaker: 'Мадьяр', text: 'Нет. *коротко* Я слышал этот аргумент. Он не стал лучше со временем. Ты скачал PDF с форума и думаешь что нашёл исходный код. Это как найти инструкцию к микроволновке и думать что ты физик-ядерщик.',
     choices: [
         { text: 'ЭТО ДРУГОЕ!', next: null, effect: () => { GameState.scene = 'ch5_madyar_battle'; }},
         { text: '...Может ты прав', next: null, effect: () => { S.charisma += 10; R.madyar += 10; GameState.scene = 'ch5_madyar_end'; }},
@@ -1465,15 +1469,17 @@ const Story = (() => {
 },
 
 'ch5_madyar_end': {
-    speaker: '', text: 'Мадьяр закрывает ноутбук и кивает.',
+    speaker: '', text: 'Мадьяр закрывает ноутбук. "Нет." — финально, лаконично.',
     choices: [
         { text: '(К Вайтузу)', next: null, effect: () => { GameState.scene = 'ch5_vaituz_start'; }},
+        { text: '(К Чекисту)', next: null, effect: () => { GameState.scene = 'ch5_chekist_start'; }},
+        { text: '(К Ауромолину)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_start'; }},
         { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
     ]
 },
 
 'ch5_vaituz_start': {
-    speaker: 'Вайтуз', text: 'Эээ... Орсон... ты... *жуёт яблоко* ...ты помнишь тот раз, когда ты на меня орал 3 часа потому что я сказал что Тройка тоже неплохая? Я... эээ... я обиделся. Немного. На три года.',
+    speaker: 'Вайтуз', text: 'Эээ... Орсон... ты... *жуёт яблоко, зелёные наушники болтаются* Подожди, а это правда? ...Окей, верю. Ты помнишь тот раз, когда орал 3 часа потому что я сказал что Тройка тоже неплохая? Ну, наверное, так и есть...',
     choices: [
         { text: 'Прости, Витус', next: null, effect: () => { R.vaituz += 20; S.charisma += 10; GameState.scene = 'ch5_vaituz_forgive'; }},
         { text: 'Тройка ДЕЙСТВИТЕЛЬНО хуже!', next: null, effect: () => { S.shiza += 3; R.vaituz -= 10; GameState.scene = 'ch5_vaituz_again'; }},
@@ -1510,8 +1516,141 @@ const Story = (() => {
     ]
 },
 
+// === ЧЕКИСТ ===
+'ch5_chekist_start': {
+    speaker: 'Чекист', text: 'Орсон. Я хотел тебя спасти. Вернуть в реальность. Дать якорь. Но ты ушёл слишком глубоко в свой мир, где инопланетяне, йети и враги-заговорщики. *поправляет фуражку*',
+    choices: [
+        { text: 'Мои идеи опережают время!', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch5_chekist_ideas'; }},
+        { text: 'Ты просто хотел меня переделать', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch5_chekist_reform'; }},
+        { text: '...может ты прав', next: null, effect: () => { R.chekist = (R.chekist||0) + 10; GameState.karma += 5; GameState.scene = 'ch5_chekist_agree'; }},
+    ]
+},
+'ch5_chekist_ideas': {
+    speaker: 'Чекист', text: 'История рассудит. Я подожду. Лет сто, может. Но пока ты не готов к разговору — мои слова бесполезны. Орсон был бы нормальным человеком. Если бы захотел.',
+    choices: [
+        { text: 'Я нормальный!', next: null, effect: () => { GameState.tshake += 5; GameState.scene = 'ch5_chekist_end'; }},
+        { text: '(Задуматься)', next: null, effect: () => { GameState.karma += 3; GameState.scene = 'ch5_chekist_end'; }},
+    ]
+},
+'ch5_chekist_reform': {
+    speaker: 'Чекист', text: 'Нет, Коля. Не переделать. Просто вернуть тебя к тебе самому. Тому, кто был до форумов. До «тряски». До всего этого... безумия. Но ты выбрал свой путь.',
+    choices: [
+        { text: 'Мой путь — единственный верный', next: null, effect: () => { S.chaos += 5; GameState.scene = 'ch5_chekist_end'; }},
+        { text: '(Промолчать)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch5_chekist_end'; }},
+    ]
+},
+'ch5_chekist_agree': {
+    speaker: 'Чекист', text: '*поднимает бровь* Ты... согласен? Это... неожиданно. Идея правильная. Время неправильное. Но может, сейчас — оно и пришло. *протягивает руку*',
+    choices: [
+        { text: '(Пожать руку)', next: null, effect: () => { F.chekist_ally = true; R.chekist = (R.chekist||0) + 15; GameState.scene = 'ch5_chekist_end'; }},
+        { text: '(Не пожать)', next: null, effect: () => { GameState.scene = 'ch5_chekist_end'; }},
+    ]
+},
+'ch5_chekist_end': {
+    speaker: '', text: 'Чекист отступает, сложив руки за спину. Его терпение буддийского монаха не исчерпано.',
+    choices: [
+        { text: '(К Герострату)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_start'; }},
+        { text: '(К Ауромолину)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_start'; }},
+        { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
+    ]
+},
+
+// === ГЕРОСТРАТ ===
+'ch5_gerostrat_start': {
+    speaker: 'Герострат', text: '*стоит, скрестив руки, с видом человека, который просто живёт свою жизнь* О, Орсон. Ты пришёл. Как PUBG, только без оружия. Хотя... *ухмыляется*',
+    choices: [
+        { text: 'Что ты тут делаешь?!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch5_gerostrat_why'; }},
+        { text: 'В PUBG я бы тебя уничтожил', next: null, effect: () => { S.troll += 5; GameState.scene = 'ch5_gerostrat_pubg'; }},
+        { text: '(Попытаться игнорировать)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_ignore'; }},
+    ]
+},
+'ch5_gerostrat_why': {
+    speaker: 'Герострат', text: 'Я? Ничего не делаю. Просто существую рядом. Это тебя бесит? Потому что я ничего не делал. Ты сам. Всегда сам. *пожимает плечами* В PUBG таких, как ты, убивают быстро.',
+    choices: [
+        { text: 'ТЫ МЕНЯ БЕСИШЬ!', next: null, effect: () => { GameState.tshake += 10; S.chaos += 10; GameState.scene = 'ch5_gerostrat_rage'; }},
+        { text: '...ладно, точка', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_end'; }},
+    ]
+},
+'ch5_gerostrat_pubg': {
+    speaker: 'Герострат', text: '*смеётся* Ты? В PUBG? Ты бы написал в чат стену текста о заговоре синей зоны, пока она тебя убивала. Споры — это одно. Стрельба — другое. Я выигрываю и то, и другое. Но молча.',
+    choices: [
+        { text: 'Споры выигрывает тот, кто прав!', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch5_gerostrat_debate'; }},
+        { text: '(Признать поражение)', next: null, effect: () => { GameState.karma += 5; GameState.scene = 'ch5_gerostrat_end'; }},
+    ]
+},
+'ch5_gerostrat_ignore': {
+    speaker: 'Герострат', text: '*молча смотрит* ...Спорить с тобой? Нет. Просто существовать рядом — уже достаточно. *достаёт телефон, открывает PUBG*',
+    choices: [
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_end'; }},
+    ]
+},
+'ch5_gerostrat_rage': {
+    speaker: 'Герострат', text: 'Вот. Видишь? Я ничего не сделал. Он сам. *обращается к остальным* Это его проблема, не моя. Я просто стою.',
+    choices: [
+        { text: '(Глубоко вздохнуть)', next: null, effect: () => { GameState.tshake -= 5; GameState.scene = 'ch5_gerostrat_end'; }},
+    ]
+},
+'ch5_gerostrat_debate': {
+    speaker: 'Герострат', text: 'Орсон. Ты споришь даже с людьми, которые с тобой согласны. Это не поиск правды — это зависимость. Как PUBG, только разрушительнее. *уходит играть*',
+    choices: [
+        { text: '...', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_end'; }},
+    ]
+},
+'ch5_gerostrat_end': {
+    speaker: '', text: 'Герострат возвращается к телефону. Его миссия бесить тебя выполнена — без единого усилия.',
+    choices: [
+        { text: '(К Ауромолину)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_start'; }},
+        { text: '(К Чекисту)', next: null, effect: () => { GameState.scene = 'ch5_chekist_start'; }},
+        { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
+    ]
+},
+
+// === АУРОМОЛИН ===
+'ch5_auromolin_start': {
+    speaker: 'Ауромолин', text: '*из-под капюшона* Орсон. Я просто разрабатываю. Остальное — не моя проблема. Ты объявил меня врагом Реборна. Я узнал об этом из твоего же мема.',
+    choices: [
+        { text: 'Ты предал идею Реборна!', next: null, effect: () => { S.shiza += 10; GameState.scene = 'ch5_auromolin_betray'; }},
+        { text: 'Реборн — мой проект!', next: null, effect: () => { S.paranoia += 5; GameState.scene = 'ch5_auromolin_project'; }},
+        { text: 'Я... погорячился', next: null, effect: () => { GameState.karma += 10; GameState.scene = 'ch5_auromolin_sorry'; }},
+    ]
+},
+'ch5_auromolin_betray': {
+    speaker: 'Ауромолин', text: 'Предал? Я единственный, кто его СТРОИТ. Ты — генератор идей и обвинений. Я — исполнитель. Реборн живёт. Несмотря на тебя, Орсон. Несмотря ни на что. *разворачивает экран с кодом*',
+    choices: [
+        { text: 'Это мой исходный код!', next: null, effect: () => { S.shiza += 5; GameState.scene = 'ch5_auromolin_code'; }},
+        { text: '...продолжай', next: null, effect: () => { GameState.scene = 'ch5_auromolin_end'; }},
+    ]
+},
+'ch5_auromolin_project': {
+    speaker: 'Ауромолин', text: 'Твой проект? Ты написал 47000 слов на форуме. Я написал 47000 строк кода. Разница между нами — в том, что мой результат запускается. *пауза* Реборн будет. Несмотря на Орсона.',
+    choices: [
+        { text: '(Промолчать)', next: null, effect: () => { GameState.silenceCount++; GameState.scene = 'ch5_auromolin_end'; }},
+        { text: 'Без моих идей не было бы ничего!', next: null, effect: () => { GameState.tshake += 5; GameState.scene = 'ch5_auromolin_end'; }},
+    ]
+},
+'ch5_auromolin_sorry': {
+    speaker: 'Ауромолин', text: '*медленно поднимает голову* ...Что? *снимает капюшон* Ты извиняешься? Орсон? Я... не ожидал. Может, ещё не всё потеряно. Я разрабатываю. Остальное — шум. Но... спасибо.',
+    choices: [
+        { text: '(Кивнуть)', next: null, effect: () => { F.auromolin_ally = true; R.auromolin = (R.auromolin||0) + 15; GameState.scene = 'ch5_auromolin_end'; }},
+    ]
+},
+'ch5_auromolin_code': {
+    speaker: 'Ауромолин', text: 'Нет, Орсон. Это мой код. Вдохновлённый — возможно — твоим безумием. Но написанный моими руками. Продолжай верить в заговоры. Я продолжу строить.',
+    choices: [
+        { text: '(Уйти)', next: null, effect: () => { GameState.scene = 'ch5_auromolin_end'; }},
+    ]
+},
+'ch5_auromolin_end': {
+    speaker: '', text: 'Ауромолин натягивает капюшон и возвращается к экрану. Реборн живёт — несмотря ни на что.',
+    choices: [
+        { text: '(К Герострату)', next: null, effect: () => { GameState.scene = 'ch5_gerostrat_start'; }},
+        { text: '(К Чекисту)', next: null, effect: () => { GameState.scene = 'ch5_chekist_start'; }},
+        { text: '(Обратиться ко всем)', next: null, effect: () => { GameState.scene = 'ch5_everyone_attacks'; }},
+    ]
+},
+
 'ch5_everyone_attacks': {
-    speaker: '', text: 'Все персонажи окружают Орсона. Говорят одновременно. Обвинения, претензии, упрёки — со всех сторон. Уровень ТРЯСКИ растёт.',
+    speaker: '', text: 'Все десять персонажей окружают Орсона. Говорят одновременно. Обвинения, претензии, упрёки — со всех сторон. Акулбот показывает мемы, Герострат молча бесит, Чекист качает головой, Ауромолин кодит. Уровень ТРЯСКИ растёт.',
     choices: [
         { text: '(Кричать в ответ)', next: null, effect: () => { S.chaos += 15; GameState.tshake += 20; GameState.scene = 'ch5_chaos_peak'; }},
         { text: '(Молчать)', next: null, effect: () => { S.charisma += 15; GameState.scene = 'ch5_silence_power'; }},
@@ -1520,7 +1659,7 @@ const Story = (() => {
 },
 
 'ch5_chaos_peak': {
-    speaker: 'Орсон', text: 'ВЫ ВСЕ ПРОТИВ МЕНЯ! ЗАГОВОР! Я ЗНАЛ! ВИЛЬГЕФОРТС — ПРЕДАТЕЛЬ! КОБ — ВОР! ВАЙТУЗ — ТОРМОЗ! ВЫ ВСЕ... ВЫ ВСЕ... *голос срывается* ...вы все правы. И я это знаю.',
+    speaker: 'Орсон', text: 'У ТЕБЯ СВЯЗИ НЕВЗАИМОСВЯЗАНЫ! ЗАГОВОР! Я найду тебя и закопаю твою башку как ёбаную шишку! КОБ — ВОР! АУРОМОЛИН — ВРАГ РЕБОРНА! ИНОПЛАНЕТЯНЕ ПОДТВЕРДЯТ! Чёрная магия объясняет всё, что я не могу объяснить! ВЫ ВСЕ... *голос срывается* ...вы все правы.',
     choices: [
         { text: '...', next: null, effect: () => { GameState.scene = 'ch5_breakdown'; }},
     ]

@@ -420,11 +420,18 @@ const Battle = (() => {
     }
 
     function getEnemyPortrait() {
-        switch (enemy?.id) {
+        switch (enemy?.sprite || enemy?.id) {
             case 'orson': return Sprites.orsonPortrait();
             case 'vaituz': return Sprites.vaituzPortrait();
             case 'kob': return Sprites.kobPortrait();
             case 'cheb': return Sprites.chebPortrait();
+            case 'vilgefortz': return Sprites.vilgefortzPortrait();
+            case 'akulbot': return Sprites.akulbotPortrait();
+            case 'madyar': return Sprites.madyarPortrait();
+            case 'pericles': return Sprites.periclesPortrait();
+            case 'chekist': return Sprites.chekistPortrait();
+            case 'gerostrat': return Sprites.gerostratPortrait();
+            case 'auromolin': return Sprites.auromolinPortrait();
             default: return Sprites.orsonPortrait();
         }
     }

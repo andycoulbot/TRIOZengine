@@ -36,6 +36,16 @@ const Dialogue = (() => {
             case 'Вайтуз': speakerPortrait = Sprites.vaituzPortrait(); break;
             case 'Коб': speakerPortrait = Sprites.kobPortrait(); break;
             case 'Чеб': speakerPortrait = Sprites.chebPortrait(); break;
+            case 'Периклес': speakerPortrait = Sprites.periclesPortrait(); break;
+            case 'Мадьяр': speakerPortrait = Sprites.madyarPortrait(); break;
+            case 'Акулбот': speakerPortrait = Sprites.akulbotPortrait(); break;
+            case 'Чекист': speakerPortrait = Sprites.chekistPortrait(); break;
+            case 'Герострат': speakerPortrait = Sprites.gerostratPortrait(); break;
+            case 'Ауромолин': speakerPortrait = Sprites.auromolinPortrait(); break;
+            case 'Вильгефортс': speakerPortrait = Sprites.vilgefortzPortrait(); break;
+            case 'Евгения Германовна': speakerPortrait = Sprites.periclesPortrait(); break;
+            case 'Аркадий': speakerPortrait = Sprites.kobPortrait(); break;
+            case 'Shadowban': speakerPortrait = Sprites.auromolinPortrait(); break;
             default: speakerPortrait = null;
         }
 
@@ -133,6 +143,15 @@ const Dialogue = (() => {
             const speakerColors = {
                 'Орсон': '#cc4444',
                 'Вайтуз': '#44cc44',
+                'Периклес': '#8b6543',
+                'Мадьяр': '#334455',
+                'Акулбот': '#5566dd',
+                'Чекист': '#cc2222',
+                'Герострат': '#44aa44',
+                'Ауромолин': '#8866cc',
+                'Вильгефортс': '#ff4444',
+                'Евгения Германовна': '#ffffff',
+                'Shadowban': '#444466',
                 'Коб': '#9966cc',
                 'Чеб': '#4488cc',
             };
@@ -155,7 +174,17 @@ const Dialogue = (() => {
                 'Орсон': '#cc4444',
                 'Вайтуз': '#44cc44',
                 'Коб': '#9966cc',
-                'Чеб': '#4488cc',
+                'Чеб': '#ff7744',
+                'Периклес': '#c4a07a',
+                'Мадьяр': '#88aacc',
+                'Акулбот': '#6688ff',
+                'Чекист': '#ff4444',
+                'Герострат': '#66cc66',
+                'Ауромолин': '#aa88ff',
+                'Вильгефортс': '#ff6633',
+                'Евгения Германовна': '#eeeeff',
+                'Аркадий': '#ccaa66',
+                'Shadowban': '#666688',
             };
             const nameColor = nameColors[speakerName] || '#ffcc00';
             ctx.fillStyle = nameColor;
