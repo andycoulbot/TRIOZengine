@@ -151,7 +151,13 @@
         if (key === 'confirm') {
             Audio8Bit.menuConfirm();
             Sprites.emitBurst(W / 2, 120, '#cc0000', 12);
-            startScene('intro');
+            const circle = GameState.circle || 1;
+            if (circle > 1) {
+                gameMode = 'dialogue';
+                loadDialogue('title');
+            } else {
+                startScene('intro');
+            }
         }
     }
 
@@ -169,8 +175,14 @@
         }
 
         if (sceneId === 'title') {
-            gameMode = 'title';
-            Audio8Bit.playMelody('title');
+            const circle = GameState.circle || 1;
+            if (circle > 1) {
+                gameMode = 'dialogue';
+                loadDialogue('title');
+            } else {
+                gameMode = 'title';
+                Audio8Bit.playMelody('title');
+            }
             return;
         }
 
