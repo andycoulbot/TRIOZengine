@@ -242,10 +242,14 @@
                 renderTitle();
                 break;
             case 'dialogue':
-                GameMap.render(ctx, W, H);
-                renderNPCs();
+                if (GameState.scene === 'ending_rarity_screen') {
+                    renderRarityScreen();
+                } else {
+                    GameMap.render(ctx, W, H);
+                    renderNPCs();
+                }
                 Dialogue.render(ctx, W, H);
-                renderHUD();
+                if (GameState.scene !== 'ending_rarity_screen' && GameState.scene !== 'endings_gallery') renderHUD();
                 break;
             case 'battle':
                 Battle.render(ctx, W, H);
@@ -369,10 +373,16 @@
         ctx.fillText('Z / Enter — подтвердить  |  X / Esc — отмена', W / 2, 418);
         ctx.fillStyle = '#9966cc';
         ctx.font = '11px monospace';
-        ctx.fillText('6 глав · 3 концовки · Босс-файты · Тряска™', W / 2, 440);
+        ctx.fillText('6 глав · 8 концовок · 5 кругов · Тряска™', W / 2, 440);
         ctx.fillStyle = '#555566';
         ctx.font = '10px monospace';
-        ctx.fillText('90% дурка · 9% победа · 1% правда', W / 2, 458);
+        const circle = GameState.circle || 1;
+        if (circle > 1) {
+            ctx.fillStyle = '#cc88ff';
+            ctx.fillText(`КРУГ ${circle}/5 · Мудрость: ${GameState.circleWisdom || 0}`, W / 2, 458);
+        } else {
+            ctx.fillText('Обычная · Редкая · Эпическая · Легендарная', W / 2, 458);
+        }
 
         ctx.textAlign = 'left';
     }
@@ -496,10 +506,80 @@
             ctx.fillText(`🎒${GameState.inventory.length}`, W - 60, 22);
         }
 
+        // Circle indicator
+        const circleHud = GameState.circle || 1;
+        if (circleHud > 1) {
+            ctx.fillStyle = '#cc88ff';
+            ctx.font = 'bold 10px monospace';
+            ctx.fillText(`◉${circleHud}`, W - 65, 22);
+        }
+
         // Path counter
         ctx.fillStyle = '#555';
         ctx.font = '10px monospace';
         ctx.fillText(`#${GameState.pathCount}`, W - 35, 22);
+    }
+
+    function renderRarityScreen() {
+        const endingId = GameState.flags.ending || 'hospital';
+        const rarity = getEndingRarity(endingId);
+        const t = frameCount * 0.02;
+
+        // Background gradient based on rarity
+        const rarityBgs = {
+            'ОБЫЧНАЯ': ['#111111', '#222233'],
+            'РЕДКАЯ': ['#001133', '#002266'],
+            'ЭПИЧЕСКАЯ': ['#110033', '#220066'],
+            'ЛЕГЕНДАРНАЯ': ['#221100', '#443300'],
+        };
+        const bg = rarityBgs[rarity.name] || rarityBgs['ОБЫЧНАЯ'];
+        const grad = ctx.createLinearGradient(0, 0, 0, H);
+        grad.addColorStop(0, bg[0]);
+        grad.addColorStop(1, bg[1]);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, W, H);
+
+        // Floating particles based on rarity
+        const particleCount = rarity.stars * 8;
+        for (let i = 0; i < particleCount; i++) {
+            const px = (i * 73 + frameCount * 0.5) % W;
+            const py = (i * 51 + Math.sin(t + i * 0.7) * 30) % (H * 0.6);
+            const pa = Math.sin(t + i * 1.3) * 0.3 + 0.4;
+            const ps = Math.sin(t + i * 0.5) * 2 + 3;
+            ctx.fillStyle = rarity.color + Math.floor(pa * 255).toString(16).padStart(2, '0');
+            ctx.beginPath();
+            ctx.arc(px, py, ps, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // Stars
+        ctx.textAlign = 'center';
+        ctx.font = '32px monospace';
+        const stars = '★'.repeat(rarity.stars) + '☆'.repeat(4 - rarity.stars);
+        ctx.fillStyle = rarity.color;
+        ctx.shadowColor = rarity.glow;
+        ctx.shadowBlur = 20;
+        ctx.fillText(stars, W / 2, 60);
+        ctx.shadowBlur = 0;
+
+        // Rarity name with glow
+        ctx.font = 'bold 28px monospace';
+        ctx.shadowColor = rarity.glow;
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = rarity.color;
+        const nameAlpha = Math.sin(t * 2) * 0.15 + 0.85;
+        ctx.globalAlpha = nameAlpha;
+        ctx.fillText(rarity.name, W / 2, 100);
+        ctx.globalAlpha = 1;
+        ctx.shadowBlur = 0;
+
+        // Circle info
+        ctx.fillStyle = '#8888aa';
+        ctx.font = '14px monospace';
+        const circleNum = GameState.circle || 1;
+        ctx.fillText(`Круг ${circleNum}/5`, W / 2, 130);
+
+        ctx.textAlign = 'left';
     }
 
     Audio8Bit.playMelody('title');

@@ -13,7 +13,62 @@ const GameState = {
     secretItems: 0,  // hidden: count of secret collectibles found
     liesCount: 0,    // hidden: how many times Orson lied
     silenceCount: 0, // hidden: how many times player chose silence
+    // === CIRCLE SYSTEM (5 кругов перепрохождения) ===
+    circle: 1,       // current circle (1-5)
+    circleWisdom: 0,  // accumulated wisdom from past circles
+    endingsUnlocked: [], // list of ending IDs seen
+    totalRuns: 0,     // total number of completions
 };
+
+// Load circle data from localStorage
+(function loadCircleData() {
+    try {
+        const saved = localStorage.getItem('orson_circles');
+        if (saved) {
+            const data = JSON.parse(saved);
+            GameState.circle = Math.min(data.circle || 1, 5);
+            GameState.circleWisdom = data.circleWisdom || 0;
+            GameState.endingsUnlocked = data.endingsUnlocked || [];
+            GameState.totalRuns = data.totalRuns || 0;
+            // Circle bonuses: Orson gets smarter each circle
+            if (GameState.circle > 1) {
+                GameState.stats.charisma += (GameState.circle - 1) * 3;
+                GameState.maxHp += (GameState.circle - 1) * 5;
+                GameState.hp = GameState.maxHp;
+            }
+        }
+    } catch(e) {}
+})();
+
+function saveCircleData(endingId) {
+    try {
+        const endings = GameState.endingsUnlocked || [];
+        if (endingId && !endings.includes(endingId)) endings.push(endingId);
+        const newCircle = Math.min((GameState.circle || 1) + 1, 5);
+        const wisdom = (GameState.circleWisdom || 0) + Math.floor((GameState.karma || 0) + (GameState.stats.charisma || 0) / 2);
+        const data = {
+            circle: newCircle,
+            circleWisdom: wisdom,
+            endingsUnlocked: endings,
+            totalRuns: (GameState.totalRuns || 0) + 1
+        };
+        localStorage.setItem('orson_circles', JSON.stringify(data));
+    } catch(e) {}
+}
+
+function getEndingRarity(endingId) {
+    const rarities = {
+        'hospital':       { name: 'ОБЫЧНАЯ',     color: '#aaaaaa', glow: '#666666', stars: 1 },
+        'hospital_good':  { name: 'РЕДКАЯ',       color: '#55aaff', glow: '#2277cc', stars: 2 },
+        'victory':        { name: 'РЕДКАЯ',       color: '#55aaff', glow: '#2277cc', stars: 2 },
+        'truth':          { name: 'ЭПИЧЕСКАЯ',    color: '#cc55ff', glow: '#9933cc', stars: 3 },
+        'silence':        { name: 'ЭПИЧЕСКАЯ',    color: '#cc55ff', glow: '#9933cc', stars: 3 },
+        'reborn':         { name: 'ЛЕГЕНДАРНАЯ',   color: '#ffaa00', glow: '#cc7700', stars: 4 },
+        'circle5_true':   { name: 'ЛЕГЕНДАРНАЯ',   color: '#ffaa00', glow: '#cc7700', stars: 4 },
+        'forgiveness':    { name: 'ЛЕГЕНДАРНАЯ',   color: '#ffaa00', glow: '#cc7700', stars: 4 },
+    };
+    return rarities[endingId] || rarities['hospital'];
+}
 
 const Story = (() => {
     function getNode(sceneId) {
@@ -26,23 +81,142 @@ const Story = (() => {
 // ============== TITLE ==============
 'title': {
     speaker: '', text: '',
+    choices: (() => {
+        const c = GameState.circle || 1;
+        const choices = [];
+        if (c === 1) {
+            choices.push({ text: 'НАЧАТЬ ИГРУ', next: null, effect: () => { GameState.scene = 'intro'; }});
+        } else {
+            choices.push({ text: `КРУГ ${c} — НАЧАТЬ`, next: null, effect: () => { GameState.scene = 'circle_intro'; }});
+            choices.push({ text: 'НОВАЯ ИГРА (сброс)', next: null, effect: () => {
+                try { localStorage.removeItem('orson_circles'); } catch(e) {}
+                location.reload();
+            }});
+        }
+        if (GameState.endingsUnlocked && GameState.endingsUnlocked.length > 0) {
+            choices.push({ text: `КОЛЛЕКЦИЯ КОНЦОВОК (${GameState.endingsUnlocked.length}/8)`, next: null, effect: () => { GameState.scene = 'endings_gallery'; }});
+        }
+        return choices;
+    })()
+},
+
+// === CIRCLE INTRO (New Game+) ===
+'circle_intro': {
+    speaker: '', text: (() => {
+        const c = GameState.circle || 1;
+        const circleTexts = {
+            2: 'КРУГ 2: ПРОБУЖДЕНИЕ\n\nОрсон открывает глаза. Дежавю. Он... был тут раньше? Что-то изменилось. Мысли чётче. Слова — острее. Он помнит... фрагменты. Палату. Часы. 3:47.',
+            3: 'КРУГ 3: ОСОЗНАНИЕ\n\nОпять. Снова. Орсон уже ЗНАЕТ что будет дальше. Замок. Гном. Площадь. Но в этот раз — он умнее. Он видит нити. Паттерны. Связи, которых раньше не замечал.',
+            4: 'КРУГ 4: ПРОЗРЕНИЕ\n\nЧетвёртый раз. Орсон больше не удивляется. Он помнит каждый разговор, каждый выбор, каждое последствие. Мир Меча и Шизофрении — его тюрьма? Или его дом?',
+            5: 'КРУГ 5: ФИНАЛЬНЫЙ КРУГ\n\nОрсон просыпается с абсолютным пониманием. Пять кругов. Пять жизней. Каждый спор, каждый мем, каждая тряска — всё вело СЮДА. К последнему выбору. К настоящему финалу.',
+        };
+        return circleTexts[c] || circleTexts[2];
+    })(),
+    choices: (() => {
+        const c = GameState.circle || 1;
+        const choices = [
+            { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'intro'; }}
+        ];
+        if (c >= 3) {
+            choices.push({ text: '(Попробовать вспомнить больше)', next: null, effect: () => { GameState.flags.circle_memory = true; GameState.stats.charisma += 5; GameState.scene = 'circle_memory'; }});
+        }
+        if (c >= 5) {
+            choices.push({ text: '(Разорвать цикл)', next: null, effect: () => { GameState.scene = 'circle5_break'; }});
+        }
+        return choices;
+    })()
+},
+
+'circle_memory': {
+    speaker: 'Орсон', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 5) return 'Я помню ВСЁ. Каждый круг. Каждый выбор. Каждую концовку. Палата №5... Заклинатель Тряски... Исходный Код... Рассвет... Я прожил их все. И ни одна — не правда. Правда — между ними.';
+        if (c >= 4) return 'Лица. Имена. Герострат молча бесил. Ауромолин кодил. Чекист ждал. Вайтуз... жевал яблоко. Мадьяр говорил "Нет". А я... я спорил. Всегда спорил. Может... в этом проблема?';
+        return 'Фрагменты. Белые стены. Запах антисептика. Голос Евгении Германовны: "Мы работаем над этим". Часы на стене — 3:47. Яблоко на тумбочке. Это было... реальным? Или...';
+    })(),
     choices: [
-        { text: 'НАЧАТЬ ИГРУ', next: null, effect: () => { GameState.scene = 'intro'; }},
+        { text: '(Начать круг)', next: null, effect: () => { GameState.scene = 'intro'; }},
+    ]
+},
+
+'circle5_break': {
+    speaker: 'Орсон', text: 'Нет. Хватит. Пять раз я прошёл этот путь. Пять раз просыпался в замке, шёл за хлебом, спорил на форумах, встречал всех на площади. Пять раз мир давал мне финал, который я не выбирал. В этот раз — я выбираю сам.',
+    choices: [
+        { text: '(Выбрать ПРОЩЕНИЕ)', next: null, effect: () => { GameState.flags.circle5_forgiveness = true; GameState.karma += 50; GameState.scene = 'intro'; }},
+        { text: '(Выбрать РАЗРУШЕНИЕ)', next: null, effect: () => { GameState.flags.circle5_destruction = true; GameState.stats.chaos += 50; GameState.scene = 'intro'; }},
+        { text: '(Выбрать ТИШИНУ)', next: null, effect: () => { GameState.flags.circle5_silence = true; GameState.silenceCount += 50; GameState.scene = 'intro'; }},
+    ]
+},
+
+// === ENDINGS GALLERY ===
+'endings_gallery': {
+    speaker: '', text: (() => {
+        const endings = GameState.endingsUnlocked || [];
+        const allEndings = [
+            { id: 'hospital', name: 'Палата №5' },
+            { id: 'hospital_good', name: 'Рассвет' },
+            { id: 'victory', name: 'Заклинатель Тряски' },
+            { id: 'truth', name: 'Исходный Код' },
+            { id: 'silence', name: 'Тишина Орсона' },
+            { id: 'reborn', name: 'Настоящий Реборн' },
+            { id: 'circle5_true', name: 'Разрыв Цикла' },
+            { id: 'forgiveness', name: 'Прощение' },
+        ];
+        let text = 'КОЛЛЕКЦИЯ КОНЦОВОК\n\n';
+        allEndings.forEach(e => {
+            const rarity = getEndingRarity(e.id);
+            const unlocked = endings.includes(e.id);
+            const star = '★'.repeat(rarity.stars) + '☆'.repeat(4 - rarity.stars);
+            text += unlocked ? `${star} ${e.name} [${rarity.name}]\n` : `${star} ??? [???]\n`;
+        });
+        text += `\nРазблокировано: ${endings.length}/8`;
+        text += `\nКругов пройдено: ${GameState.totalRuns}`;
+        return text;
+    })(),
+    choices: [
+        { text: '(Назад)', next: null, effect: () => { GameState.scene = 'title'; }},
     ]
 },
 
 'intro': {
-    speaker: '', text: 'Франция. Квартира миллионера неизвестного происхождения. 3:47 ночи. На экране ноутбука — 47 открытых вкладок: форумы, дискорд, Heroes 5. Рядом — пустые банки от энергетика и дорогие часы.',
+    speaker: '', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 4) return 'Франция. Снова. Квартира. 3:47. Орсон уже знает — 47 вкладок. Он помнит каждую. Но пальцы всё равно тянутся к клавиатуре. Привычка сильнее памяти.';
+        if (c >= 2) return 'Франция. Квартира миллионера. 3:47 ночи. Дежавю. 47 вкладок. Энергетик. Часы. Орсон чувствует — он тут уже был. Но память ускользает как рыба в мутной воде.';
+        return 'Франция. Квартира миллионера неизвестного происхождения. 3:47 ночи. На экране ноутбука — 47 открытых вкладок: форумы, дискорд, Heroes 5. Рядом — пустые банки от энергетика и дорогие часы.';
+    })(),
     choices: [
         { text: 'Продолжить', next: null, effect: () => { GameState.scene = 'intro_2'; }},
     ]
 },
 
 'intro_2': {
-    speaker: '', text: 'Орсон печатает. Быстро. Яростно. Ответ на форуме. 2847 слов. Контраргумент, который никто не просил. В соседней вкладке — его собственный пост с нулём лайков.',
+    speaker: '', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 3) return 'Орсон печатает. Но руки дрожат. Он уже ЗНАЕТ этот пост. 2847 слов. Каждое — наизусть. Он прожил это раньше. Сколько раз? Два? Три? Пальцы замирают над клавиатурой.';
+        return 'Орсон печатает. Быстро. Яростно. Ответ на форуме. 2847 слов. Контраргумент, который никто не просил. В соседней вкладке — его собственный пост с нулём лайков.';
+    })(),
+    choices: (() => {
+        const c = GameState.circle || 1;
+        const choices = [
+            { text: '(Отправить ответ)', next: null, effect: () => { GameState.scene = 'intro_3'; }},
+            { text: '(Удалить и лечь спать)', next: null, effect: () => { GameState.karma += 1; GameState.scene = 'intro_3'; }},
+        ];
+        if (c >= 2) {
+            choices.push({ text: '(Закрыть все вкладки)', next: null, effect: () => { GameState.karma += 3; GameState.silenceCount += 1; GameState.scene = 'intro_3'; }});
+        }
+        if (c >= 4) {
+            choices.push({ text: '(Я знаю что будет дальше...)', next: null, effect: () => { GameState.flags.circle_skip = true; GameState.karma += 5; GameState.scene = 'intro_circle_skip'; }});
+        }
+        return choices;
+    })()
+},
+
+'intro_circle_skip': {
+    speaker: 'Орсон', text: 'Замок. Гном. Площадь. Больница. Я знаю весь сценарий. Каждый поворот. Каждый диалог. Но знание — не спасение. Даже зная, что нож порежет — ты всё равно режешься. Потому что рука сама тянется.',
     choices: [
-        { text: '(Отправить ответ)', next: null, effect: () => { GameState.scene = 'intro_3'; }},
-        { text: '(Удалить и лечь спать)', next: null, effect: () => { GameState.karma += 1; GameState.scene = 'intro_3'; }},
+        { text: '(Попробовать изменить)', next: null, effect: () => { GameState.karma += 10; GameState.flags.circle_aware = true; GameState.chapter = 1; GameState.scene = 'ch1_wake'; }},
+        { text: '(Пройти заново — вдруг иначе)', next: null, effect: () => { GameState.flags.circle_aware = true; GameState.scene = 'intro_3'; }},
     ]
 },
 
@@ -62,11 +236,24 @@ const Story = (() => {
 
 // ============== ГЛАВА 1: ПРОБУЖДЕНИЕ ==============
 'ch1_wake': {
-    speaker: '', text: 'ГЛАВА 1: ПРОБУЖДЕНИЕ В МИРЕ МЕЧА И ШИЗОФРЕНИИ.\n\nОрсон открывает глаза. Он лежит на каменном полу. Вокруг — средневековый замок. Стены увиты плющом. В воздухе пахнет магией и багетами.',
-    choices: [
-        { text: '(Встать и осмотреться)', next: null, effect: () => { GameState.scene = 'ch1_look_around'; }},
-        { text: '(Лежать дальше)', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_stay_lying'; }},
-    ]
+    speaker: '', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 5) return 'ГЛАВА 1: ПОСЛЕДНЕЕ ПРОБУЖДЕНИЕ.\n\nОрсон открывает глаза. Замок. Опять. Пятый раз. Камень под спиной знакомый до боли. Каждая трещина, каждый плющ — выучены наизусть. Но что-то изменилось. Воздух — другой. Тяжелее. Как перед грозой.';
+        if (c >= 3) return 'ГЛАВА 1: ПРОБУЖДЕНИЕ В МИРЕ МЕЧА И ШИЗОФРЕНИИ.\n\nОрсон открывает глаза. Каменный пол. Замок. Плющ. Он узнаёт это место. Дежавю разрывает мозг. "Опять. Опять этот чёртов замок." Но в этот раз — он чувствует силу. Мудрость прошлых кругов.';
+        if (c >= 2) return 'ГЛАВА 1: ПРОБУЖДЕНИЕ В МИРЕ МЕЧА И ШИЗОФРЕНИИ.\n\nОрсон открывает глаза. Каменный пол. Замок. Плющ. Магия и багеты. Что-то знакомое. Как сон, который снился раньше. Или... не сон?';
+        return 'ГЛАВА 1: ПРОБУЖДЕНИЕ В МИРЕ МЕЧА И ШИЗОФРЕНИИ.\n\nОрсон открывает глаза. Он лежит на каменном полу. Вокруг — средневековый замок. Стены увиты плющом. В воздухе пахнет магией и багетами.';
+    })(),
+    choices: (() => {
+        const c = GameState.circle || 1;
+        const choices = [
+            { text: '(Встать и осмотреться)', next: null, effect: () => { GameState.scene = 'ch1_look_around'; }},
+            { text: '(Лежать дальше)', next: null, effect: () => { S.chaos += 3; GameState.scene = 'ch1_stay_lying'; }},
+        ];
+        if (c >= 3) {
+            choices.push({ text: '(Я помню этот замок...)', next: null, effect: () => { S.charisma += 5; GameState.flags.circle_aware = true; GameState.scene = 'ch1_look_around'; }});
+        }
+        return choices;
+    })()
 },
 
 'ch1_stay_lying': {
@@ -1880,13 +2067,35 @@ const Story = (() => {
 
 'ch6_germanovna': {
     speaker: '', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 5) return '*Дверь открывается. Евгения Германовна. Пятый раз. Пятый сеанс. Пятый круг. Она не постарела ни на день. Потому что время здесь не идёт. Или потому что она — не человек.*';
+        if (c >= 3) return '*Дверь открывается. Она снова тут. Евгения Германовна. Орсон узнаёт каждую морщинку. Каждый жест. "Мы уже встречались," — думает он. "Много раз."*';
         if (GameState.tshake > 80) return '*Дверь открывается. Входит женщина в белом халате. Руки Орсона трясутся. Тряска зашкаливает.*';
         if (F.saw_hospital_vision) return '*Дверь открывается. Входит женщина в белом халате. Вы её узнаёте. Из зеркала. Из видений.*';
         return '*Дверь открывается. Входит женщина в белом халате. Спокойная. Уверенная. С блокнотом.*';
     })(),
+    choices: (() => {
+        const c = GameState.circle || 1;
+        const choices = [
+            { text: 'Кто вы?', next: null, effect: () => { GameState.scene = 'ch6_germanovna_intro'; }},
+            { text: 'Евгения Германовна?', next: null, effect: () => { F.knows_germanovna = true; GameState.scene = 'ch6_germanovna_knows'; }},
+        ];
+        if (c >= 3) {
+            choices.push({ text: 'Мы уже виделись. Много раз.', next: null, effect: () => { F.knows_germanovna = true; F.circle_aware_germanovna = true; GameState.karma += 10; GameState.scene = 'ch6_germanovna_circle'; }});
+        }
+        return choices;
+    })()
+},
+
+'ch6_germanovna_circle': {
+    speaker: 'Евгения Германовна', text: (() => {
+        const c = GameState.circle || 1;
+        if (c >= 5) return '*вздрагивает* ...Ты помнишь. Пять раз. Орсон... никто раньше не помнил пять раз. Ты... ты действительно меняешься. Не сценарий. Ты.';
+        return '*пауза* ...Ты помнишь прошлые сеансы? По-настоящему? Орсон, это... необычно. Обычно пациенты не помнят циклы. Расскажи мне — что ты помнишь?';
+    })(),
     choices: [
-        { text: 'Кто вы?', next: null, effect: () => { GameState.scene = 'ch6_germanovna_intro'; }},
-        { text: 'Евгения Германовна?', next: null, effect: () => { F.knows_germanovna = true; GameState.scene = 'ch6_germanovna_knows'; }},
+        { text: 'Палату. Часы. Яблоко.', next: null, effect: () => { GameState.karma += 5; GameState.scene = 'ch6_doctor_reveal'; }},
+        { text: 'ВСЁ. Каждый круг.', next: null, effect: () => { GameState.karma += 10; GameState.scene = 'ch6_doctor_reveal'; }},
     ]
 },
 
@@ -1943,33 +2152,55 @@ const Story = (() => {
         const karma = GameState.karma || 0;
         const secrets = GameState.secretItems || 0;
         const silence = GameState.silenceCount || 0;
+        const circle = GameState.circle || 1;
         const roll = Math.random() * 100;
 
-        // Hidden mechanic: collecting 3+ secret items unlocks secret ending path
-        if (secrets >= 3 && F.shadowban_advice && roll <= 5) {
+        // LEGENDARY: Circle 5 forgiveness path
+        if (circle >= 5 && F.circle5_forgiveness && karma >= 30) {
+            F.ending = 'forgiveness';
+            return '*Свет. Не белый — золотой. Тёплый. Как прощение, которое ждало пять кругов.*';
+        }
+        // LEGENDARY: Circle 5 true ending — break the cycle
+        else if (circle >= 5 && F.circle5_silence && silence >= 10) {
+            F.ending = 'circle5_true';
+            return '*Тишина разрывает ткань реальности. Орсон видит ВСЕ пять кругов одновременно. Петля замыкается... и рвётся.*';
+        }
+        // LEGENDARY: Reborn ending (circle 4+, all secrets, high shiza)
+        else if (circle >= 4 && secrets >= 3 && totalShiza > 40 && F.auromolin_ally) {
+            F.ending = 'reborn';
+            return '*Код. Настоящий код. Но не исходный код Нивал — код САМОЙ РЕАЛЬНОСТИ. Ауромолин был прав. Реборн — реален.*';
+        }
+        // EPIC: Silence ending
+        else if (silence >= 8 && karma >= 15 && totalChaos < 20) {
+            F.ending = 'silence';
+            return '*Тишина. Та самая, которую Орсон боялся больше смерти. Но сейчас — она не страшная. Она... честная.*';
+        }
+        // EPIC: Truth ending (secret items path)
+        else if (secrets >= 3 && F.shadowban_advice && roll <= 5 + circle * 3) {
             F.ending = 'truth';
             return '*Осколок правды в кармане светится. Жетон тишины вибрирует. Камень Согласия тёплый. Мир трескается...*';
         }
-        // 1% base + bonus from high shiza
-        else if (totalShiza > 50 && roll <= 1 + totalShiza/20) {
+        // EPIC: Truth ending (high shiza path)
+        else if (totalShiza > 50 && roll <= 1 + totalShiza/20 + circle * 2) {
             F.ending = 'truth';
             return '*Экран мерцает. Реальность трещит. Стены палаты растворяются...*';
         }
-        // Hidden: silence path - choosing silence 5+ times + high karma
-        else if (silence >= 5 && karma >= 15 && roll <= 15) {
+        // RARE: Victory ending (silence path)
+        else if (silence >= 5 && karma >= 15 && roll <= 15 + circle * 3) {
             F.ending = 'victory';
             return '*Тишина. Но не пустая. Наполненная. Орсон улыбается впервые за долгое время...*';
         }
-        // 9% base + bonus from charisma
-        else if (totalCharisma > 40 && totalChaos < 30 && roll <= 9 + totalCharisma/5) {
+        // RARE: Victory ending (charisma path)
+        else if (totalCharisma > 40 && totalChaos < 30 && roll <= 9 + totalCharisma/5 + circle * 2) {
             F.ending = 'victory';
             return '*Орсон чувствует прилив сил. Всё вокруг замирает...*';
         }
-        // Hidden: empathy ending variant (hospital but hopeful)
+        // RARE: Hospital good ending (empathy path)
         else if (karma >= 20 && F.accepted_help) {
             F.ending = 'hospital_good';
             return '*Тёплый свет. Не холодный больничный — а утренний. Запах кофе. Звук шагов.*';
         }
+        // COMMON: Hospital ending
         else {
             F.ending = 'hospital';
             return '*Белый свет. Запах антисептика. Звук капельницы.*';
@@ -1977,7 +2208,11 @@ const Story = (() => {
     })(),
     choices: [
         { text: '(Открыть глаза)', next: null, effect: () => {
-            if (F.ending === 'truth') GameState.scene = 'ending_truth';
+            if (F.ending === 'forgiveness') GameState.scene = 'ending_forgiveness';
+            else if (F.ending === 'circle5_true') GameState.scene = 'ending_circle5';
+            else if (F.ending === 'reborn') GameState.scene = 'ending_reborn';
+            else if (F.ending === 'silence') GameState.scene = 'ending_silence';
+            else if (F.ending === 'truth') GameState.scene = 'ending_truth';
             else if (F.ending === 'victory') GameState.scene = 'ending_victory';
             else if (F.ending === 'hospital_good') GameState.scene = 'ending_hospital_good';
             else GameState.scene = 'ending_hospital';
@@ -2003,7 +2238,7 @@ const Story = (() => {
 'ending_hospital_3': {
     speaker: '', text: 'Орсон смотрит на часы на стене. Они идут. 3:48. Впервые за долгое время — время движется вперёд.\n\n...На тумбочке лежит яблоко. На нём записка: "Эээ... выздоравливай. — В."',
     choices: [
-        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
     ]
 },
 
@@ -2025,7 +2260,7 @@ const Story = (() => {
 'ending_hospital_good_3': {
     speaker: '', text: 'За окном — двор. Скамейка. На ней сидят: Вайтуз (с яблоком), Чеб (без дельтаплана, но в лётной форме), и даже Коб (с кофе, не с вином). Они ждут. Они пришли навестить.\n\nОрсон улыбается. Часы показывают 8:00. Утро. Новое утро.',
     choices: [
-        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
     ]
 },
 
@@ -2047,7 +2282,7 @@ const Story = (() => {
 'ending_victory_3': {
     speaker: '', text: 'Орсон сидит на троне из выигранных аргументов. Вокруг — тишина. Та самая тишина, которую он боялся больше всего. Он победил мир. И остался один.\n\nНавсегда.',
     choices: [
-        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
     ]
 },
 
@@ -2069,13 +2304,142 @@ const Story = (() => {
 'ending_truth_3': {
     speaker: 'Орсон', text: 'Я. Был. Прав. *ухмылка превосходства* Какие же вы жалкие, ребят. Все до единого. А теперь... теперь начинается НАСТОЯЩИЙ Реборн.\n\n...30-35 фпс. Как в 2009 году.',
     choices: [
-        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'credits'; }},
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
+    ]
+},
+
+// === ЭПИЧЕСКАЯ КОНЦОВКА: ТИШИНА ОРСОНА ===
+'ending_silence': {
+    speaker: '', text: 'КОНЦОВКА: ТИШИНА ОРСОНА [ЭПИЧЕСКАЯ]\n\nОрсон замолкает. Впервые. По-настоящему. Не из стратегии. Не из обиды. Просто... замолкает. И мир вокруг — тоже.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_silence_2'; }},
+    ]
+},
+'ending_silence_2': {
+    speaker: '', text: 'Тишина заполняет всё. Форумы пустеют. Дискорд замирает. 47 вкладок закрываются. Одна за другой. Клавиатура больше не стучит. Часы на стене показывают 3:48. Время пошло.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_silence_3'; }},
+    ]
+},
+'ending_silence_3': {
+    speaker: 'Евгения Германовна', text: 'Орсон... ты молчишь уже третий сеанс. Раньше ты бы спорил. *улыбается* Это... прогресс. Настоящий. Тишина — это не поражение. Это выбор. Самый сильный из всех.',
+    choices: [
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
+    ]
+},
+
+// === ЛЕГЕНДАРНАЯ КОНЦОВКА: НАСТОЯЩИЙ РЕБОРН ===
+'ending_reborn': {
+    speaker: '', text: 'КОНЦОВКА: НАСТОЯЩИЙ РЕБОРН [ЛЕГЕНДАРНАЯ]\n\nОрсон и Ауромолин стоят перед экраном. На нём — не Heroes 5. Не форумы. Не мемы. На экране — НАСТОЯЩИЙ Реборн. Работающий. Запускающийся. 60 фпс.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_reborn_2'; }},
+    ]
+},
+'ending_reborn_2': {
+    speaker: 'Ауромолин', text: '*снимает капюшон* Вот. Реальный код. Реальная игра. Ты мечтал об этом. Я — строил. Вместе мы создали то, что не мог создать каждый по отдельности. Безумие плюс дисциплина равно... Реборн.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_reborn_3'; }},
+    ]
+},
+'ending_reborn_3': {
+    speaker: 'Орсон', text: '*тихо* Он... работает. Он реальный. Все эти годы... все эти споры... всё... ради этого момента. *нажимает "Новая Игра"* 30-35 фпс. Как мечтал. Нет. ЛУЧШЕ.\n\nReborn v1.0 — загружается.',
+    choices: [
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
+    ]
+},
+
+// === ЛЕГЕНДАРНАЯ КОНЦОВКА: РАЗРЫВ ЦИКЛА (круг 5) ===
+'ending_circle5': {
+    speaker: '', text: 'КОНЦОВКА: РАЗРЫВ ЦИКЛА [ЛЕГЕНДАРНАЯ]\n\nПять кругов. Пять жизней. Пять попыток найти выход из лабиринта собственного разума. Орсон стоит на пересечении всех путей одновременно.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_circle5_2'; }},
+    ]
+},
+'ending_circle5_2': {
+    speaker: 'Орсон', text: 'Я вижу все варианты. Палату. Трон. Код. Тишину. Рассвет. Я прожил каждый. И каждый был... неполным. Потому что в каждом — я оставался Орсоном. Провокатором. Параноиком. Шизиком.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_circle5_3'; }},
+    ]
+},
+'ending_circle5_3': {
+    speaker: '', text: 'Орсон закрывает все 47 вкладок. Выключает ноутбук. Снимает часы. Выходит из комнаты. Впервые за пять кругов — он не идёт ни в замок, ни на форум, ни в палату.\n\nОн идёт на улицу.\nПросто гулять.\nБез цели.\nБез аргументов.\nБез тряски.\n\nЧасы показывают 3:48.\nПотом — 3:49.\nВремя идёт вперёд. Наконец.',
+    choices: [
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
+    ]
+},
+
+// === ЛЕГЕНДАРНАЯ КОНЦОВКА: ПРОЩЕНИЕ (круг 5) ===
+'ending_forgiveness': {
+    speaker: '', text: 'КОНЦОВКА: ПРОЩЕНИЕ [ЛЕГЕНДАРНАЯ]\n\nОрсон стоит на площади. Все десять — здесь. Но в этот раз — он не спорит. Не кричит. Не трясёт. Он просто... говорит.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_forgiveness_2'; }},
+    ]
+},
+'ending_forgiveness_2': {
+    speaker: 'Орсон', text: 'Вильгефортс. Прости. Коб. Прости. Чеб, Вайтуз, Акулбот, Мадьяр, Периклес. Чекист. Герострат. Ауромолин. ...Евгения Германовна. Прости. Я знаю... знаю, что был неправ. Не всегда. Но достаточно часто.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_forgiveness_3'; }},
+    ]
+},
+'ending_forgiveness_3': {
+    speaker: 'Вайтуз', text: 'Эээ... *роняет яблоко* ...Ты... серьёзно? *подбирает яблоко* Орсон... я... *все молчат* ...Мы тоже. *одно за другим, все кивают*\n\nДаже Герострат. Даже Вильгефортс.',
+    choices: [
+        { text: '(Продолжить)', next: null, effect: () => { GameState.scene = 'ending_forgiveness_4'; }},
+    ]
+},
+'ending_forgiveness_4': {
+    speaker: '', text: 'Площадь тихая. Впервые — не от страха. От покоя.\n\nОрсон улыбается. Не ухмылкой превосходства. Просто — улыбается.\n\nЧасы на башне бьют. Не 3:47. 12:00. Полдень. Новый день.\n\nПять кругов ада. Один момент прощения.\nЭтого достаточно.',
+    choices: [
+        { text: 'КОНЕЦ', next: null, effect: () => { GameState.scene = 'ending_rarity_screen'; }},
+    ]
+},
+
+// === ENDING RARITY SCREEN ===
+'ending_rarity_screen': {
+    speaker: '', text: (() => {
+        const endingId = F.ending || 'hospital';
+        const rarity = getEndingRarity(endingId);
+        const endingNames = {
+            'hospital': 'ПАЛАТА №5',
+            'hospital_good': 'РАССВЕТ',
+            'victory': 'ЗАКЛИНАТЕЛЬ ТРЯСКИ',
+            'truth': 'ИСХОДНЫЙ КОД',
+            'silence': 'ТИШИНА ОРСОНА',
+            'reborn': 'НАСТОЯЩИЙ РЕБОРН',
+            'circle5_true': 'РАЗРЫВ ЦИКЛА',
+            'forgiveness': 'ПРОЩЕНИЕ',
+        };
+        const name = endingNames[endingId] || 'ПАЛАТА №5';
+        const stars = '★'.repeat(rarity.stars) + '☆'.repeat(4 - rarity.stars);
+        const circle = GameState.circle || 1;
+        const totalEndings = (GameState.endingsUnlocked || []).length + (!(GameState.endingsUnlocked || []).includes(endingId) ? 1 : 0);
+
+        // Save circle progress
+        saveCircleData(endingId);
+
+        let text = `\n${stars}\n\n`;
+        text += `КОНЦОВКА: ${name}\n\n`;
+        text += `РЕДКОСТЬ: ${rarity.name}\n\n`;
+        text += `КРУГ: ${circle}/5\n`;
+        text += `КОНЦОВОК ОТКРЫТО: ${totalEndings}/8\n\n`;
+        if (circle < 5) {
+            text += `Круг ${circle + 1} разблокирован!\n`;
+            text += `Орсон станет умнее в следующем прохождении.\n`;
+        } else {
+            text += `Все 5 кругов пройдены.\n`;
+        }
+        if (totalEndings >= 8) text += '\n🏆 ВСЕ КОНЦОВКИ РАЗБЛОКИРОВАНЫ!';
+        return text;
+    })(),
+    choices: [
+        { text: 'ТИТРЫ', next: null, effect: () => { GameState.scene = 'credits'; }},
+        { text: 'НАЧАТЬ НОВЫЙ КРУГ', next: null, effect: () => { location.reload(); }},
     ]
 },
 
 // === CREDITS ===
 'credits': {
-    speaker: '', text: 'МЕЧ И ШИЗОФРЕНИЯ\n\nСпасибо за игру!\n\nОрсон — провокатор, манипулятор, гений, одиночка.\nИ иногда — действительно бывает прав.\n\nЭто самое страшное.',
+    speaker: '', text: 'МЕЧ И ШИЗОФРЕНИЯ\n\nСпасибо за игру!\n\nОрсон — провокатор, манипулятор, гений, одиночка.\nИ иногда — действительно бывает прав.\n\nЭто самое страшное.\n\n8 концовок · 5 кругов · 10 персонажей\nОбычная · Редкая · Эпическая · Легендарная',
     choices: [
         { text: 'В ГЛАВНОЕ МЕНЮ', next: null, effect: () => { location.reload(); }},
     ]
