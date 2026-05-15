@@ -1,0 +1,148 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #0a0a1e;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    font-family: monospace;
+    -webkit-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+}
+
+canvas {
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    cursor: default;
+    border: 2px solid #333;
+    border-radius: 4px;
+    box-shadow: 0 0 30px rgba(100, 50, 150, 0.3), 0 0 60px rgba(50, 25, 75, 0.2);
+}
+
+/* ───── On-screen controls ───── */
+#controls {
+    display: flex;
+    gap: 40px;
+    align-items: center;
+    margin-top: 12px;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+}
+
+#dpad {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+#dpad-mid {
+    display: flex;
+    gap: 2px;
+}
+
+.ctrl-btn {
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.06);
+    color: #ccc;
+    font-size: 18px;
+    font-family: monospace;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.1s, border-color 0.1s, transform 0.05s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.ctrl-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.4);
+}
+
+.ctrl-btn:active {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.6);
+    transform: scale(0.92);
+}
+
+#action-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.action-z {
+    background: rgba(204, 0, 0, 0.15);
+    border-color: rgba(204, 0, 0, 0.4);
+    color: #ff6666;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.action-z:hover {
+    background: rgba(204, 0, 0, 0.25);
+    border-color: rgba(204, 0, 0, 0.6);
+}
+
+.action-z:active {
+    background: rgba(204, 0, 0, 0.4);
+    border-color: #cc0000;
+}
+
+.action-x {
+    background: rgba(100, 100, 255, 0.1);
+    border-color: rgba(100, 100, 255, 0.3);
+    color: #8888ff;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.action-x:hover {
+    background: rgba(100, 100, 255, 0.2);
+    border-color: rgba(100, 100, 255, 0.5);
+}
+
+.action-x:active {
+    background: rgba(100, 100, 255, 0.35);
+    border-color: #6666ff;
+}
+
+/* ───── Responsive ───── */
+@media (max-width: 700px) {
+    .ctrl-btn {
+        width: 44px;
+        height: 44px;
+        font-size: 16px;
+    }
+
+    #controls {
+        gap: 24px;
+        padding: 8px 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ctrl-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+    }
+
+    #controls {
+        gap: 16px;
+        padding: 6px 10px;
+    }
+}

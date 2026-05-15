@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>МЕЧ И ШИЗОФРЕНИЯ — Приключения Орсона</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <canvas id="game" width="640" height="480"></canvas>
+
+    <div id="controls">
+        <div id="dpad">
+            <button id="btn-up" class="ctrl-btn" aria-label="Вверх">▲</button>
+            <div id="dpad-mid">
+                <button id="btn-left" class="ctrl-btn" aria-label="Влево">◀</button>
+                <button id="btn-right" class="ctrl-btn" aria-label="Вправо">▶</button>
+            </div>
+            <button id="btn-down" class="ctrl-btn" aria-label="Вниз">▼</button>
+        </div>
+        <div id="action-btns">
+            <button id="btn-confirm" class="ctrl-btn action-z" aria-label="Подтвердить">Z</button>
+            <button id="btn-cancel" class="ctrl-btn action-x" aria-label="Отмена">X</button>
+        </div>
+    </div>
+
+    <script src="js/sprites.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/dialogue.js"></script>
+    <script src="js/battle.js"></script>
+    <script src="js/story.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/engine.js"></script>
+</body>
+</html>
