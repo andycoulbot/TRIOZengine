@@ -168,8 +168,13 @@
             gameMode = 'battle';
             Battle.start(GameState.battleData, (result, log) => {
                 gameMode = 'dialogue';
-                const afterScene = GameState.afterBattle || 'ch5_after_vilgefortz';
-                loadDialogue(afterScene);
+                if (result === 'death') {
+                    GameState.hp = 0;
+                    loadDialogue('game_over');
+                } else {
+                    const afterScene = GameState.afterBattle || 'ch5_after_vilgefortz';
+                    loadDialogue(afterScene);
+                }
             });
             return;
         }

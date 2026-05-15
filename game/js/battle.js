@@ -7,7 +7,7 @@ const Battle = (() => {
     let enemyMaxHP = 20;
     let menu = 'main';
     let menuIndex = 0;
-    let phase = 'menu';
+    let phase = 'menu'; // menu, timing_attack, timing_defend, dodge, message, death, victory
     let messageText = '';
     let messageTimer = 0;
     let dodgePhase = false;
@@ -21,6 +21,25 @@ const Battle = (() => {
     let battleLog = [];
     let mercyCount = 0;
     let spareable = false;
+
+    // Timing mechanic
+    let timingBar = 0;        // 0-100, moves back and forth
+    let timingDirection = 1;   // 1 = right, -1 = left
+    let timingSpeed = 120;     // pixels per second
+    let timingZoneStart = 35;  // sweet spot start
+    let timingZoneEnd = 65;    // sweet spot end
+    let timingType = '';       // 'attack' or 'defend'
+    let timingResult = null;   // null, 'perfect', 'good', 'miss'
+    let timingResultTimer = 0;
+
+    // Death/victory animation
+    let deathTimer = 0;
+    let victoryTimer = 0;
+    let shakeAmount = 0;
+
+    // Enemy attack phase
+    let enemyAttackTimer = 0;
+    let enemyDamage = 0;
 
     const mainMenuItems = ['АТАКА', 'ДЕЙСТВИЕ', 'ПРЕДМЕТ', 'ПОЩАДА'];
 
@@ -45,6 +64,15 @@ const Battle = (() => {
         battleLog = [];
         mercyCount = 0;
         spareable = false;
+        timingBar = 0;
+        timingDirection = 1;
+        timingResult = null;
+        timingResultTimer = 0;
+        deathTimer = 0;
+        victoryTimer = 0;
+        shakeAmount = 0;
+        enemyAttackTimer = 0;
+        enemyDamage = 0;
         Audio8Bit.battleStart();
         Audio8Bit.playMelody('battle');
     }
@@ -52,18 +80,93 @@ const Battle = (() => {
     function update(dt) {
         if (!active) return;
 
+        if (shakeAmount > 0) shakeAmount *= 0.9;
+
         if (phase === 'message') {
             messageTimer -= dt;
             if (messageTimer <= 0) {
                 if (enemyHP <= 0) {
-                    endBattle('kill');
+                    phase = 'victory';
+                    victoryTimer = 2.5;
+                    Audio8Bit.menuConfirm();
                     return;
                 }
                 if (spareable) {
                     endBattle('spare');
                     return;
                 }
-                startDodgePhase();
+                if (playerHP <= 0) {
+                    phase = 'death';
+                    deathTimer = 3;
+                    return;
+                }
+                // Enemy attacks — start defend timing
+                startDefendTiming();
+            }
+        }
+
+        if (phase === 'timing_attack' || phase === 'timing_defend') {
+            timingBar += timingDirection * timingSpeed * dt;
+            if (timingBar >= 100) { timingBar = 100; timingDirection = -1; }
+            if (timingBar <= 0) { timingBar = 0; timingDirection = 1; }
+        }
+
+        if (phase === 'timing_result') {
+            timingResultTimer -= dt;
+            if (timingResultTimer <= 0) {
+                if (timingType === 'attack') {
+                    // After attack result, show damage message
+                    let dmg = 0;
+                    if (timingResult === 'perfect') dmg = 8 + Math.floor(Math.random() * 4);
+                    else if (timingResult === 'good') dmg = 4 + Math.floor(Math.random() * 3);
+                    else dmg = 1 + Math.floor(Math.random() * 2);
+
+                    enemyHP = Math.max(0, enemyHP - dmg);
+                    shakeAmount = dmg * 2;
+                    Audio8Bit.damage();
+                    battleLog.push({ type: 'attack', dmg, timing: timingResult });
+
+                    const labels = { perfect: 'ИДЕАЛЬНО!', good: 'Хорошо!', miss: 'Промах...' };
+                    showMessage(`${labels[timingResult]} Урон: ${dmg}`, 1.5);
+                } else {
+                    // After defend result, apply enemy damage
+                    const baseDmg = enemy.atk || 4;
+                    let finalDmg = 0;
+                    if (timingResult === 'perfect') finalDmg = 0;
+                    else if (timingResult === 'good') finalDmg = Math.max(1, Math.floor(baseDmg * 0.5));
+                    else finalDmg = baseDmg + Math.floor(Math.random() * 3);
+
+                    if (finalDmg > 0) {
+                        playerHP = Math.max(0, playerHP - finalDmg);
+                        GameState.hp = playerHP;
+                        shakeAmount = finalDmg * 3;
+                        Audio8Bit.damage();
+                    }
+
+                    if (finalDmg === 0) {
+                        showMessage(`Блок! ${enemy.name} не попал!`, 1.5);
+                    } else {
+                        showMessage(`${enemy.name} наносит ${finalDmg} урона!`, 1.5);
+                    }
+
+                    if (playerHP <= 0) {
+                        messageTimer = 1.5;
+                    }
+                }
+            }
+        }
+
+        if (phase === 'death') {
+            deathTimer -= dt;
+            if (deathTimer <= 0) {
+                endBattle('death');
+            }
+        }
+
+        if (phase === 'victory') {
+            victoryTimer -= dt;
+            if (victoryTimer <= 0) {
+                endBattle('kill');
             }
         }
 
@@ -76,6 +179,51 @@ const Battle = (() => {
                 menuIndex = 0;
             }
         }
+    }
+
+    function startAttackTiming() {
+        phase = 'timing_attack';
+        timingType = 'attack';
+        timingBar = 0;
+        timingDirection = 1;
+        timingSpeed = 100 + (enemyMaxHP - enemyHP) * 2; // faster as enemy gets hurt
+        timingResult = null;
+        // Sweet spot gets smaller for stronger enemies
+        const difficulty = enemy.difficulty || 1;
+        const zoneSize = Math.max(10, 30 - difficulty * 5);
+        timingZoneStart = 50 - zoneSize / 2;
+        timingZoneEnd = 50 + zoneSize / 2;
+    }
+
+    function startDefendTiming() {
+        phase = 'timing_defend';
+        timingType = 'defend';
+        timingBar = 0;
+        timingDirection = 1;
+        timingSpeed = 80 + (enemy.atk || 4) * 15;
+        timingResult = null;
+        const difficulty = enemy.difficulty || 1;
+        const zoneSize = Math.max(12, 35 - difficulty * 5);
+        timingZoneStart = 50 - zoneSize / 2;
+        timingZoneEnd = 50 + zoneSize / 2;
+    }
+
+    function confirmTiming() {
+        const pos = timingBar;
+        const center = (timingZoneStart + timingZoneEnd) / 2;
+        const perfectRange = (timingZoneEnd - timingZoneStart) * 0.3;
+
+        if (Math.abs(pos - center) <= perfectRange) {
+            timingResult = 'perfect';
+        } else if (pos >= timingZoneStart && pos <= timingZoneEnd) {
+            timingResult = 'good';
+        } else {
+            timingResult = 'miss';
+        }
+
+        phase = 'timing_result';
+        timingResultTimer = 0.6;
+        Audio8Bit.menuConfirm();
     }
 
     function startDodgePhase() {
@@ -137,7 +285,6 @@ const Battle = (() => {
 
     function updateProjectiles(dt) {
         const boxL = 180, boxR = 460, boxT = 280, boxB = 400;
-        const speed = 3;
 
         for (const p of projectiles) {
             p.x += p.vx * dt;
@@ -146,15 +293,18 @@ const Battle = (() => {
             const dx = p.x - heartX;
             const dy = p.y - heartY;
             if (Math.abs(dx) < (p.size + 6) && Math.abs(dy) < (p.size + 6)) {
-                playerHP = Math.max(0, playerHP - 1);
+                const dmg = 2;
+                playerHP = Math.max(0, playerHP - dmg);
                 GameState.hp = playerHP;
                 Audio8Bit.damage();
+                shakeAmount = 8;
                 p.x = -100;
                 p.y = -100;
                 p.vx = 0;
                 p.vy = 0;
                 if (playerHP <= 0) {
-                    endBattle('death');
+                    phase = 'death';
+                    deathTimer = 3;
                     return;
                 }
             }
@@ -176,11 +326,21 @@ const Battle = (() => {
     function handleInput(key) {
         if (!active) return;
 
+        if (phase === 'timing_attack' || phase === 'timing_defend') {
+            if (key === 'confirm') {
+                confirmTiming();
+            }
+            return;
+        }
+
         if (phase === 'dodge') {
             return;
         }
 
         if (phase === 'message') return;
+        if (phase === 'death') return;
+        if (phase === 'victory') return;
+        if (phase === 'timing_result') return;
 
         if (phase === 'menu') {
             if (menu === 'main') {
@@ -189,7 +349,7 @@ const Battle = (() => {
                 if (key === 'confirm') {
                     Audio8Bit.menuConfirm();
                     switch (menuIndex) {
-                        case 0: doAttack(); break;
+                        case 0: startAttackTiming(); break;
                         case 1: menu = 'act'; selectedAct = 0; break;
                         case 2: doItem(); break;
                         case 3: doMercy(); break;
@@ -205,14 +365,6 @@ const Battle = (() => {
                 if (key === 'cancel') { menu = 'main'; Audio8Bit.menuSelect(); }
             }
         }
-    }
-
-    function doAttack() {
-        const dmg = 3 + Math.floor(Math.random() * 4);
-        enemyHP = Math.max(0, enemyHP - dmg);
-        Audio8Bit.damage();
-        showMessage(`Вы нанесли ${dmg} урона!`);
-        battleLog.push({ type: 'attack', dmg });
     }
 
     function doAct(index) {
@@ -243,14 +395,14 @@ const Battle = (() => {
         if (mercyCount >= 5) spareable = true;
 
         battleLog.push({ type: 'act', act, effect });
-        showMessage(msg);
+        showMessage(msg, 1.8);
         menu = 'main';
     }
 
     function doItem() {
         const inv = GameState.inventory || [];
         if (inv.length === 0) {
-            showMessage('В инвентаре пусто...');
+            showMessage('В инвентаре пусто...', 1.2);
             return;
         }
         const healItems = {
@@ -270,42 +422,66 @@ const Battle = (() => {
             if (effect.shake) GameState.tshake = Math.max(0, GameState.tshake + effect.shake);
             GameState.inventory = inv.filter(i => i !== usable);
             Audio8Bit.heal();
-            showMessage(effect.msg);
+            showMessage(effect.msg, 1.5);
         } else {
-            showMessage('Нет подходящих предметов для боя!');
+            showMessage('Нет подходящих предметов для боя!', 1.2);
         }
     }
 
     function doMercy() {
         if (spareable) {
-            showMessage(`Вы пощадили ${enemy.name}!`);
-            phase = 'message';
-            messageTimer = 60;
+            showMessage(`Вы пощадили ${enemy.name}!`, 2);
             spareable = true;
             return;
         }
         mercyCount++;
         if (mercyCount >= 5) spareable = true;
-        showMessage(spareable ? `${enemy.name} готов к примирению...` : `${enemy.name} не хочет сдаваться!`);
+        showMessage(spareable ? `${enemy.name} готов к примирению...` : `${enemy.name} не хочет сдаваться!`, 1.5);
     }
 
-    function showMessage(text) {
+    function showMessage(text, duration) {
         messageText = text;
-        messageTimer = 90;
+        messageTimer = duration || 1.5;
         phase = 'message';
     }
 
     function endBattle(result) {
         active = false;
         Audio8Bit.stopMelody();
+        if (result === 'death') {
+            GameState.hp = 0;
+        }
         if (onEnd) onEnd(result, battleLog);
     }
 
     function render(ctx, W, H) {
         if (!active) return;
 
+        // Screen shake
+        if (shakeAmount > 0.5) {
+            ctx.save();
+            ctx.translate(
+                (Math.random() - 0.5) * shakeAmount,
+                (Math.random() - 0.5) * shakeAmount
+            );
+        }
+
         ctx.fillStyle = '#000000';
         ctx.fillRect(0, 0, W, H);
+
+        // Death screen
+        if (phase === 'death') {
+            renderDeathScreen(ctx, W, H);
+            if (shakeAmount > 0.5) ctx.restore();
+            return;
+        }
+
+        // Victory screen
+        if (phase === 'victory') {
+            renderVictoryScreen(ctx, W, H);
+            if (shakeAmount > 0.5) ctx.restore();
+            return;
+        }
 
         const portrait = getEnemyPortrait();
         if (portrait) {
@@ -317,11 +493,21 @@ const Battle = (() => {
         ctx.textAlign = 'center';
         ctx.fillText(enemy.name || 'ВРАГ', W / 2, 210);
 
+        // Enemy HP bar
         ctx.fillStyle = '#444';
         ctx.fillRect(W / 2 - 60, 220, 120, 10);
         ctx.fillStyle = enemyHP > enemyMaxHP * 0.3 ? '#00cc00' : '#cc0000';
         ctx.fillRect(W / 2 - 60, 220, (enemyHP / enemyMaxHP) * 120, 10);
+        ctx.fillStyle = '#aaa';
+        ctx.font = '10px monospace';
+        ctx.fillText(`${enemyHP}/${enemyMaxHP}`, W / 2, 243);
 
+        // Timing bar for attack/defend
+        if (phase === 'timing_attack' || phase === 'timing_defend' || phase === 'timing_result') {
+            renderTimingBar(ctx, W, H);
+        }
+
+        // Dodge phase
         if (phase === 'dodge') {
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 3;
@@ -343,6 +529,7 @@ const Battle = (() => {
             ctx.fillText(`Уклоняйтесь! ${Math.ceil(dodgeTimer)}с`, W / 2, 275);
         }
 
+        // Bottom bar
         ctx.fillStyle = '#000';
         ctx.fillRect(0, H - 60, W, 60);
         ctx.strokeStyle = '#fff';
@@ -357,9 +544,11 @@ const Battle = (() => {
         const hpBarX = 100, hpBarW = 100;
         ctx.fillStyle = '#444';
         ctx.fillRect(hpBarX, H - 25, hpBarW, 12);
-        ctx.fillStyle = playerHP > playerMaxHP * 0.3 ? '#00cc00' : '#cc0000';
-        ctx.fillRect(hpBarX, H - 25, (playerHP / playerMaxHP) * hpBarW, 12);
+        const hpRatio = playerHP / playerMaxHP;
+        ctx.fillStyle = hpRatio > 0.5 ? '#00cc00' : hpRatio > 0.25 ? '#cccc00' : '#cc0000';
+        ctx.fillRect(hpBarX, H - 25, hpRatio * hpBarW, 12);
 
+        // Menu
         if (phase === 'menu') {
             if (menu === 'main') {
                 const startX = 240;
@@ -397,6 +586,7 @@ const Battle = (() => {
             }
         }
 
+        // Message
         if (phase === 'message' && messageText) {
             ctx.fillStyle = '#000000';
             ctx.fillRect(50, 280, W - 100, 40);
@@ -417,6 +607,111 @@ const Battle = (() => {
         }
 
         ctx.textAlign = 'left';
+
+        if (shakeAmount > 0.5) ctx.restore();
+    }
+
+    function renderTimingBar(ctx, W, H) {
+        const barX = 120, barY = 260, barW = 400, barH = 20;
+
+        // Background
+        ctx.fillStyle = '#222';
+        ctx.fillRect(barX, barY, barW, barH);
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(barX, barY, barW, barH);
+
+        // Sweet zone
+        const zoneX = barX + (timingZoneStart / 100) * barW;
+        const zoneW = ((timingZoneEnd - timingZoneStart) / 100) * barW;
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.3)';
+        ctx.fillRect(zoneX, barY, zoneW, barH);
+
+        // Perfect zone (inner)
+        const center = (timingZoneStart + timingZoneEnd) / 2;
+        const perfectRange = (timingZoneEnd - timingZoneStart) * 0.3;
+        const perfectX = barX + ((center - perfectRange) / 100) * barW;
+        const perfectW = (perfectRange * 2 / 100) * barW;
+        ctx.fillStyle = 'rgba(255, 255, 0, 0.4)';
+        ctx.fillRect(perfectX, barY, perfectW, barH);
+
+        // Moving indicator
+        if (phase !== 'timing_result') {
+            const indX = barX + (timingBar / 100) * barW;
+            ctx.fillStyle = '#ff0000';
+            ctx.fillRect(indX - 2, barY - 4, 4, barH + 8);
+        }
+
+        // Labels
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 14px monospace';
+        if (phase === 'timing_result') {
+            const colors = { perfect: '#ffff00', good: '#00ff00', miss: '#ff4444' };
+            const labels = { perfect: 'ИДЕАЛЬНО!', good: 'ХОРОШО!', miss: 'ПРОМАХ!' };
+            ctx.fillStyle = colors[timingResult] || '#fff';
+            ctx.fillText(labels[timingResult] || '', W / 2, barY - 10);
+        } else {
+            ctx.fillStyle = '#ffcc00';
+            if (timingType === 'attack') {
+                ctx.fillText('АТАКА! Нажми Z в зелёной зоне!', W / 2, barY - 10);
+            } else {
+                ctx.fillStyle = '#44aaff';
+                ctx.fillText('ЗАЩИТА! Нажми Z чтобы блокировать!', W / 2, barY - 10);
+            }
+        }
+    }
+
+    function renderDeathScreen(ctx, W, H) {
+        ctx.fillStyle = '#110000';
+        ctx.fillRect(0, 0, W, H);
+
+        // Broken heart
+        ctx.textAlign = 'center';
+        const heartScale = 1 + Math.sin(deathTimer * 3) * 0.2;
+        ctx.font = `${Math.floor(60 * heartScale)}px monospace`;
+        ctx.fillStyle = '#cc0000';
+        ctx.fillText('💔', W / 2, H / 2 - 40);
+
+        ctx.font = 'bold 24px monospace';
+        ctx.fillStyle = '#cc0000';
+        ctx.fillText('ОРСОН ПОВЕРЖЕН', W / 2, H / 2 + 30);
+
+        ctx.font = '14px monospace';
+        ctx.fillStyle = '#884444';
+        const deathLines = [
+            'Тряска оказалась сильнее...',
+            'Даже миллионер может проиграть.',
+            'Тишина наступает.',
+        ];
+        const line = deathLines[Math.floor(Math.random() * 10) % deathLines.length];
+        ctx.fillText(line, W / 2, H / 2 + 60);
+
+        ctx.fillStyle = '#666';
+        ctx.font = '12px monospace';
+        ctx.fillText(`HP: 0/${playerMaxHP}`, W / 2, H / 2 + 90);
+    }
+
+    function renderVictoryScreen(ctx, W, H) {
+        ctx.fillStyle = '#001100';
+        ctx.fillRect(0, 0, W, H);
+
+        ctx.textAlign = 'center';
+        ctx.font = '48px monospace';
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillText('ПОБЕДА!', W / 2, H / 2 - 50);
+
+        ctx.font = 'bold 20px monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText(`${enemy.name} повержен!`, W / 2, H / 2);
+
+        ctx.font = '14px monospace';
+        ctx.fillStyle = '#88cc88';
+        ctx.fillText(`HP: ${playerHP}/${playerMaxHP}`, W / 2, H / 2 + 40);
+
+        // XP reward
+        const xp = enemy.xp || 5;
+        ctx.fillStyle = '#ffcc00';
+        ctx.fillText(`+${xp} XP`, W / 2, H / 2 + 65);
     }
 
     function getEnemyPortrait() {

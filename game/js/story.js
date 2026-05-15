@@ -2394,6 +2394,26 @@ const Story = (() => {
     ]
 },
 
+// === GAME OVER ===
+'game_over': {
+    speaker: '', text: (() => {
+        const deathTexts = [
+            'Тряска оказалась сильнее. Орсон падает. Экран темнеет.\n\nДаже миллионер из Франции может проиграть.',
+            'Орсон бормочет что-то про исходный код Nival...\n\nНо мир больше не слушает.',
+            'Последняя мысль: "Я был прав..."\n\nТишина. Та самая.',
+            'HP: 0. Аргументы закончились раньше здоровья.\n\nИли здоровье закончилось раньше аргументов.',
+        ];
+        return deathTexts[Math.floor(Math.random() * deathTexts.length)];
+    })(),
+    choices: [
+        { text: 'ПОПРОБОВАТЬ СНОВА', next: null, effect: () => { location.reload(); }},
+        { text: 'СДАТЬСЯ', next: null, effect: () => {
+            GameState.flags.ending = 'hospital';
+            GameState.scene = 'ending_rarity_screen';
+        }},
+    ]
+},
+
 // === ENDING RARITY SCREEN ===
 'ending_rarity_screen': {
     speaker: '', text: (() => {
