@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TRIOZengine — 3D Редактор Карты</title>
+    <link rel="stylesheet" href="css/editor.css">
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+    }
+    </script>
+</head>
+<body>
+    <!-- Top Menu Bar -->
+    <div id="menu-bar">
+        <div class="menu-left">
+            <span class="menu-title">TRIOZengine</span>
+            <button class="menu-btn" id="btn-file">Файл</button>
+            <button class="menu-btn" id="btn-edit-menu">Правка</button>
+            <button class="menu-btn" id="btn-view">Вид</button>
+        </div>
+        <div class="menu-center" id="tool-buttons">
+            <button class="tool-btn active" data-tool="select" title="Выбор (Q)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M7 2l10 10-4 1 3 7-2 1-3-7-4 4z" fill="currentColor"/></svg>
+            </button>
+            <button class="tool-btn" data-tool="terrain" title="Ландшафт (T)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M2 20l7-12 5 8 4-6 4 10z" fill="currentColor"/></svg>
+            </button>
+            <button class="tool-btn" data-tool="road" title="Дороги (R)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M11 2h2v4h-2zm0 6h2v4h-2zm0 6h2v4h-2zm0 6h2v2h-2zM4 2h4l-2 20H4zm12 0h4l-2 20h-2z" fill="currentColor"/></svg>
+            </button>
+            <button class="tool-btn" data-tool="texture" title="Текстуры (X)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M4 4h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 10h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4zM4 16h4v4H4zm6 0h4v4h-4zm6 0h4v4h-4z" fill="currentColor"/></svg>
+            </button>
+            <button class="tool-btn" data-tool="object" title="Объекты (O)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12 2L2 7l10 5 10-5zm0 7.5L2 15l10 5 10-5z" fill="currentColor"/></svg>
+            </button>
+            <button class="tool-btn" data-tool="district" title="Районы (D)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z" fill="currentColor"/></svg>
+            </button>
+        </div>
+        <div class="menu-right">
+            <span id="info-fps">0 FPS</span>
+            <span id="info-coords">X: 0 Z: 0</span>
+        </div>
+    </div>
+
+    <!-- Left Toolbar -->
+    <div id="left-toolbar">
+        <!-- Terrain sub-tools -->
+        <div id="terrain-tools" class="subtool-group" style="display:none">
+            <button class="subtool-btn active" data-brush="raise" title="Поднять">UP</button>
+            <button class="subtool-btn" data-brush="lower" title="Опустить">DN</button>
+            <button class="subtool-btn" data-brush="smooth" title="Сгладить">SM</button>
+            <button class="subtool-btn" data-brush="flatten" title="Выровнять">FL</button>
+        </div>
+        <!-- Object sub-tools -->
+        <div id="object-tools" class="subtool-group" style="display:none">
+            <button class="subtool-btn" data-obj="cube" title="Куб">CB</button>
+            <button class="subtool-btn" data-obj="sphere" title="Сфера">SP</button>
+            <button class="subtool-btn" data-obj="cylinder" title="Цилиндр">CY</button>
+            <button class="subtool-btn" data-obj="tree" title="Дерево">TR</button>
+            <button class="subtool-btn" data-obj="building" title="Здание">BD</button>
+            <button class="subtool-btn" data-obj="import" title="Загрузить модель">IM</button>
+        </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right-panel">
+        <div class="panel-header">
+            <span id="panel-title">Свойства</span>
+            <button class="panel-toggle" id="toggle-panel">_</button>
+        </div>
+        <div id="panel-content">
+            <!-- Dynamic content populated by JS -->
+        </div>
+    </div>
+
+    <!-- Bottom Info Bar -->
+    <div id="bottom-bar">
+        <span id="status-msg">Готово</span>
+        <span id="selected-info"></span>
+    </div>
+
+    <!-- 3D Canvas -->
+    <canvas id="viewport"></canvas>
+
+    <!-- File input for model import -->
+    <input type="file" id="model-import" accept=".glb,.gltf,.obj,.fbx" style="display:none">
+    <input type="file" id="texture-import" accept=".png,.jpg,.jpeg,.bmp" style="display:none">
+    <input type="file" id="map-import" accept=".png,.jpg,.jpeg" style="display:none">
+
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
